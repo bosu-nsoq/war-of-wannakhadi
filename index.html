@@ -1015,9 +1015,12 @@
       }
 
       function isSkinTonePixel(r, g, b, h, s, l) {
-        // คงสีผิวธรรมชาติไว้ (โทนเนื้อ/ครีม/น้ำตาลอ่อน โดยไม่ไปจับชุดสีแดงสดหรือทองจัด)
-        if (r > g && g >= b && (r - b) >= 10 && (r - g) <= 64) {
-          if (h >= 3 && h <= 43 && s >= 0.10 && s <= 0.65 && l >= 0.28 && l <= 0.90) {
+        // คงสีผิวธรรมชาติไว้ด้วยช่วง RGB/HSV (แยกผิวคนออกจากผ้าสีแดงสดหรือสีสดอื่นๆ)
+        const maxC = Math.max(r, g, b);
+        const minC = Math.min(r, g, b);
+        const hsvSat = maxC > 0 ? (maxC - minC) / maxC : 0;
+        if (r > g && g >= b && (r - b) >= 10 && (r - g) <= 68 && hsvSat >= 0.08 && hsvSat <= 0.58) {
+          if (h >= 3 && h <= 44 && l >= 0.28 && l <= 0.92) {
             return true;
           }
         }
