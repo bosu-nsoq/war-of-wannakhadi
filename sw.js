@@ -1,4 +1,4 @@
-const CACHE_NAME = 'war-of-wannakhadi-v2';
+const CACHE_NAME = 'war-of-wannakhadi-v3';
 const STATIC_ASSETS = [
   './',
   './index.html',

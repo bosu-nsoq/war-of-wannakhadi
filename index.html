@@ -17,57 +17,68 @@
     <style>
       :root { --board-rot: -45deg; --inv-rot: 45deg; --board-scale: 1; }
 
+      *, *::before, *::after { font-family: 'Mali', sans-serif; }
+
       body { 
         font-family: 'Mali', sans-serif; background-color: #1a1a2e; 
         background-image: url('https://i.postimg.cc/tTFLndvv/Gemini_Generated_Image_gi9fhngi9fhngi9f.png'); 
         background-size: cover; background-position: center; background-attachment: fixed; 
-        margin: 0; color: #333; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; touch-action: manipulation;
+        margin: 0; color: #333; display: flex; flex-direction: column; align-items: center; min-height: 100vh; min-height: 100dvh; overflow-x: hidden; touch-action: manipulation;
       }
-      body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.15); z-index: -1; pointer-events: none; }
-      .glass { background: rgba(255, 255, 255, 0.9); border: 2px solid rgba(255, 255, 255, 0.6); border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); color: #333; }
+      body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 20, 45, 0.22); z-index: -1; pointer-events: none; }
+      .glass { background: rgba(255, 255, 255, 0.94); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 2px solid rgba(255, 255, 255, 0.78); border-radius: 22px; box-shadow: 0 12px 32px rgba(0,0,0,0.24); color: #2c2c3a; }
       
-      #init-screen, #char-select-screen { margin-top: 5vh; padding: 30px; text-align: center; width: 90%; max-width: 450px; z-index: 1000; position: relative;}
-      input { width: 85%; padding: 12px; font-size: 16px; margin-bottom: 15px; border-radius: 10px; border: 2px solid #ce93d8; text-align: center; font-family: 'Mali', sans-serif; outline: none; transition: 0.3s;}
-      input:focus { border-color: #ba68c8; box-shadow: 0 0 10px #ba68c8; }
-      .btn { padding: 15px 20px; font-size: 18px; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 10px; font-family: 'Mali', sans-serif; box-shadow: 0 6px 0px rgba(0,0,0,0.15); transition: 0.1s; }
-      .btn:active { transform: translateY(4px); box-shadow: 0 2px 0px rgba(0,0,0,0.15); } 
-      .btn-create { background: #ffca28; color: #5d4037; } .btn-join { background: #69f0ae; color: #1b5e20; }
+      #init-screen, #char-select-screen { margin-top: 6vh; padding: 28px 26px; text-align: center; width: 90%; max-width: 450px; z-index: 1000; position: relative; box-sizing: border-box; }
+      input { width: 88%; padding: 12px 14px; font-size: 16px; margin-bottom: 15px; border-radius: 14px; border: 2px solid #ce93d8; text-align: center; font-family: 'Mali', sans-serif; outline: none; transition: 0.25s; background: #fff; box-sizing: border-box; }
+      input:focus { border-color: #9c27b0; box-shadow: 0 0 12px rgba(186, 104, 200, 0.45); }
+      .btn { padding: 14px 20px; font-size: 17px; border-radius: 14px; border: none; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 10px; font-family: 'Mali', sans-serif; box-shadow: 0 5px 0px rgba(0,0,0,0.16); transition: transform 0.12s, box-shadow 0.12s, filter 0.15s; box-sizing: border-box; }
+      .btn:hover:not(:disabled) { filter: brightness(1.04); }
+      .btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 2px 0px rgba(0,0,0,0.16); } 
+      .btn:disabled { opacity: 0.7; cursor: not-allowed; }
+      .btn-create { background: linear-gradient(135deg, #ffd54f, #ffb300); color: #4e342e; } 
+      .btn-join { background: linear-gradient(135deg, #69f0ae, #00e676); color: #1b5e20; }
 
-      #game-screen { display: none; width: 100%; height: 100vh; position: relative; }
+      #game-screen { display: none; width: 100%; height: 100vh; height: 100dvh; position: relative; overflow: hidden; }
       #corner-ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 200; }
-      .corner-card { position: absolute; width: 230px; text-align: center; padding: 15px 10px; border-radius: 15px; transition: 0.3s; pointer-events: auto;}
+      .corner-card { position: absolute; width: 230px; text-align: center; padding: 14px 12px; border-radius: 18px; transition: 0.3s; pointer-events: auto; }
       .pos-0 { top: 20px; right: 20px; } .pos-1 { bottom: 20px; right: 20px; } .pos-2 { bottom: 20px; left: 20px; } .pos-3 { top: 120px; left: 20px; }
       
       .glow-0 { border: 3px solid #00b0ff; } .glow-1 { border: 3px solid #00e676; } .glow-2 { border: 3px solid #ffea00; } .glow-3 { border: 3px solid #d500f9; }
-      .corner-card img { width: 55px; height: 55px; border-radius: 50%; object-fit: contain; background: transparent; }
-      .corner-card.active-turn { background: rgba(255, 249, 196, 0.95); transform: scale(1.05); color: #333; box-shadow: 0 0 20px #ffca28;}
+      .corner-card img { width: 55px; height: 55px; border-radius: 50%; object-fit: contain; background: rgba(255,255,255,0.7); }
+      .corner-card.active-turn { background: rgba(255, 250, 205, 0.96); transform: scale(1.05); color: #2c2c3a; box-shadow: 0 0 22px rgba(255, 202, 40, 0.75); }
       
-      .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; max-height: 50vh; overflow-y: auto; padding-right: 5px; }
-      .char-grid::-webkit-scrollbar { width: 6px; } .char-grid::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 10px; } .char-grid::-webkit-scrollbar-thumb { background: #ce93d8; border-radius: 10px; }
+      .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; max-height: 50vh; overflow-y: auto; padding-right: 4px; }
+      .char-grid::-webkit-scrollbar, .dice-box::-webkit-scrollbar { width: 6px; }
+      .char-grid::-webkit-scrollbar-track, .dice-box::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 10px; }
+      .char-grid::-webkit-scrollbar-thumb, .dice-box::-webkit-scrollbar-thumb { background: #ce93d8; border-radius: 10px; }
 
-      .char-btn { display: flex; align-items: center; background: rgba(255,255,255,0.7); border: 3px solid transparent; border-radius: 15px; padding: 10px; cursor: pointer; transition: 0.2s;}
-      .char-btn img { width: 50px; height: 50px; border-radius: 50%; object-fit: contain; margin-right: 10px; border: 2px solid #ccc; background: transparent;}
+      .char-btn { display: flex; align-items: center; background: rgba(255,255,255,0.82); border: 2px solid rgba(206, 147, 216, 0.45); border-radius: 15px; padding: 10px; cursor: pointer; transition: 0.2s; font-weight: bold; font-size: 14px; text-align: left; }
+      .char-btn:hover { border-color: #ab47bc; background: #fff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+      .char-btn img { width: 48px; height: 48px; border-radius: 50%; object-fit: contain; margin-right: 10px; border: 2px solid #ce93d8; background: #fff; flex-shrink: 0; }
       
       .item-container { display: flex; justify-content: center; gap: 8px; margin-top: 10px; flex-wrap: wrap;}
-      .item-slot { width: 35px; height: 35px; background: rgba(0,0,0,0.1); border-radius: 8px; display: flex; justify-content: center; align-items: center; border: 1px solid rgba(0,0,0,0.2); font-size: 20px; cursor: pointer;}
-      .item-slot.usable { border-color: #69f0ae; background: #e8f5e9; box-shadow: 0 0 10px #69f0ae;} .item-slot.usable:hover { transform: scale(1.1); }
-      .item-slot.viewable { border-color: #90caf9; background: #e3f2fd; } .item-slot.viewable:hover { transform: scale(1.05); }
+      .item-slot { width: 35px; height: 35px; background: rgba(0,0,0,0.07); border-radius: 10px; display: flex; justify-content: center; align-items: center; border: 1.5px solid rgba(0,0,0,0.16); font-size: 20px; cursor: pointer; transition: 0.15s; }
+      .item-slot.usable { border-color: #00c853; background: #e8f5e9; box-shadow: 0 0 10px rgba(105, 240, 174, 0.7); } .item-slot.usable:hover { transform: scale(1.1); }
+      .item-slot.viewable { border-color: #64b5f6; background: #e3f2fd; } .item-slot.viewable:hover { transform: scale(1.05); }
 
       /* ปุ่ม Active Skill */
-      .active-skill-btn { background: #d500f9; color: white; border: 2px solid #fff; border-radius: 8px; padding: 6px; font-size: 13px; font-family: 'Mali', sans-serif; font-weight: bold; cursor: pointer; width: 100%; margin-top: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: 0.2s;}
-      .active-skill-btn.disabled { background: #ccc; border-color: #999; color: #666; cursor: not-allowed; box-shadow: none; }
+      .active-skill-btn { background: linear-gradient(135deg, #e040fb, #aa00ff); color: white; border: 2px solid #fff; border-radius: 10px; padding: 6px 10px; font-size: 13px; font-family: 'Mali', sans-serif; font-weight: bold; cursor: pointer; width: 100%; margin-top: 6px; box-shadow: 0 3px 8px rgba(170,0,255,0.28); transition: 0.2s;}
+      .active-skill-btn.disabled { background: #cfd8dc; border-color: #b0bec5; color: #607d8b; cursor: not-allowed; box-shadow: none; }
       .active-skill-btn:active:not(.disabled) { transform: translateY(2px); }
       
-      #center-turn-display { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); font-size: 26px; font-weight: bold; padding: 10px 40px; border-bottom: 4px solid #ffca28; z-index: 300; background: white;}
+      #center-turn-display { position: absolute; top: 18px; left: 50%; transform: translateX(-50%); font-size: 22px; font-weight: bold; padding: 10px 32px; border-bottom: 4px solid #ffca28; z-index: 300; background: rgba(255,255,255,0.96); white-space: nowrap; }
       
-      /* --- เมนูตั้งค่าแบบยุบรวม (ปุ่มฟันเฟือง) --- */
-      #settings-menu { position: absolute; top: 20px; left: 20px; z-index: 4000; pointer-events: auto; }
-      .gear-btn { font-size: 24px; width: 50px; height: 50px; border-radius: 50%; background: #e1f5fe; border: 2px solid #0288d1; color: #0288d1; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: transform 0.3s; display: flex; justify-content: center; align-items: center; }
-      .gear-btn:hover { transform: rotate(90deg); background: #0288d1; color: white; }
-      #settings-panel { display: none; position: absolute; top: 60px; left: 0; background: rgba(255,255,255,0.95); padding: 15px; border-radius: 15px; border: 2px solid #0288d1; box-shadow: 0 5px 15px rgba(0,0,0,0.3); flex-direction: column; gap: 10px; width: max-content; }
-      .settings-row { display: flex; gap: 5px; justify-content: center; }
-      .settings-btn { padding: 8px 12px; font-size: 14px; border-radius: 8px; border: 1px solid #ccc; background: white; cursor: pointer; font-family: 'Mali', sans-serif; font-weight: bold; transition: 0.2s;}
-      .settings-btn:hover { background: #eee; }
+      /* --- แถบตั้งค่า เปิด-ปิดเสียง และเต็มจอ (ใช้ได้ทั้ง Desktop & มือถือ) --- */
+      #settings-menu { position: fixed; top: 16px; left: 16px; z-index: 6000; pointer-events: auto; display: flex; align-items: center; gap: 8px; }
+      .gear-btn { font-size: 20px; width: 44px; height: 44px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); border: 2px solid #0288d1; color: #0288d1; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: transform 0.25s, background 0.2s; display: flex; justify-content: center; align-items: center; padding: 0; }
+      .gear-btn:hover { background: #0288d1; color: white; }
+      .top-pill-btn { height: 40px; padding: 0 14px; border-radius: 22px; border: 2px solid rgba(255,255,255,0.9); background: rgba(255,255,255,0.94); color: #1a237e; font-family: 'Mali', sans-serif; font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.18); display: inline-flex; align-items: center; justify-content: center; gap: 5px; transition: 0.2s; white-space: nowrap; }
+      .top-pill-btn:hover { transform: translateY(-1px); background: #fff; }
+      .top-pill-btn:active { transform: scale(0.96); }
+      #settings-panel { display: none; position: absolute; top: 54px; left: 0; background: rgba(255,255,255,0.97); backdrop-filter: blur(12px); padding: 14px; border-radius: 18px; border: 2px solid #0288d1; box-shadow: 0 12px 28px rgba(0,0,0,0.28); flex-direction: column; gap: 10px; width: max-content; z-index: 6100; }
+      .settings-row { display: flex; gap: 6px; justify-content: center; }
+      .settings-btn { padding: 8px 12px; font-size: 14px; border-radius: 10px; border: 1.5px solid #cfd8dc; background: #fff; cursor: pointer; font-family: 'Mali', sans-serif; font-weight: bold; transition: 0.2s; color: #333; }
+      .settings-btn:hover { background: #e1f5fe; border-color: #0288d1; }
 
       #flash-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff59d; z-index: 9999; pointer-events: none; opacity: 0; display: none; }
       .flash-anim { display: block !important; animation: flashEffect 0.6s ease-out; }
@@ -129,58 +140,78 @@
       @keyframes screenShake { 0%, 100% { transform: translate(0, 0); } 20% { transform: translate(-10px, 5px) rotate(-2deg); } 40% { transform: translate(10px, -5px) rotate(2deg); } 60% { transform: translate(-10px, -5px) rotate(-2deg); } 80% { transform: translate(10px, 5px) rotate(2deg); } }
       .clash-left { animation: clashL 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; } .clash-right { animation: clashR 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
       
-      .controls { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 300; width: 80%; max-width: 400px;}
-      .modal-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 10px; box-sizing: border-box;}
+      .controls { position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 300; width: 80%; max-width: 420px; }
+      .modal-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 16, 35, 0.78); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 14px; box-sizing: border-box; }
       #item-confirm-modal { z-index: 2500 !important; }
       #skill-confirm-modal { z-index: 2600 !important; }
       
-      .dice-box { padding: 40px; text-align: center; width: 350px; background: white; position: relative; box-sizing: border-box; max-height: 90vh; overflow-y: auto;}
-      .dice-number { font-size: 150px; color: #69f0ae; width: 150px; line-height: 150px; border-radius: 35px; margin: 0 auto; text-shadow: 2px 5px 10px rgba(0,0,0,0.2);}
-      .shop-item-btn { display: flex; align-items: center; justify-content: space-between; background: #fff3e0; border: 2px solid #ffca28; padding: 10px; margin-bottom: 10px; border-radius: 10px; cursor: pointer; color: #5d4037; font-size: 16px; transition: 0.2s; font-weight: bold; text-align: left;}
+      @keyframes modalPopIn {
+        0% { transform: scale(0.9) translateY(10px); opacity: 0; }
+        100% { transform: scale(1) translateY(0); opacity: 1; }
+      }
+      .dice-box { padding: 28px 26px; text-align: center; width: 380px; background: linear-gradient(180deg, #ffffff 0%, #f8f9ff 100%); position: relative; box-sizing: border-box; max-height: 88dvh; overflow-y: auto; border-radius: 24px; border: 2.5px solid rgba(255, 202, 40, 0.75); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35); animation: modalPopIn 0.22s cubic-bezier(0.22, 1, 0.36, 1); }
+      .dice-box h2 { margin-top: 0; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 2px dashed rgba(2, 136, 209, 0.2); font-size: 22px; }
+      .dice-number { font-size: 140px; color: #00c853; width: 140px; line-height: 140px; border-radius: 35px; margin: 0 auto; text-shadow: 2px 5px 10px rgba(0,0,0,0.18);}
+      .shop-item-btn { display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, #fff8e1, #ffecb3); border: 2px solid #ffca28; padding: 10px 12px; margin-bottom: 10px; border-radius: 12px; cursor: pointer; color: #4e342e; font-size: 15px; transition: 0.2s; font-weight: bold; text-align: left; }
       .shop-item-btn:hover { background: #ffe082; transform: scale(1.02); }
-      .combat-fighter { display: flex; flex-direction: column; align-items: center; flex: 1; transition: transform 0.2s; }
-      .combat-fighter img { width: 80px; height: 80px; border-radius: 50%; object-fit: contain; background: rgba(255,255,255,0.8); box-shadow: 0 5px 10px rgba(0,0,0,0.2); margin-bottom: 10px;}
+      .combat-fighter { display: flex; flex-direction: column; align-items: center; flex: 1; transition: transform 0.2s; background: rgba(0,0,0,0.03); padding: 10px 6px; border-radius: 16px; }
+      .combat-fighter img { width: 76px; height: 76px; border-radius: 50%; object-fit: contain; background: rgba(255,255,255,0.95); box-shadow: 0 5px 12px rgba(0,0,0,0.18); margin-bottom: 8px; }
       .combat-dice-slot { font-size: 50px; color: #e53935; line-height: 50px; height: 50px; margin-top: 10px; display: none;}
 
-      #toast { visibility: hidden; min-width: 250px; background-color: #ffca28; color: #5d4037; text-align: center; border-radius: 10px; padding: 16px; position: fixed; z-index: 3000; top: 80px; left: 50%; transform: translate(-50%, -20px); font-weight: bold; font-size: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: 0.4s; border: 2px solid white;}
+      #toast { visibility: hidden; min-width: 240px; max-width: 88vw; background: linear-gradient(135deg, #ffd54f, #ffb300); color: #4e342e; text-align: center; border-radius: 16px; padding: 12px 18px; position: fixed; z-index: 6500; top: 72px; left: 50%; transform: translate(-50%, -18px); font-weight: bold; font-size: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.28); transition: 0.35s; border: 2px solid #fff; box-sizing: border-box; line-height: 1.4; }
       #toast.show { visibility: visible; transform: translate(-50%, 0); }
-      #status-board { background: #fff9c4; color: #f57f17; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-weight: bold; border: 1px dashed #f57f17;}
+      #status-board { background: #fff9c4; color: #f57f17; padding: 10px 14px; border-radius: 12px; margin-bottom: 15px; font-weight: bold; border: 1.5px dashed #f57f17; font-size: 14px; }
 
-      .log-entry { margin: 4px 0; font-size: 14px; border-bottom: 1px dashed #ccc; padding-bottom: 4px; text-align: left;}
+      .log-entry { margin: 4px 0; font-size: 13px; border-bottom: 1px dashed #e0e0e0; padding-bottom: 4px; text-align: left;}
       .log-entry:last-child { border: none; }
 
-      #start-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 2500; flex-direction: column; text-align: center; color: white;}
-      .giant-start-btn { font-size: 40px; padding: 25px 60px; border-radius: 50px; background: #69f0ae; color: #1b5e20; border: 5px solid white; cursor: pointer; font-family: 'Mali', sans-serif; font-weight: bold; box-shadow: 0 10px 30px rgba(105, 240, 174, 0.5); animation: giantPulse 1.5s infinite; margin-top: 30px; transition: 0.2s;}
-      .giant-start-btn:hover { transform: scale(1.1); }
+      #start-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 16, 35, 0.88); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 2500; flex-direction: column; text-align: center; color: white; padding: 20px; box-sizing: border-box; }
+      .giant-start-btn { font-size: 36px; padding: 20px 52px; border-radius: 50px; background: linear-gradient(135deg, #69f0ae, #00e676); color: #1b5e20; border: 4px solid white; cursor: pointer; font-family: 'Mali', sans-serif; font-weight: bold; box-shadow: 0 10px 30px rgba(105, 240, 174, 0.5); animation: giantPulse 1.5s infinite; margin-top: 24px; transition: 0.2s;}
+      .giant-start-btn:hover { transform: scale(1.06); }
       @keyframes giantPulse { 0% { box-shadow: 0 0 0 0 rgba(105, 240, 174, 0.7); } 70% { box-shadow: 0 0 0 30px rgba(105, 240, 174, 0); } 100% { box-shadow: 0 0 0 0 rgba(105, 240, 174, 0); } }
 
       /* Turn Announcer */
-      #turn-announcer { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(0); background: rgba(0,0,0,0.9); color: white; padding: 20px 50px; border-radius: 20px; font-size: 40px; font-weight: bold; border: 5px solid #ffca28; z-index: 5000; text-shadow: 0 5px 10px rgba(0,0,0,0.5); pointer-events: none; transition: 0.3s; text-align: center; }
+      #turn-announcer { position: fixed; top: 42%; left: 50%; transform: translate(-50%, -50%) scale(0); background: rgba(18, 20, 40, 0.94); color: white; padding: 20px 44px; border-radius: 24px; font-size: 34px; font-weight: bold; border: 4px solid #ffca28; z-index: 5000; text-shadow: 0 4px 10px rgba(0,0,0,0.5); pointer-events: none; transition: 0.3s; text-align: center; max-width: 86vw; box-sizing: border-box; }
       .announce-anim { transform: translate(-50%, -50%) scale(1) !important; animation: pulseAnnounce 0.5s infinite alternate; }
       @keyframes pulseAnnounce { from { box-shadow: 0 0 20px rgba(255,202,40,0.5); } to { box-shadow: 0 0 50px rgba(255,202,40,1); transform: translate(-50%, -50%) scale(1.05); } }
 
-      /* ปุ่มลัดบนมือถือ (ซ่อนบน Desktop) */
-      #mobile-quick-actions { display: none; }
+      /* ปุ่มลัดและหน้าล็อบบี้ */
       .lobby-copy-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
-      .lobby-copy-btn { padding: 8px 16px; border-radius: 20px; border: 2px solid rgba(255,255,255,0.7); background: rgba(255,255,255,0.18); color: #fff; font-family: 'Mali', sans-serif; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+      .lobby-copy-btn { padding: 9px 16px; border-radius: 22px; border: 2px solid rgba(255,255,255,0.75); background: rgba(255,255,255,0.16); color: #fff; font-family: 'Mali', sans-serif; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; }
       .lobby-copy-btn:active { transform: scale(0.95); }
 
       /* ========================================================= */
       /* ส่วนที่ 1: การตั้งค่าสำหรับหน้าจอมือถือ */
       /* ========================================================= */
       @media (max-width: 1080px) {
-        #mobile-quick-actions { display: block; }
-        .mobile-qa-btn { position: fixed; top: 14px; width: 38px; height: 38px; border-radius: 50%; border: 2px solid #0288d1; background: rgba(255,255,255,0.92); font-size: 18px; display: flex; align-items: center; justify-content: center; z-index: 5100; cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,0.25); padding: 0; }
-        #mobileBgmBtn { left: 10px; }
-        #mobileUnstuckBtn { right: 10px; background: #ffca28; border-color: #fff; }
-        :root { --board-scale: 0.3; } 
+        :root { --board-scale: 0.34; } 
         
         body, html { 
-            overflow: hidden !important; 
-            touch-action: none; 
             width: 100vw; 
-            height: 100vh;
+            min-height: 100dvh;
+            overflow-x: hidden;
         }
+
+        #settings-menu { top: 10px; left: 10px; right: 10px; justify-content: flex-start; pointer-events: none; }
+        #settings-menu > * { pointer-events: auto; }
+        .gear-btn { width: 38px; height: 38px; font-size: 18px; flex-shrink: 0; }
+        .top-pill-btn { height: 36px; padding: 0 11px; font-size: 12px; border-radius: 18px; }
+        #bgmToggleBtn { margin-left: auto; }
+        #settings-panel { top: 46px; left: 0; max-width: 88vw; }
+
+        #init-screen, #char-select-screen {
+            margin-top: 60px;
+            margin-bottom: 16px;
+            width: 92vw;
+            max-width: 430px;
+            max-height: calc(100dvh - 80px);
+            overflow-y: auto;
+            padding: 20px 16px;
+            touch-action: pan-y;
+        }
+        .char-grid { gap: 10px; max-height: 46dvh; }
+        .char-btn { padding: 8px; font-size: 13px; border-radius: 13px; }
+        .char-btn img { width: 42px; height: 42px; margin-right: 8px; }
 
         #corner-ui { position: absolute; top: 0; left: 0; width: 100%; display: block; overflow: visible; padding: 0; pointer-events: none; z-index: 500; height: auto; }
         
@@ -188,9 +219,9 @@
         
         .corner-card.active-turn { 
             position: absolute !important; 
-            top: 70px !important;
+            top: 96px !important;
             left: 50% !important; 
-            transform: translateX(-50%) scale(0.9) !important; 
+            transform: translateX(-50%) !important; 
             
             display: flex !important; 
             flex-direction: row !important;
@@ -198,110 +229,110 @@
             justify-content: center !important;
             align-items: center !important;
             
-            width: 95% !important; 
-            max-width: 95vw !important; 
+            width: 92vw !important; 
+            max-width: 420px !important; 
             
             height: auto !important; 
             min-height: min-content !important; 
             
             margin: 0 !important; 
-            padding: 15px !important; 
-            gap: 5px;
+            padding: 10px 12px !important; 
+            gap: 6px;
             
-            font-size: 14px; 
+            font-size: 13px; 
             box-sizing: border-box; 
             pointer-events: auto; 
-            scroll-snap-align: none; 
-            border-radius: 15px; 
-            border: 3px solid #69f0ae; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+            border-radius: 16px; 
+            border: 2.5px solid #00e676; 
+            box-shadow: 0 6px 18px rgba(0,0,0,0.32); 
             z-index: 1000 !important; 
             background-color: rgba(255, 255, 255, 0.95); 
         }
         
         .corner-card.active-turn > br { display: none; }
-        .corner-card img { width: 35px; height: 35px; margin-bottom: 5px;}
-        .item-slot { width: 30px; height: 30px; font-size: 14px; }
+        .corner-card img { width: 34px; height: 34px; margin-bottom: 0; }
+        .item-slot { width: 30px; height: 30px; font-size: 15px; }
         
         .item-container { 
             display: flex;
             gap: 8px; 
-            margin-top: 5px; 
+            margin-top: 2px; 
             justify-content: center; 
             flex-wrap: wrap; 
             width: 100%; 
         } 
         
-        .active-skill-btn { font-size: 13px; padding: 6px 12px; margin-top: 5px;}
+        .active-skill-btn { font-size: 13px; padding: 6px 12px; margin-top: 4px; width: auto; min-width: 150px; }
         
-        .scene { align-items: flex-start; padding-top: 15vh; }
+        .scene { top: 170px; bottom: 130px; height: auto !important; align-items: center !important; padding-top: 0 !important; }
         
         #game-container { 
             position: absolute !important;
-            top: -10% !important;
-            bottom: 0 !important;
-            left: -18% !important;
-            right: 0 !important;
-            margin: auto !important; 
+            top: 50% !important;
+            left: 50% !important;
+            right: auto !important;
+            bottom: auto !important;
+            margin: 0 !important; 
+            transform: translate(-50%, -50%) scale(var(--board-scale)) rotateX(55deg) rotateZ(var(--board-rot)) !important;
             transform-origin: center center !important; 
         }
         
-        #settings-menu { display: none !important; }
-        
         #center-turn-display { 
-            font-size: 16px; 
-            padding: 5px 15px; 
-            top: 15px !important; 
+            font-size: 15px; 
+            padding: 6px 18px; 
+            top: 54px !important; 
             bottom: auto !important; 
             left: 50%; 
             transform: translateX(-50%); 
             white-space: nowrap; 
             width: max-content; 
-            max-width: 80%; 
-            border-radius: 10px; 
-            z-index: 5000;
+            max-width: 88vw; 
+            overflow: hidden;
+            text-overflow: ellipsis;
+            border-radius: 14px; 
+            z-index: 4500;
         }
         
         .controls { 
-            position: absolute;
+            position: fixed;
             bottom: 0 !important; 
             left: 50%;
             transform: translateX(-50%); 
             width: 100% !important; 
-            max-width: 400px; 
+            max-width: 440px; 
             z-index: 1500; 
             display: flex; 
             flex-direction: column; 
             justify-content: flex-end;
-            background: rgba(255,255,255,0.95); 
-            padding: 10px 10px 15px 10px; 
+            background: rgba(255,255,255,0.96); 
+            padding: 10px 14px calc(12px + env(safe-area-inset-bottom, 0px)) 14px; 
             box-sizing: border-box;
-            border-top-left-radius: 20px; 
-            border-top-right-radius: 20px;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.2);
+            border-top-left-radius: 22px; 
+            border-top-right-radius: 22px;
+            box-shadow: 0 -6px 22px rgba(0,0,0,0.22);
         }
         #rollBtn { 
-            margin-bottom: 5px !important; 
-            font-size: 22px !important; 
+            margin-bottom: 6px !important; 
+            font-size: 20px !important; 
             padding: 12px 20px !important; 
             border-radius: 20px; 
             width: 100%; 
             box-sizing: border-box;
         }
-        #sys-log { font-size: 12px; padding: 8px; margin-bottom: env(safe-area-inset-bottom, 2px); height: 50px; margin-top: 0;}
+        #sys-log { font-size: 12px; padding: 8px 10px; height: 50px; margin-top: 0; border-radius: 12px; }
         
-        .dice-box { width: 100% !important; max-width: 100%; padding: 15px !important; box-sizing: border-box; }
-        #combat-modal .dice-box, #boss-modal .dice-box { width: 100% !important; }
+        .dice-box { width: 92vw !important; max-width: 420px !important; padding: 20px 16px !important; box-sizing: border-box; max-height: 85dvh; border-radius: 22px; touch-action: pan-y; }
+        #combat-modal .dice-box, #boss-modal .dice-box { width: 92vw !important; max-width: 420px !important; }
         .shop-flex { flex-direction: column !important; }
         .shop-detail-area { border-left: none !important; border-top: 2px dashed #ccc; padding-left: 0 !important; padding-top: 10px; margin-top: 10px; }
         .shop-list-area { max-height: 150px !important; }
-        .combat-fighter img { width: 50px; height: 50px; margin-bottom: 5px; }
+        .combat-fighter img { width: 52px; height: 52px; margin-bottom: 5px; }
         .combat-dice-slot { font-size: 30px; height: 30px; line-height: 30px; }
         .vs-text { font-size: 60px; } .fighter-cut-l, .fighter-cut-r { width: 100px; height: 100px; }
-        .action-box { padding: 20px; width: 90%; } .action-box h1 { font-size: 28px !important; } .action-box p { font-size: 16px !important; }
-        .giant-start-btn { font-size: 24px; padding: 15px 30px; }
-        #start-overlay h1 { font-size: 35px !important; }
-        #turn-announcer { font-size: 30px; padding: 15px 30px; width: 80%; z-index: 2000; }
+        .action-box { padding: 24px 18px; width: 88vw; } .action-box h1 { font-size: 24px !important; } .action-box p { font-size: 15px !important; }
+        .giant-start-btn { font-size: 22px; padding: 14px 28px; }
+        #start-overlay h1 { font-size: 32px !important; }
+        #turn-announcer { font-size: 26px; padding: 16px 24px; width: 84vw; z-index: 5500; }
         .dice-number { font-size: 100px !important; width: 100px !important; line-height: 100px !important; }
       }
 
@@ -356,8 +387,8 @@
       /* ส่วนที่ 3: บังคับตั้งค่าเฉพาะตอนถือมือถือแนวตั้ง (Portrait) */
       /* ========================================================= */
       @media (max-width: 1080px) and (orientation: portrait) {
-        :root { --board-scale: 0.55; } 
-        .scene { padding-top: 20vh; }
+        :root { --board-scale: 0.56; } 
+        .scene { top: 185px; bottom: 132px; padding-top: 0; }
         .splash-subtitle { font-size: 20px; }
       }
     </style>
@@ -371,8 +402,10 @@
 
     <div id="settings-menu">
         <button class="gear-btn" onclick="toggleSettings()" title="ตั้งค่าและมุมกล้อง">⚙️</button>
+        <button id="bgmToggleBtn" class="top-pill-btn" onclick="toggleBgm()" title="เปิด/ปิดเสียง">🔇 เสียง</button>
+        <button id="fsToggleBtn" class="top-pill-btn" onclick="toggleFullScreen()" title="เต็มจอ">⛶ เต็มจอ</button>
         <div id="settings-panel">
-            <div style="font-weight:bold; color:#0288d1; text-align:center; margin-bottom:5px;">มุมกล้อง</div>
+            <div style="font-weight:bold; color:#0288d1; text-align:center; margin-bottom:2px;">⚙️ ตั้งค่าเกมและมุมกล้อง</div>
             <div class="settings-row">
                 <button class="settings-btn" onclick="zoomBoard(0.1)" title="ขยาย">🔍+</button>
                 <button class="settings-btn" onclick="zoomBoard(-0.1)" title="ย่อ">🔍-</button>
@@ -381,10 +414,8 @@
                 <button class="settings-btn" onclick="rotateCam(-90)">↺ ซ้าย</button>
                 <button class="settings-btn" onclick="rotateCam(90)">ขวา ↻</button>
             </div>
-            <div class="settings-row" style="margin-top:5px; border-top:1px dashed #0288d1; padding-top:10px;">
-                <button id="bgmToggleBtn" class="settings-btn" onclick="toggleBgm()" title="เปิด/ปิดเสียง">🔇 เสียง</button>
-                <button class="settings-btn" onclick="toggleFullScreen()" title="เต็มจอ">⛶ จอ</button>
-                <button class="settings-btn" onclick="emergencyUnstuck(true)" title="รีเฟรชข้อมูล" style="background:#ffca28; color:#5d4037;">🔄 รีเฟรช</button>
+            <div class="settings-row" style="margin-top:4px; border-top:1px dashed #0288d1; padding-top:10px;">
+                <button class="settings-btn" onclick="emergencyUnstuck(true)" title="รีเฟรชข้อมูล" style="background:#ffca28; color:#5d4037;">🔄 รีเฟรช / ข้ามตา</button>
             </div>
         </div>
     </div>
@@ -471,10 +502,6 @@
     <div id="start-overlay"><h1 style="font-size: 50px; margin: 0; color: #ffca28; text-shadow: 2px 2px 10px rgba(0,0,0,0.5);">🎲 ห้องรอล็อบบี้</h1><p style="font-size: 24px; margin-bottom: 6px;">รหัสห้อง: <span id="lobby-room-code" style="color: #69f0ae; font-weight: bold; font-size: 35px;">----</span></p><div class="lobby-copy-row"><button type="button" class="lobby-copy-btn" onclick="copyRoomCode()">📋 คัดลอกรหัส</button><button type="button" class="lobby-copy-btn" onclick="copyRoomInviteLink()">🔗 คัดลอกลิงก์ชวนเพื่อน</button></div><div id="lobby-players" style="margin: 20px 0; font-size: 20px;">กำลังโหลด...</div><button id="giantStartBtn" class="giant-start-btn" onclick="requestStartGame()" style="display: none;">🚀 เริ่มเกมสิ! 🚀</button><p id="waiting-host-msg" style="display: none; color: #ffab00; font-size: 24px; font-weight: bold; margin-top: 30px;">⏳ รอหัวหน้าปาร์ตี้กดเริ่มเกม...</p></div>
 
     <div id="game-screen">
-      <div id="mobile-quick-actions">
-        <button id="mobileBgmBtn" class="mobile-qa-btn" onclick="toggleBgm()" title="เปิด/ปิดเสียง">🔇</button>
-        <button id="mobileUnstuckBtn" class="mobile-qa-btn" onclick="emergencyUnstuck(true)" title="รีเฟรช / ข้ามตา">🔄</button>
-      </div>
       <div id="center-turn-display" class="glass">รอเริ่มเกม...</div>
       <div id="corner-ui"></div>
       
@@ -789,28 +816,36 @@
       function toggleFullScreen() { 
           let doc = window.document;
           let docEl = doc.documentElement;
+          const fsBtn = document.getElementById('fsToggleBtn');
 
           let requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
           let cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
 
           if(!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
               if(requestFullScreen) {
-                  requestFullScreen.call(docEl).catch(() => { showToast("เบราว์เซอร์นี้ไม่รองรับ Fullscreen"); });
+                  requestFullScreen.call(docEl).then(() => {
+                    if (fsBtn) fsBtn.innerText = "🗗 ออกจอ";
+                  }).catch(() => { showToast("เบราว์เซอร์นี้ไม่รองรับ Fullscreen"); });
               } else {
                   showToast("เบราว์เซอร์นี้ไม่รองรับ Fullscreen");
               }
           } else if(cancelFullScreen) {
-              cancelFullScreen.call(doc);
+              Promise.resolve(cancelFullScreen.call(doc)).then(() => {
+                if (fsBtn) fsBtn.innerText = "⛶ เต็มจอ";
+              }).catch(() => {});
           }
       }
+
+      document.addEventListener('fullscreenchange', () => {
+          const fsBtn = document.getElementById('fsToggleBtn');
+          if (fsBtn) fsBtn.innerText = document.fullscreenElement ? "🗗 ออกจอ" : "⛶ เต็มจอ";
+      });
 
       function toggleBgm(forcePlay = false) { 
           const bgm = document.getElementById('bgmAudio'); 
           const btn = document.getElementById('bgmToggleBtn'); 
-          const mBtn = document.getElementById('mobileBgmBtn');
           const setLabels = (playing) => {
               if (btn) btn.innerText = playing ? "🔊 เสียง" : "🔇 เสียง";
-              if (mBtn) mBtn.innerText = playing ? "🔊" : "🔇";
           };
           try {
               if(forcePlay) { 
@@ -832,6 +867,14 @@
           const panel = document.getElementById('settings-panel');
           panel.style.display = panel.style.display === 'flex' ? 'none' : 'flex';
       }
+
+      document.addEventListener('click', (e) => {
+          const menu = document.getElementById('settings-menu');
+          const panel = document.getElementById('settings-panel');
+          if (panel && panel.style.display === 'flex' && menu && !menu.contains(e.target)) {
+              panel.style.display = 'none';
+          }
+      });
 
       function playSound(type) { 
         try { 
