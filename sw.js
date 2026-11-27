@@ -1,8 +1,10 @@
-const CACHE_NAME = 'war-of-wannakhadi-v1';
+const CACHE_NAME = 'war-of-wannakhadi-v2';
 const STATIC_ASSETS = [
   './',
   './index.html',
-  './manifest.json'
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {

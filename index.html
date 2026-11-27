@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>War of Wannakhadi</title>
     <meta name="description" content="มหาศึกวรรณคดี (War of Wannakhadi) เกมเพื่อความสนุกและการเรียนรู้">
-    <link rel="icon" type="image/png" href="https://i.postimg.cc/V6m5HSRD/wow.png">
-    <link rel="shortcut icon" type="image/png" href="https://i.postimg.cc/V6m5HSRD/wow.png">
+    <link rel="icon" type="image/png" href="./icon-192.png">
+    <link rel="shortcut icon" type="image/png" href="./icon-192.png">
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#1a1a2e">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="War of Wannakhadi">
-    <link rel="apple-touch-icon" href="https://i.postimg.cc/V6m5HSRD/wow.png">
+    <link rel="apple-touch-icon" href="./icon-192.png">
     <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;700&display=swap" rel="stylesheet">
     <style>
       :root { --board-rot: -45deg; --inv-rot: 45deg; --board-scale: 1; }
@@ -159,10 +159,20 @@
       .announce-anim { transform: translate(-50%, -50%) scale(1) !important; animation: pulseAnnounce 0.5s infinite alternate; }
       @keyframes pulseAnnounce { from { box-shadow: 0 0 20px rgba(255,202,40,0.5); } to { box-shadow: 0 0 50px rgba(255,202,40,1); transform: translate(-50%, -50%) scale(1.05); } }
 
+      /* ปุ่มลัดบนมือถือ (ซ่อนบน Desktop) */
+      #mobile-quick-actions { display: none; }
+      .lobby-copy-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+      .lobby-copy-btn { padding: 8px 16px; border-radius: 20px; border: 2px solid rgba(255,255,255,0.7); background: rgba(255,255,255,0.18); color: #fff; font-family: 'Mali', sans-serif; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+      .lobby-copy-btn:active { transform: scale(0.95); }
+
       /* ========================================================= */
       /* ส่วนที่ 1: การตั้งค่าสำหรับหน้าจอมือถือ */
       /* ========================================================= */
       @media (max-width: 1080px) {
+        #mobile-quick-actions { display: block; }
+        .mobile-qa-btn { position: fixed; top: 14px; width: 38px; height: 38px; border-radius: 50%; border: 2px solid #0288d1; background: rgba(255,255,255,0.92); font-size: 18px; display: flex; align-items: center; justify-content: center; z-index: 5100; cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,0.25); padding: 0; }
+        #mobileBgmBtn { left: 10px; }
+        #mobileUnstuckBtn { right: 10px; background: #ffca28; border-color: #fff; }
         :root { --board-scale: 0.3; } 
         
         body, html { 
@@ -452,15 +462,19 @@
             <p id="modal-char-skill" style="color:#e53935; font-weight:bold; margin:10px 0; font-size:14px; line-height: 1.4; text-align: left; background: rgba(0,0,0,0.05); padding: 10px; border-radius: 10px;"></p>
             <p id="modal-char-active-skill" style="color:#6a1b9a; font-weight:bold; margin:10px 0; font-size:14px; line-height: 1.4; text-align: left; background: rgba(106, 27, 154, 0.1); padding: 10px; border-radius: 10px;"></p>
             <div style="display:flex; gap:10px; margin-top:20px;">
-                <button class="btn btn-create" style="background:#4caf50; color:white; flex:1;" onclick="confirmSelection()">✅ เลือก</button>
+                <button id="confirm-char-btn" class="btn btn-create" style="background:#4caf50; color:white; flex:1;" onclick="confirmSelection()">✅ เลือก</button>
                 <button class="btn btn-join" style="background:#e0e0e0; color:#333; flex:1;" onclick="closeCharModal()">❌ ปิด</button>
             </div>
         </div>
     </div>
     
-    <div id="start-overlay"><h1 style="font-size: 50px; margin: 0; color: #ffca28; text-shadow: 2px 2px 10px rgba(0,0,0,0.5);">🎲 ห้องรอล็อบบี้</h1><p style="font-size: 24px;">รหัสห้อง: <span id="lobby-room-code" style="color: #69f0ae; font-weight: bold; font-size: 35px;">----</span></p><div id="lobby-players" style="margin: 20px 0; font-size: 20px;">กำลังโหลด...</div><button id="giantStartBtn" class="giant-start-btn" onclick="requestStartGame()" style="display: none;">🚀 เริ่มเกมสิ! 🚀</button><p id="waiting-host-msg" style="display: none; color: #ffab00; font-size: 24px; font-weight: bold; margin-top: 30px;">⏳ รอหัวหน้าปาร์ตี้กดเริ่มเกม...</p></div>
+    <div id="start-overlay"><h1 style="font-size: 50px; margin: 0; color: #ffca28; text-shadow: 2px 2px 10px rgba(0,0,0,0.5);">🎲 ห้องรอล็อบบี้</h1><p style="font-size: 24px; margin-bottom: 6px;">รหัสห้อง: <span id="lobby-room-code" style="color: #69f0ae; font-weight: bold; font-size: 35px;">----</span></p><div class="lobby-copy-row"><button type="button" class="lobby-copy-btn" onclick="copyRoomCode()">📋 คัดลอกรหัส</button><button type="button" class="lobby-copy-btn" onclick="copyRoomInviteLink()">🔗 คัดลอกลิงก์ชวนเพื่อน</button></div><div id="lobby-players" style="margin: 20px 0; font-size: 20px;">กำลังโหลด...</div><button id="giantStartBtn" class="giant-start-btn" onclick="requestStartGame()" style="display: none;">🚀 เริ่มเกมสิ! 🚀</button><p id="waiting-host-msg" style="display: none; color: #ffab00; font-size: 24px; font-weight: bold; margin-top: 30px;">⏳ รอหัวหน้าปาร์ตี้กดเริ่มเกม...</p></div>
 
     <div id="game-screen">
+      <div id="mobile-quick-actions">
+        <button id="mobileBgmBtn" class="mobile-qa-btn" onclick="toggleBgm()" title="เปิด/ปิดเสียง">🔇</button>
+        <button id="mobileUnstuckBtn" class="mobile-qa-btn" onclick="emergencyUnstuck(true)" title="รีเฟรช / ข้ามตา">🔄</button>
+      </div>
       <div id="center-turn-display" class="glass">รอเริ่มเกม...</div>
       <div id="corner-ui"></div>
       
@@ -793,17 +807,22 @@
       function toggleBgm(forcePlay = false) { 
           const bgm = document.getElementById('bgmAudio'); 
           const btn = document.getElementById('bgmToggleBtn'); 
+          const mBtn = document.getElementById('mobileBgmBtn');
+          const setLabels = (playing) => {
+              if (btn) btn.innerText = playing ? "🔊 เสียง" : "🔇 เสียง";
+              if (mBtn) mBtn.innerText = playing ? "🔊" : "🔇";
+          };
           try {
               if(forcePlay) { 
                   bgm.volume = 0.5; let p = bgm.play(); 
-                  if(p && p.then) p.then(() => { isBgmPlaying = true; btn.innerText = "🔊 เสียง"; }).catch(()=>{}); 
+                  if(p && p.then) p.then(() => { isBgmPlaying = true; setLabels(true); }).catch(()=>{}); 
               } else { 
                   if(isBgmPlaying) { 
-                      bgm.pause(); btn.innerText = "🔇 เสียง"; isBgmPlaying = false; 
+                      bgm.pause(); isBgmPlaying = false; setLabels(false);
                   } else { 
                       bgm.volume = 0.5; let p = bgm.play(); 
-                      if(p && p.then) p.then(()=>{ btn.innerText = "🔊 เสียง"; isBgmPlaying = true; }).catch(()=>{}); 
-                      else { btn.innerText = "🔊 เสียง"; isBgmPlaying = true; } 
+                      if(p && p.then) p.then(()=>{ isBgmPlaying = true; setLabels(true); }).catch(()=>{}); 
+                      else { isBgmPlaying = true; setLabels(true); } 
                   } 
               } 
           } catch(e) {}
@@ -993,6 +1012,10 @@
       }
 
       window.onload = function() {
+        const roomParam = new URLSearchParams(window.location.search).get('room');
+        if (roomParam) {
+          document.getElementById('roomCodeInput').value = roomParam.trim();
+        }
         const statusBoard = document.getElementById('status-board');
         google.script.run.withSuccessHandler(res => { 
           if(res && res.error) { statusBoard.innerHTML = "❌ โหลดข้อมูลพัง: " + res.error; statusBoard.style.color = "#c62828"; } 
@@ -1109,21 +1132,60 @@
           toggleBgm(true); document.getElementById('init-screen').style.display = 'none'; document.getElementById('char-select-screen').style.display = 'block'; 
       }
       function goBackToInit() { document.getElementById('char-select-screen').style.display = 'none'; document.getElementById('init-screen').style.display = 'block'; }
+      let isSubmittingRoom = false;
       function confirmSelection() {
         if(!selectedCharObj) return alert("รอโหลดตัวละครแป๊บนะครับ!");
-        document.getElementById('char-detail-modal').style.display = 'none';
+        if(isSubmittingRoom) return;
+        const confirmBtn = document.getElementById('confirm-char-btn');
+        isSubmittingRoom = true;
+        if(confirmBtn) {
+          confirmBtn.disabled = true;
+          confirmBtn.innerText = lobbyMode === 'create' ? '⏳ กำลังสร้างห้อง...' : '⏳ กำลังเข้าห้อง...';
+        }
+        const resetBtn = () => {
+          isSubmittingRoom = false;
+          if(confirmBtn) {
+            confirmBtn.disabled = false;
+            confirmBtn.innerText = '✅ เลือก';
+          }
+        };
         if (lobbyMode === 'create') {
           google.script.run.withSuccessHandler(res => {
-            if(res && res.success) { myRoomCode = res.roomCode; myPlayerId = res.myId; enterGameRoom(true); }
-            else alert((res && res.msg) || 'สร้างห้องไม่สำเร็จ');
-          }).withFailureHandler(() => alert('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้')).createRoom(selectedCharObj.name, selectedCharObj);
+            resetBtn();
+            if(res && res.success) {
+              document.getElementById('char-detail-modal').style.display = 'none';
+              myRoomCode = res.roomCode; myPlayerId = res.myId; enterGameRoom(true);
+            } else alert((res && res.msg) || 'สร้างห้องไม่สำเร็จ');
+          }).withFailureHandler(() => { resetBtn(); alert('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้'); }).createRoom(selectedCharObj.name, selectedCharObj);
         } else {
           const code = document.getElementById('roomCodeInput').value.trim();
           google.script.run.withSuccessHandler(res => {
-            if(res && res.success) { myRoomCode = res.roomCode; myPlayerId = res.myId; enterGameRoom(false); }
-            else alert((res && res.msg) || 'เข้าห้องไม่สำเร็จ');
-          }).withFailureHandler(() => alert('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้')).joinRoom(code, selectedCharObj.name, selectedCharObj);
+            resetBtn();
+            if(res && res.success) {
+              document.getElementById('char-detail-modal').style.display = 'none';
+              myRoomCode = res.roomCode; myPlayerId = res.myId; enterGameRoom(false);
+            } else alert((res && res.msg) || 'เข้าห้องไม่สำเร็จ');
+          }).withFailureHandler(() => { resetBtn(); alert('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้'); }).joinRoom(code, selectedCharObj.name, selectedCharObj);
         }
+      }
+
+      function copyTextWithFallback(text, okMsg) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(() => showToast(okMsg)).catch(() => {
+            prompt('คัดลอกข้อความด้านล่าง:', text);
+          });
+        } else {
+          prompt('คัดลอกข้อความด้านล่าง:', text);
+        }
+      }
+      function copyRoomCode() {
+        if (!myRoomCode) return;
+        copyTextWithFallback(myRoomCode, `📋 คัดลอกรหัสห้อง ${myRoomCode} แล้ว!`);
+      }
+      function copyRoomInviteLink() {
+        if (!myRoomCode) return;
+        const inviteUrl = `${window.location.origin}${window.location.pathname}?room=${encodeURIComponent(myRoomCode)}`;
+        copyTextWithFallback(inviteUrl, '🔗 คัดลอกลิงก์ชวนเพื่อนแล้ว!');
       }
       function showToast(msg) { const toast = document.getElementById("toast"); toast.innerText = msg; toast.className = "show"; setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000); }
       
@@ -1323,6 +1385,10 @@
           }
           cell.innerHTML = `<div class="cell-face face-front"></div><div class="cell-face face-back"></div><div class="cell-face face-left"></div><div class="cell-face face-right"></div><span>${i}</span>`; 
           let infoBox = document.createElement('div'); infoBox.className = 'cell-info'; infoBox.innerHTML = infoText; cell.appendChild(infoBox);
+          cell.addEventListener('click', () => {
+            const msg = infoBox.innerText.replace(/\s*\n+\s*/g, ' • ').trim();
+            if (msg) showToast(msg);
+          });
           let coords = getCellCoords(i); cell.style.top = (coords.row * CELL_SIZE) + 'px'; cell.style.left = (coords.col * CELL_SIZE) + 'px'; board.appendChild(cell);
         }
       }
