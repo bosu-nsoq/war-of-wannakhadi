@@ -6,6 +6,7 @@ const ALLOWED_API_ACTIONS = {
   getGameConfig: true,
   createRoom: true,
   joinRoom: true,
+  addBot: true,
   startGame: true,
   getGameState: true,
   updateGameState: true,
@@ -260,7 +261,7 @@ function getGameConfig(forceRefresh) {
   return config;
 }
 
-function buildPlayerObject(id, playerName, characterObj) {
+function buildPlayerObject(id, playerName, characterObj, isBot) {
   const basePower = characterObj.basePower !== undefined ? Number(characterObj.basePower) : 200;
   let initPower = basePower;
   let initLives = 3;
@@ -275,12 +276,14 @@ function buildPlayerObject(id, playerName, characterObj) {
   return {
     id: id,
     name: playerName,
+    isBot: Boolean(isBot),
     pos: 1,
     power: initPower,
     basePower: basePower,
     lives: initLives,
     maxLives: initLives,
     icon: characterObj.img,
+    skinFilter: characterObj.skinFilter || '',
     skipTurns: 0,
     items: [],
     shield: false,
@@ -332,7 +335,8 @@ function createRoom(playerName, characterObj) {
 
     const initialData = {
       v: 1,
-      players: [buildPlayerObject(0, playerName, characterObj)],
+      round: 1,
+      players: [buildPlayerObject(0, playerName, characterObj, false)],
       turn: 0,
       status: 'Waiting',
       bossLevels: {},
@@ -369,11 +373,48 @@ function joinRoom(roomCode, playerName, characterObj) {
     }
 
     const newId = gameData.players.length;
-    gameData.players.push(buildPlayerObject(newId, playerName, characterObj));
+    gameData.players.push(buildPlayerObject(newId, playerName, characterObj, false));
     pushGameLog(gameData, '✨ <b>' + playerName + '</b> เข้าร่วมวงผจญภัย!');
 
     saveRoomState(sheet, found.rowIndex, roomCode, 'Waiting', gameData);
     return { success: true, roomCode: String(roomCode).trim(), myId: newId };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function addBot(roomCode) {
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(5000)) return { success: false, msg: 'เซิร์ฟเวอร์กำลังยุ่ง กรุณาลองใหม่' };
+  try {
+    const ss = getSS();
+    if (!ss) return { success: false, msg: 'เชื่อมต่อ Sheet ไม่ได้' };
+    const sheet = getOrCreateRoomsSheet(ss);
+    const found = findRoomRow(sheet, roomCode);
+
+    if (!found || found.status !== 'Waiting') {
+      return { success: false, msg: 'ไม่พบรหัสห้องนี้ หรือเกมเริ่มไปแล้ว' };
+    }
+
+    const gameData = JSON.parse(found.rawData);
+    if (gameData.players.length >= 4) return { success: false, msg: 'ห้องนี้เต็มแล้ว (สูงสุด 4 คน)' };
+
+    const cfg = getGameConfig(false);
+    const usedImgs = gameData.players.map(p => p.icon);
+    const availableChars = (cfg.characters || []).filter(c => usedImgs.indexOf(c.img) === -1);
+    if (availableChars.length === 0) return { success: false, msg: 'ไม่มีตัวละครเหลือสำหรับบอท' };
+
+    const botChar = availableChars[Math.floor(Math.random() * availableChars.length)];
+    const botSkins = ['', 'hue-rotate(195deg) saturate(1.3)', 'hue-rotate(320deg) saturate(1.35)', 'hue-rotate(105deg) saturate(1.25)', 'hue-rotate(38deg) saturate(1.45)'];
+    botChar.skinFilter = botSkins[Math.floor(Math.random() * botSkins.length)];
+
+    const newId = gameData.players.length;
+    const botName = '🤖 ' + botChar.name;
+    gameData.players.push(buildPlayerObject(newId, botName, botChar, true));
+    pushGameLog(gameData, '🤖 เพิ่มบอท <b>' + botChar.name + '</b> เข้าร่วมปาร์ตี้!');
+
+    const saved = saveRoomState(sheet, found.rowIndex, roomCode, 'Waiting', gameData);
+    return { success: true, data: saved };
   } finally {
     lock.releaseLock();
   }
@@ -724,6 +765,14 @@ function executeActiveSkill(skillName, caster, target, gameState) {
     case 'cancel_combat':
       caster.evade = true;
       if (caster.status.indexOf('peace') === -1) caster.status.push('peace');
+      break;
+    case 'peek_event':
+      caster.shield = true;
+      caster.power += (caster.activeSkillVal > 0 ? caster.activeSkillVal : 400);
+      break;
+    case 'reveal_map':
+      caster.evade = true;
+      caster.power += (caster.activeSkillVal > 0 ? caster.activeSkillVal : 500);
       break;
   }
 

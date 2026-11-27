@@ -15,7 +15,10 @@
     <link rel="apple-touch-icon" href="./icon-192.png">
     <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;700&display=swap" rel="stylesheet">
     <style>
-      :root { --board-rot: -45deg; --inv-rot: 45deg; --board-scale: 1; }
+      :root { --board-rot: -45deg; --inv-rot: 45deg; --board-scale: 1.24; }
+      @media (max-width: 1360px) and (min-width: 1081px) {
+        :root { --board-scale: 1.08; }
+      }
 
       *, *::before, *::after { font-family: 'Mali', sans-serif; }
 
@@ -52,9 +55,15 @@
       .char-grid::-webkit-scrollbar-track, .dice-box::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 10px; }
       .char-grid::-webkit-scrollbar-thumb, .dice-box::-webkit-scrollbar-thumb { background: #ce93d8; border-radius: 10px; }
 
-      .char-btn { display: flex; align-items: center; background: rgba(255,255,255,0.82); border: 2px solid rgba(206, 147, 216, 0.45); border-radius: 15px; padding: 10px; cursor: pointer; transition: 0.2s; font-weight: bold; font-size: 14px; text-align: left; }
+      .char-btn { display: flex; align-items: center; background: rgba(255,255,255,0.85); border: 2px solid rgba(206, 147, 216, 0.45); border-radius: 15px; padding: 9px 10px; cursor: pointer; transition: 0.2s; font-weight: bold; font-size: 14px; text-align: left; }
       .char-btn:hover { border-color: #ab47bc; background: #fff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-      .char-btn img { width: 48px; height: 48px; border-radius: 50%; object-fit: contain; margin-right: 10px; border: 2px solid #ce93d8; background: #fff; flex-shrink: 0; }
+      .char-btn img { width: 46px; height: 46px; border-radius: 50%; object-fit: contain; margin-right: 9px; border: 2px solid #ce93d8; background: #fff; flex-shrink: 0; }
+      .char-btn-meta { display: flex; flex-direction: column; min-width: 0; }
+      .char-btn-sub { font-size: 11px; font-weight: normal; color: #6a1b9a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+      .skin-picker { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 6px 0 10px 0; flex-wrap: wrap; }
+      .skin-swatch { width: 28px; height: 28px; border-radius: 50%; border: 2.5px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.25); cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; padding: 0; }
+      .skin-swatch:hover { transform: scale(1.12); }
+      .skin-swatch.active { transform: scale(1.18); box-shadow: 0 0 0 2.5px #0288d1, 0 3px 8px rgba(0,0,0,0.3); }
       
       .item-container { display: flex; justify-content: center; gap: 8px; margin-top: 10px; flex-wrap: wrap;}
       .item-slot { width: 35px; height: 35px; background: rgba(0,0,0,0.07); border-radius: 10px; display: flex; justify-content: center; align-items: center; border: 1.5px solid rgba(0,0,0,0.16); font-size: 20px; cursor: pointer; transition: 0.15s; }
@@ -101,7 +110,7 @@
       .float-anim-text { font-size: 32px; font-weight: bold; white-space: nowrap; line-height: 1.2; padding: 5px; width: max-content; text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 0 6px 12px rgba(0,0,0,0.6); animation: floatUpText 2.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
       @keyframes floatUpText { 0% { transform: translate(-50%, 0) scale(0.5); opacity: 0; } 15% { transform: translate(-50%, -40px) scale(1.3); opacity: 1; } 85% { transform: translate(-50%, -100px) scale(1); opacity: 1; } 100% { transform: translate(-50%, -130px) scale(1); opacity: 0; } }
 
-      .scene { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 10; perspective: 3500px;} 
+      .scene { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 10; perspective: 3500px; padding-bottom: 50px; box-sizing: border-box; } 
       #game-container { position: relative; width: 540px; height: 540px; transform: scale(var(--board-scale)) rotateX(55deg) rotateZ(var(--board-rot)); transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1); transform-origin: center center;}
       #board-inner, #tokens-container, #bosses-container, #anim-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform-style: preserve-3d; pointer-events: none; }
 
@@ -192,19 +201,16 @@
             overflow-x: hidden;
         }
 
-        #settings-menu { top: 10px; left: 10px; right: 10px; justify-content: flex-start; pointer-events: none; }
-        #settings-menu > * { pointer-events: auto; }
+        #settings-menu { top: 10px; left: 10px; right: auto; justify-content: flex-start; pointer-events: auto; }
         .gear-btn { width: 38px; height: 38px; font-size: 18px; flex-shrink: 0; }
-        .top-pill-btn { height: 36px; padding: 0 11px; font-size: 12px; border-radius: 18px; }
-        #bgmToggleBtn { margin-left: auto; }
         #settings-panel { top: 46px; left: 0; max-width: 88vw; }
 
         #init-screen, #char-select-screen {
-            margin-top: 60px;
+            margin-top: 58px;
             margin-bottom: 16px;
             width: 92vw;
             max-width: 430px;
-            max-height: calc(100dvh - 80px);
+            max-height: calc(100dvh - 76px);
             overflow-y: auto;
             padding: 20px 16px;
             touch-action: pan-y;
@@ -219,7 +225,7 @@
         
         .corner-card.active-turn { 
             position: absolute !important; 
-            top: 96px !important;
+            top: 56px !important;
             left: 50% !important; 
             transform: translateX(-50%) !important; 
             
@@ -236,8 +242,8 @@
             min-height: min-content !important; 
             
             margin: 0 !important; 
-            padding: 10px 12px !important; 
-            gap: 6px;
+            padding: 9px 12px !important; 
+            gap: 5px;
             
             font-size: 13px; 
             box-sizing: border-box; 
@@ -250,7 +256,7 @@
         }
         
         .corner-card.active-turn > br { display: none; }
-        .corner-card img { width: 34px; height: 34px; margin-bottom: 0; }
+        .corner-card img { width: 32px; height: 32px; margin-bottom: 0; }
         .item-slot { width: 30px; height: 30px; font-size: 15px; }
         
         .item-container { 
@@ -264,7 +270,7 @@
         
         .active-skill-btn { font-size: 13px; padding: 6px 12px; margin-top: 4px; width: auto; min-width: 150px; }
         
-        .scene { top: 170px; bottom: 130px; height: auto !important; align-items: center !important; padding-top: 0 !important; }
+        .scene { top: 140px; bottom: 130px; height: auto !important; align-items: center !important; padding-top: 0 !important; padding-bottom: 0 !important; }
         
         #game-container { 
             position: absolute !important;
@@ -278,15 +284,15 @@
         }
         
         #center-turn-display { 
-            font-size: 15px; 
-            padding: 6px 18px; 
-            top: 54px !important; 
+            font-size: 14px; 
+            padding: 6px 14px; 
+            top: 10px !important; 
             bottom: auto !important; 
             left: 50%; 
             transform: translateX(-50%); 
             white-space: nowrap; 
             width: max-content; 
-            max-width: 88vw; 
+            max-width: calc(100vw - 110px); 
             overflow: hidden;
             text-overflow: ellipsis;
             border-radius: 14px; 
@@ -387,8 +393,8 @@
       /* ส่วนที่ 3: บังคับตั้งค่าเฉพาะตอนถือมือถือแนวตั้ง (Portrait) */
       /* ========================================================= */
       @media (max-width: 1080px) and (orientation: portrait) {
-        :root { --board-scale: 0.56; } 
-        .scene { top: 185px; bottom: 132px; padding-top: 0; }
+        :root { --board-scale: 0.58; } 
+        .scene { top: 146px; bottom: 130px; padding-top: 0; }
         .splash-subtitle { font-size: 20px; }
       }
     </style>
@@ -401,9 +407,7 @@
     </div>
 
     <div id="settings-menu">
-        <button class="gear-btn" onclick="toggleSettings()" title="ตั้งค่าและมุมกล้อง">⚙️</button>
-        <button id="bgmToggleBtn" class="top-pill-btn" onclick="toggleBgm()" title="เปิด/ปิดเสียง">🔇 เสียง</button>
-        <button id="fsToggleBtn" class="top-pill-btn" onclick="toggleFullScreen()" title="เต็มจอ">⛶ เต็มจอ</button>
+        <button class="gear-btn" onclick="toggleSettings()" title="ตั้งค่า">⚙️</button>
         <div id="settings-panel">
             <div style="font-weight:bold; color:#0288d1; text-align:center; margin-bottom:2px;">⚙️ ตั้งค่าเกมและมุมกล้อง</div>
             <div class="settings-row">
@@ -414,8 +418,15 @@
                 <button class="settings-btn" onclick="rotateCam(-90)">↺ ซ้าย</button>
                 <button class="settings-btn" onclick="rotateCam(90)">ขวา ↻</button>
             </div>
-            <div class="settings-row" style="margin-top:4px; border-top:1px dashed #0288d1; padding-top:10px;">
-                <button class="settings-btn" onclick="emergencyUnstuck(true)" title="รีเฟรชข้อมูล" style="background:#ffca28; color:#5d4037;">🔄 รีเฟรช / ข้ามตา</button>
+            <div class="settings-row" style="border-top:1px dashed #b3e5fc; padding-top:8px;">
+                <button id="bgmToggleBtn" class="settings-btn" onclick="toggleBgm()" title="เปิด/ปิดเสียง">🔇 เสียง</button>
+                <button id="fsToggleBtn" class="settings-btn" onclick="toggleFullScreen()" title="เต็มจอ">⛶ เต็มจอ</button>
+            </div>
+            <div class="settings-row" style="border-top:1px dashed #b3e5fc; padding-top:8px;">
+                <button class="settings-btn" onclick="emergencyUnstuck(true)" title="รีเฟรชข้อมูล" style="background:#ffca28; color:#5d4037; border-color:#ffb300;">🔄 รีเฟรช / ข้ามตา</button>
+            </div>
+            <div class="settings-row">
+                <button class="settings-btn" onclick="goHomeScreen()" title="กลับไปหน้าหลัก" style="background:#e3f2fd; color:#0d47a1; border-color:#90caf9; width:100%;">🏠 กลับหน้าหลัก</button>
             </div>
         </div>
     </div>
@@ -488,18 +499,20 @@
     <div id="char-detail-modal" class="modal-bg">
         <div class="dice-box glass" style="width: 380px;">
             <h2 id="modal-char-name" style="margin-top:0; color:#0288d1;">ชื่อตัวละคร</h2>
-            <img id="modal-char-img" src="" style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid #ccc; margin-bottom: 10px; background: white; object-fit: contain;">
+            <img id="modal-char-img" src="" style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid #ccc; margin-bottom: 6px; background: white; object-fit: contain;">
+            <div style="font-size:12px; font-weight:bold; color:#555; margin-top:2px;">🎨 สกินสีชุดตัวละคร:</div>
+            <div class="skin-picker" id="skin-picker"></div>
             <p id="modal-char-basepower" style="color:#00897b; font-weight:bold; margin:5px 0; font-size:16px; background: #e0f2f1; padding: 5px; border-radius: 8px;"></p>
-            <p id="modal-char-skill" style="color:#e53935; font-weight:bold; margin:10px 0; font-size:14px; line-height: 1.4; text-align: left; background: rgba(0,0,0,0.05); padding: 10px; border-radius: 10px;"></p>
-            <p id="modal-char-active-skill" style="color:#6a1b9a; font-weight:bold; margin:10px 0; font-size:14px; line-height: 1.4; text-align: left; background: rgba(106, 27, 154, 0.1); padding: 10px; border-radius: 10px;"></p>
-            <div style="display:flex; gap:10px; margin-top:20px;">
+            <p id="modal-char-skill" style="color:#e53935; font-weight:bold; margin:10px 0; font-size:13.5px; line-height: 1.45; text-align: left; background: rgba(0,0,0,0.05); padding: 10px; border-radius: 10px;"></p>
+            <p id="modal-char-active-skill" style="color:#6a1b9a; font-weight:bold; margin:10px 0; font-size:13.5px; line-height: 1.45; text-align: left; background: rgba(106, 27, 154, 0.1); padding: 10px; border-radius: 10px;"></p>
+            <div style="display:flex; gap:10px; margin-top:18px;">
                 <button id="confirm-char-btn" class="btn btn-create" style="background:#4caf50; color:white; flex:1;" onclick="confirmSelection()">✅ เลือก</button>
                 <button class="btn btn-join" style="background:#e0e0e0; color:#333; flex:1;" onclick="closeCharModal()">❌ ปิด</button>
             </div>
         </div>
     </div>
     
-    <div id="start-overlay"><h1 style="font-size: 50px; margin: 0; color: #ffca28; text-shadow: 2px 2px 10px rgba(0,0,0,0.5);">🎲 ห้องรอล็อบบี้</h1><p style="font-size: 24px; margin-bottom: 6px;">รหัสห้อง: <span id="lobby-room-code" style="color: #69f0ae; font-weight: bold; font-size: 35px;">----</span></p><div class="lobby-copy-row"><button type="button" class="lobby-copy-btn" onclick="copyRoomCode()">📋 คัดลอกรหัส</button><button type="button" class="lobby-copy-btn" onclick="copyRoomInviteLink()">🔗 คัดลอกลิงก์ชวนเพื่อน</button></div><div id="lobby-players" style="margin: 20px 0; font-size: 20px;">กำลังโหลด...</div><button id="giantStartBtn" class="giant-start-btn" onclick="requestStartGame()" style="display: none;">🚀 เริ่มเกมสิ! 🚀</button><p id="waiting-host-msg" style="display: none; color: #ffab00; font-size: 24px; font-weight: bold; margin-top: 30px;">⏳ รอหัวหน้าปาร์ตี้กดเริ่มเกม...</p></div>
+    <div id="start-overlay"><h1 style="font-size: 50px; margin: 0; color: #ffca28; text-shadow: 2px 2px 10px rgba(0,0,0,0.5);">🎲 ห้องรอล็อบบี้</h1><p style="font-size: 24px; margin-bottom: 6px;">รหัสห้อง: <span id="lobby-room-code" style="color: #69f0ae; font-weight: bold; font-size: 35px;">----</span></p><div class="lobby-copy-row"><button type="button" class="lobby-copy-btn" onclick="copyRoomCode()">📋 คัดลอกรหัส</button><button type="button" class="lobby-copy-btn" onclick="copyRoomInviteLink()">🔗 คัดลอกลิงก์ชวนเพื่อน</button></div><div id="lobby-players" style="margin: 18px 0; font-size: 19px;">กำลังโหลด...</div><button id="addBotBtn" type="button" class="lobby-copy-btn" style="background: rgba(105, 240, 174, 0.25); border-color: #69f0ae; display: none; margin-bottom: 6px;" onclick="addBotToRoom()">🤖 เพิ่มบอท (+1)</button><button id="giantStartBtn" class="giant-start-btn" onclick="requestStartGame()" style="display: none;">🚀 เริ่มเกมสิ! 🚀</button><p id="waiting-host-msg" style="display: none; color: #ffab00; font-size: 24px; font-weight: bold; margin-top: 30px;">⏳ รอหัวหน้าปาร์ตี้กดเริ่มเกม...</p></div>
 
     <div id="game-screen">
       <div id="center-turn-display" class="glass">รอเริ่มเกม...</div>
@@ -519,7 +532,7 @@
     </div>
 
     <div id="dice-modal" class="modal-bg"><div class="dice-box glass"><h2 style="margin-top:0; color:#0288d1;">ลุ้นแต้ม...</h2><div id="diceDisplayContainer" style="display:flex; justify-content:center; gap:20px;"><div class="dice-number" id="diceDisplay1">⚀</div><div class="dice-number" id="diceDisplay2" style="display:none;">⚀</div></div><div id="dice-bonus-display" style="color:#ff8f00; font-weight:bold; margin-top:10px; font-size:22px;"></div></div></div>
-    <div id="quiz-modal" class="modal-bg"><div class="dice-box glass" style="width: 450px;"><h2 style="color: #0288d1; margin-top:0;">📜 ตอบคำถามชิงพลัง</h2><p id="quiz-q" style="font-size: 20px; font-weight: bold; margin-bottom: 20px;">คำถามจะแสดงที่นี่?</p><div id="quiz-choices" style="display:flex; flex-direction:column; gap:10px;"></div></div></div>
+    <div id="quiz-modal" class="modal-bg"><div class="dice-box glass" style="width: 450px;"><h2 style="color: #0288d1; margin-top:0;">📜 ตอบคำถามชิงพลัง</h2><div id="quiz-timer" style="font-size:14px; font-weight:bold; color:#e53935; background:#ffebee; display:inline-block; padding:4px 12px; border-radius:12px; margin-bottom:10px;">⏱️ เหลือเวลา 15 วินาที</div><p id="quiz-q" style="font-size: 19px; font-weight: bold; margin-bottom: 18px;">คำถามจะแสดงที่นี่?</p><div id="quiz-choices" style="display:flex; flex-direction:column; gap:10px;"></div></div></div>
     <div id="shop-modal" class="modal-bg"><div class="dice-box glass" style="width: 550px; max-height: 80vh; overflow-y: auto;"><h2 style="color: #8e24aa; margin-top:0;">⛩️ ร้านค้าเวทมนตร์</h2><p>พลังของคุณ: <span id="shop-power-display" style="color:#0288d1; font-weight:bold; font-size:20px;">0</span> ✨</p><div id="shop-items-container"></div><button class="btn btn-join" style="background: #e0e0e0; color:#333; margin-top:15px; width:100%;" onclick="closeShop()">❌ ออกจากร้านค้า</button></div></div>
     
     <div id="item-confirm-modal" class="modal-bg"><div class="dice-box glass"><h2 style="color:#4caf50; margin-top:0;">🪄 ข้อมูลไอเท็ม</h2><div style="font-size: 50px; margin: 10px 0;" id="item-confirm-icon">📦</div><h3 id="item-confirm-name" style="margin:0; color:#333; font-size: 22px;">ชื่อ</h3><div id="item-confirm-desc" style="color:#1a237e; font-size:14px; margin: 15px 0; padding: 10px; background: #e8eaf6; border-radius: 8px; font-weight: bold; line-height:1.5;">คำอธิบาย</div><div style="display:flex; gap:10px; margin-top:20px;"><button id="btn-confirm-use" class="btn btn-create" style="background: #4caf50; color:white; flex:1;" onclick="confirmUseItem()">ใช้งาน</button><button id="btn-cancel-use" class="btn btn-join" style="background: #e0e0e0; color:#333; flex:1;" onclick="cancelUseItem()">ยกเลิก</button></div></div></div>
@@ -921,9 +934,13 @@
         setTimeout(() => wrapper.remove(), 2600); 
       }
       
-      function playPvPCutscene(imgLeft, imgRight) { 
+      function playPvPCutscene(imgLeft, imgRight, filterLeft = '', filterRight = '') { 
           return new Promise(res => { 
-              const cut = document.getElementById('pvp-cutscene'); document.getElementById('cut-l-img').src = imgLeft; document.getElementById('cut-r-img').src = imgRight; 
+              const cut = document.getElementById('pvp-cutscene');
+              const lEl = document.getElementById('cut-l-img');
+              const rEl = document.getElementById('cut-r-img');
+              lEl.src = imgLeft; lEl.style.filter = filterLeft || 'none';
+              rEl.src = imgRight; rEl.style.filter = filterRight || 'none';
               cut.style.display = 'flex'; playSound('hit'); setTimeout(() => { triggerShake(); }, 600); setTimeout(() => { cut.style.display = 'none'; res(); }, 1800); 
           }); 
       }
@@ -1067,7 +1084,10 @@
             cellEvents = res.board; itemsConfig = res.items; eventsConfig = res.events; loadedCharacters = res.characters;
             loadedQuestions = res.questions && res.questions.length > 0 ? res.questions : [{q: "วรรณคดีเรื่องใดมี 'หนุมาน' เป็นทหารเอก?", choices: ["พระอภัยมณี", "รามเกียรติ์", "ขุนช้างขุนแผน", "อิเหนา"], ans: 1, reward: 500}];
             const grid = document.getElementById('char-grid-container'); grid.innerHTML = '';
-            loadedCharacters.forEach((char, idx) => { grid.innerHTML += `<div class="char-btn" id="char-btn-${idx}" onclick="selectChar(this, ${idx})"><img src="${char.img}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1004/1004313.png';"><div>${char.name}</div></div>`; });
+            loadedCharacters.forEach((char, idx) => {
+              const actLabel = char.skill_name && char.skill_name !== '-' ? `⚡ ${char.skill_name}` : '🌟 สกิลติดตัว';
+              grid.innerHTML += `<div class="char-btn" id="char-btn-${idx}" onclick="selectChar(this, ${idx})"><img src="${char.img}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1004/1004313.png';"><div class="char-btn-meta"><div>${char.name}</div><div class="char-btn-sub">${actLabel}</div></div></div>`;
+            });
           }
         }).withFailureHandler(() => { statusBoard.innerHTML = "🚨 ติดต่อเซิร์ฟเวอร์ไม่ได้"; statusBoard.style.color = "#c62828"; }).getGameConfig();
       };
@@ -1079,74 +1099,97 @@
         }
       });
 
+      const CHARACTER_SKINS = [
+        { id: 'default', name: 'ดั้งเดิม', color: '#9e9e9e', filter: '' },
+        { id: 'crimson', name: 'เพลิงชาด', color: '#e53935', filter: 'hue-rotate(320deg) saturate(1.35)' },
+        { id: 'azure', name: 'วารีคราม', color: '#0288d1', filter: 'hue-rotate(195deg) saturate(1.3)' },
+        { id: 'emerald', name: 'มรกต', color: '#2e7d32', filter: 'hue-rotate(105deg) saturate(1.25)' },
+        { id: 'gold', name: 'ทองคำ', color: '#ffb300', filter: 'hue-rotate(38deg) saturate(1.45) brightness(1.06)' },
+        { id: 'shadow', name: 'รัตติกาล', color: '#6a1b9a', filter: 'hue-rotate(255deg) saturate(1.2) brightness(0.88)' }
+      ];
+      let selectedSkinFilter = '';
+
+      function selectSkin(skinId) {
+        const skin = CHARACTER_SKINS.find(s => s.id === skinId) || CHARACTER_SKINS[0];
+        selectedSkinFilter = skin.filter;
+        const imgEl = document.getElementById('modal-char-img');
+        if (imgEl) imgEl.style.filter = skin.filter || 'none';
+        document.querySelectorAll('.skin-swatch').forEach(el => {
+          el.classList.toggle('active', el.dataset.skinId === skin.id);
+        });
+      }
+
       function getSkillDescription(charObj) {
           const skillCode = charObj.skillType;
           const val = charObj.skillVal || 0;
           const map = {
-              'item_immunity': 'ไม่ติดดีบัฟจากไอเท็มเวทมนตร์ทุกชนิด',
-              'world_event_immune': 'ไม่ได้รับผลกระทบแง่ลบจากเหตุการณ์โลก',
-              'roll_bonus': 'ทอยเต๋าบวกแต้มพิเศษเสมอ',
-              'extra_item_slot': 'กระเป๋าใหญ่ พกไอเท็มได้ 4 ชิ้น',
-              'combat_power': `เพิ่มพลังเวทย์ ${val}✨ ทุกครั้งก่อนต่อสู้`,
-              'loop_power': `รับโบนัสพลัง ${val}✨ เมื่อเดินผ่านจุดเริ่มต้น`,
-              'start_item': 'เริ่มเกมมาพร้อมกับไอเท็มแบบสุ่ม 1 ชิ้น',
-              'revive_once': 'ตายครั้งแรก คืนชีพฟรีพร้อมหลอดเลือดเต็ม 1 ครั้ง',
-              'start_shield': 'เริ่มเกมพร้อมโล่ และได้รับโล่เพิ่มเมื่อผ่านจุดเริ่มต้น',
-              'loop_item': 'รับไอเท็มฟรี 1 ชิ้นทุกครั้งที่ผ่านจุดเริ่มต้น',
-              'combat_bonus': `เมื่อต่อสู้แพ้จะได้รับพลังเพิ่ม ${val}✨`,
-              'extra_life': 'เริ่มต้นด้วยพลังชีวิต +1 ดวง',
-              'bonus_chest': 'ทุกครั้งที่ได้รับไอเท็ม จะได้รับเพิ่มอีก 1 ชิ้น',
-              'discount_shop': 'ซื้อไอเท็มในร้านค้าราคาถูกลง 20%',
-              'vampire_strike': 'สู้ชนะ PvP จะดูดเลือดคู่ต่อสู้มาเพิ่มให้ตัวเอง 1 ดวง',
-              'counter_attack': 'ถ้าแพ้ PvP มีโอกาส 50% ที่จะสะท้อนความเสียหาย',
-              'double_reward': 'ตอบคำถามถูกได้พลังเวทย์เพิ่มขึ้น',
-              'quiz_master': 'ตอบคำถามถูกได้พลังเพิ่มสองเท่า แถมได้ไอเท็ม 1 ชิ้น',
-              'boss_slayer': 'เมื่อต่อสู้กับบอส พลังแต้มลูกเต๋าจะถูกคูณ 200 (ปกติ 100)',
-              'item_stealer': 'สู้ชนะ PvP จะขโมยไอเท็มศัตรูมา 1 ชิ้น',
-              'passive_heal': 'ฮีลเลือด 1 ดวงทุกครั้งที่เดินผ่านจุดเริ่มต้น',
+              'item_immunity': 'ไม่ติดดีบัฟจากไอเท็มและสกิลก่อกวนของผู้เล่นอื่นทุกชนิด',
+              'world_event_immune': 'ไม่ได้รับผลกระทบแง่ลบจากเหตุการณ์โลกทุกชนิด',
+              'roll_bonus': `ทอยเต๋าเดินหมากบวกแต้มพิเศษ +${val || 1} เสมอ`,
+              'extra_item_slot': 'กระเป๋าใหญ่ พกไอเท็มได้สูงสุด 4 ชิ้น (ปกติ 3 ชิ้น)',
+              'combat_power': `เพิ่มพลังเวทย์ +${val || 100}✨ ทุกครั้งก่อนเข้าต่อสู้ (PvP และบอส)`,
+              'loop_power': `รับโบนัสพลังเวทย์เพิ่ม +${val || 100}✨ เมื่อเดินผ่านจุดเริ่มต้น`,
+              'start_item': 'เริ่มเกมมาพร้อมกับไอเท็มเวทมนตร์แบบสุ่มฟรี 1 ชิ้น',
+              'revive_once': 'ตายครั้งแรกของเกม คืนชีพฟรีทันทีพร้อมพลังชีวิตเต็มหลอด',
+              'start_shield': 'เริ่มเกมพร้อมโล่ (🛡️) และได้รับโล่เพิ่มทุกครั้งที่ผ่านจุดเริ่มต้น',
+              'loop_item': 'รับไอเท็มสุ่มฟรี 1 ชิ้นทุกครั้งที่เดินผ่านจุดเริ่มต้น',
+              'combat_bonus': `เมื่อต่อสู้แพ้หรือจัดการบอส จะได้รับพลังเวทย์เพิ่ม +${val || 200}✨`,
+              'extra_life': `เริ่มต้นเกมด้วยพลังชีวิตพิเศษ +${val || 1} ดวง (รวม 4 ดวง)`,
+              'bonus_chest': 'ทุกครั้งที่ได้รับไอเท็ม จะได้แถมไอเท็มสุ่มเพิ่มอีก 1 ชิ้น',
+              'discount_shop': 'ซื้อไอเท็มในร้านค้าเวทมนตร์ราคาถูกลง 20%',
+              'vampire_strike': 'สู้ชนะ PvP จะดูดพลังชีวิตคู่ต่อสู้มาเพิ่มให้ตัวเอง +1 ดวง',
+              'counter_attack': 'ถ้าแพ้ PvP มีโอกาส 50% ที่จะสะท้อนความเสียหายกลับไป',
+              'double_reward': 'ตอบคำถามวรรณคดีถูก ได้รับรางวัลพลังเวทย์เพิ่มขึ้น 2 เท่า',
+              'quiz_master': 'ตอบคำถามถูกได้พลังเพิ่ม 2 เท่า แถมได้รับไอเท็มสุ่ม 1 ชิ้น',
+              'boss_slayer': 'เมื่อต่อสู้กับบอส แต้มลูกเต๋าจะถูกคูณ x200 (ปกติ x100)',
+              'item_stealer': 'สู้ชนะ PvP จะขโมยไอเท็มจากคู่ต่อสู้มาได้ 1 ชิ้น',
+              'passive_heal': 'ฟื้นฟูพลังชีวิต +1 ดวงทุกครั้งที่เดินผ่านจุดเริ่มต้น',
               'dice_master': 'ทอยลูกเต๋า 2 ลูกเสมอในการเดินหมาก',
-              'escape_artist': 'สามารถเลือกหลบหนีการต่อสู้กับบอสได้ชัวร์ 100%',
-              'rich_start': 'เริ่มต้นเกมพร้อมพลังเวทย์มหาศาล',
-              'reflect_chance': `แพ้ต่อสู้ มีโอกาส ${val}% ที่จะสะท้อนความเสียหาย 1 ดวงกลับไป`,
-              'power_step': `ได้พลัง ${val}✨ ตามทุกๆ 1 ช่องที่เดินบนกระดาน`,
-              'event_healer': `เมื่อเกิดเหตุการณ์โลกเมื่อไหร่ ฮีลเลือด ${val} ดวงทันที`,
+              'escape_artist': 'สามารถเลือกหลบหนีบอสได้ 100% และมีโอกาส 50% หลบเหตุการณ์สุ่ม',
+              'rich_start': `เริ่มต้นเกมพร้อมโบนัสพลังเวทย์เพิ่ม +${val || 300}✨`,
+              'reflect_chance': `แพ้ต่อสู้ มีโอกาส ${val || 50}% สะท้อนความเสียหาย 1 ดวงกลับไป`,
+              'power_step': `ได้รับพลังเวทย์ +${val || 10}✨ ต่อทุกๆ 1 ช่องที่เดินบนกระดาน`,
+              'event_healer': `เมื่อเกิดเหตุการณ์โลก ฮีลพลังชีวิต +${val || 1} ดวงทันที`,
               'last_stand': 'เมื่อใกล้ตายจะฮึดสู้ ฟื้นคืน 1 ดวงพร้อมเพิ่มพลังเวทย์ 1 ครั้ง',
-              'shop_investor': `รับโบนัสพลัง ${val || 500}✨ ทุกครั้งที่เข้าร้านค้า`,
+              'shop_investor': `รับโบนัสพลัง +${val || 500}✨ ทุกครั้งที่เข้าร้านค้า`,
           };
           return map[skillCode] || "ไม่มีสกิลติดตัว (Passive)";
       }
 
-      function getActiveSkillDesc(typeCode) {
+      function getActiveSkillDesc(typeCode, val = 0) {
           if (!typeCode) return "-";
+          const v = val > 0 ? val : 1;
           const map = {
               'stun': 'ทำให้เป้าหมายหยุดเดิน 1 เทิร์น',
-              'damage_pierce': 'โจมตีทะลุโล่ป้องกัน ลดพลังชีวิตเป้าหมาย 1 ดวง',
-              'damage_stun': 'ลดพลังชีวิตเป้าหมาย 1 ดวง และทำให้หยุดเดิน 1 เทิร์น',
-              'crit_execute': 'ปลิดชีพเป้าหมายทันทีหากพลังชีวิตเหลือน้อย (หรือลดพลังชีวิต 2 ดวง)',
+              'damage_pierce': `โจมตีทะลุโล่ป้องกัน ลดพลังชีวิตเป้าหมาย ${v} ดวงทันที`,
+              'damage_stun': `ลดพลังชีวิตเป้าหมาย ${v} ดวง และทำให้หยุดเดิน 1 เทิร์น`,
+              'crit_execute': 'ปลิดชีพเป้าหมายทันทีหากเหลือ 1 ดวง (หรือลดพลังชีวิต 2 ดวง)',
               'burn_area': 'สร้างเพลิงเผาไหม้ใส่เป้าหมาย ทำให้เสียพลังชีวิต 1 ดวงในเทิร์นถัดไป',
-              'steal_money': 'ขโมยพลังเวทย์จากเป้าหมายมาเป็นของตัวเอง',
-              'break_buff': 'ทำลายโล่ป้องกันและบัฟสถานะดีทั้งหมดของเป้าหมาย',
+              'steal_money': `ขโมยพลังเวทย์จากเป้าหมาย ${val > 0 ? val : 200}✨ มาเป็นของตัวเอง`,
+              'break_buff': 'ทำลายโล่ป้องกัน หลบหลีก สะท้อน และอมตะทั้งหมดของเป้าหมาย',
               'damage_water': 'โจมตีด้วยพลังน้ำ ลดพลังชีวิตเป้าหมาย 1 ดวง',
-              'evade': 'หลบหลีกการโจมตีหรือการตกช่องอันตรายได้ 1 ครั้ง',
-              'immune': 'ได้รับสถานะอมตะ ป้องกันการโจมตีและขโมย 1 เทิร์น',
-              'heal_aoe': 'ฟื้นฟูพลังชีวิต 1 ดวง ให้ตัวเองและพันธมิตรบนกระดาน',
+              'evade': 'หลบหลีกการต่อสู้หรือการปะทะได้ 1 ครั้ง',
+              'immune': 'ได้รับสถานะอมตะ ป้องกันการโจมตีและการขโมย 1 เทิร์น',
+              'heal_aoe': `ฟื้นฟูพลังชีวิต +${v} ดวง ให้ตัวเองและผู้เล่นทุกคนบนกระดาน`,
               'shield_hp': 'กางโล่ป้องกันความเสียหายให้ตัวเอง 1 ครั้ง',
-              'reflect': 'สะท้อนความเสียหายหรือผลสกิลกลับไปหาผู้ร่าย 1 ครั้ง',
-              'cleanse_heal': 'ลบล้างสถานะผิดปกติทั้งหมดและฟื้นฟูพลังชีวิต 1 ดวง',
-              'revive': 'ฟื้นคืนชีพทันทีพร้อมพลังชีวิต 1 ดวงเมื่อถูกสังหาร',
-              'pull_target': 'ดึงเป้าหมายบนกระดานให้วาร์ปมาตกที่ช่องเดียวกัน',
-              'reduce_dice': 'ลดจำนวนแต้มลูกเต๋าในการเดินของเป้าหมายในเทิร์นถัดไป',
-              'steal_buff': 'ขโมยโล่ป้องกันหรือบัฟจากเป้าหมายมาเป็นของตัวเอง',
-              'swap_pos': 'สลับตำแหน่งช่องที่ยืนบนกระดานกับเป้าหมาย',
-              'invis': 'พรางตัว ไม่สามารถถูกเลือกเป็นเป้าหมายโจมตีหรือขโมยได้ 1 เทิร์น',
-              'shuffle_item': 'สุ่มสลับไอเทมทั้งหมดที่มีของผู้เล่นบนกระดาน',
+              'reflect': 'สะท้อนความเสียหายจากการโจมตีกลับไปหาผู้ร่าย 1 ครั้ง',
+              'cleanse_heal': `ลบล้างสถานะผิดปกติทั้งหมดและฟื้นฟูพลังชีวิต +${v} ดวง`,
+              'revive': 'ตั้งสถานะถอดดวงใจ: ฟื้นคืนชีพอัตโนมัติ 1 ดวงเมื่อถูกสังหาร',
+              'pull_target': 'ดึงเป้าหมายบนกระดานให้วาร์ปมาตกที่ช่องเดียวกับเรา',
+              'reduce_dice': 'ลดระยะเดินลูกเต๋าของเป้าหมายลง 2 ช่องในเทิร์นถัดไป',
+              'steal_buff': 'ขโมยโล่ป้องกัน หลบหลีก สะท้อน หรืออมตะจากเป้าหมายมาเป็นของเรา',
+              'swap_pos': 'สลับตำแหน่งช่องที่ยืนบนกระดานกับเป้าหมายทันที',
+              'invis': 'พรางตัว ไม่สามารถถูกเลือกเป็นเป้าหมายสกิลหรือ PvP ได้ 1 เทิร์น',
+              'shuffle_item': 'สุ่มสลับไอเท็มทั้งหมดของผู้เล่นทุกคนบนกระดาน',
               'poison_blind': 'เป้าหมายติดพิษ เสียพลังชีวิต 1 ดวงในเทิร์นถัดไป',
-              'discard_item': 'สุ่มทำลายไอเทมของเป้าหมายทิ้ง 1 ชิ้น',
-              'buff_stats': 'เพิ่มพลังเวทย์มหาศาลให้ตัวเอง',
-              'move_boost': 'เพิ่มระยะการเดินพิเศษ เดินข้ามช่องไปข้างหน้าบนกระดาน',
-              'warp_check': 'วาร์ปย้ายตัวเองไปยังช่องที่กำหนดบนกระดานทันที',
+              'discard_item': 'สุ่มทำลายไอเท็มของเป้าหมายทิ้ง 1 ชิ้น',
+              'buff_stats': `เพิ่มพลังเวทย์มหาศาล +${val > 0 ? val : 300}✨ ให้ตัวเองทันที`,
+              'move_boost': 'เพิ่มระยะการเดินพิเศษในการทอยเต๋าครั้งถัดไป',
+              'warp_check': 'ย่นระยะทาง วาร์ปเดินหน้าไปข้างหน้า 5 ช่องทันที',
               'summon_tank': 'อัญเชิญตัวแทนมารับการโจมตีลดพลังชีวิตแทนตนเอง 1 ครั้ง',
-              'cancel_combat': 'ยกเลิกการต่อสู้ (PvE/PvP) และรอดพ้นจากการปะทะทันที'
+              'cancel_combat': 'เจรจาพาที ยกเลิกการต่อสู้ (PvE/PvP) ในเทิร์นนี้',
+              'peek_event': `หยั่งรู้ฟ้าดิน กางโล่ป้องกัน + เพิ่มพลังเวทย์ +${val > 0 ? val : 400}✨`,
+              'reveal_map': `เบิกเนตรสวรรค์ ได้รับสถานะหลบหลีก + เพิ่มพลังเวทย์ +${val > 0 ? val : 500}✨`
           };
           return map[typeCode.toLowerCase()] || 'อัญเชิญพลังเวทมนตร์วิเศษ';
       }
@@ -1154,15 +1197,24 @@
       function selectChar(element, idx) { 
           selectedCharObj = loadedCharacters[idx]; 
           document.getElementById('modal-char-name').innerText = selectedCharObj.name; 
-          document.getElementById('modal-char-img').src = selectedCharObj.img;
+          const imgEl = document.getElementById('modal-char-img');
+          imgEl.src = selectedCharObj.img;
+
+          const picker = document.getElementById('skin-picker');
+          if (picker) {
+            picker.innerHTML = CHARACTER_SKINS.map(s =>
+              `<button type="button" class="skin-swatch" data-skin-id="${s.id}" style="background:${s.color};" title="สกิน: ${s.name}" onclick="selectSkin('${s.id}')"></button>`
+            ).join('');
+            selectSkin('default');
+          }
           
           let passDesc = getSkillDescription(selectedCharObj);
           document.getElementById('modal-char-skill').innerHTML = `🌟 <b>Passive Skill (สกิลติดตัว)</b><br>${passDesc}`;
           
           let hasActive = selectedCharObj.skill_name && selectedCharObj.skill_name !== '-' && selectedCharObj.skill_name !== 'none' && selectedCharObj.skill_name !== '';
           let effCode = selectedCharObj.effect_type || (selectedCharObj.skill_name === 'ควบม้าสีหมอก' ? 'move_boost' : '');
-          let effectDesc = getActiveSkillDesc(effCode);
-          let actDesc = hasActive ? `⚡ <b>${selectedCharObj.skill_name}</b><br>รายละเอียด: <span style="color:#2e7d32;">${effectDesc}</span><br>ค่าร่าย: ${selectedCharObj.activeCost || 0} ✨ | คูลดาวน์: ${selectedCharObj.activeCooldown || 0} ตา` : "ไม่มีสกิลกดใช้ (Active)";
+          let effectDesc = getActiveSkillDesc(effCode, selectedCharObj.activeSkillVal);
+          let actDesc = hasActive ? `⚡ <b>Active Skill: ${selectedCharObj.skill_name}</b><br>ความสามารถ: <span style="color:#2e7d32;">${effectDesc}</span><br>ค่าร่าย: ${selectedCharObj.activeCost || 0} ✨ | คูลดาวน์: ${selectedCharObj.activeCooldown || 0} ตา` : "ไม่มีสกิลกดใช้ (Active)";
           document.getElementById('modal-char-active-skill').innerHTML = `${actDesc}`;
 
           document.getElementById('modal-char-basepower').innerText = `🔋 พลังเริ่มต้น: ${selectedCharObj.basePower !== undefined ? selectedCharObj.basePower : 200} ✨`;
@@ -1192,6 +1244,7 @@
             confirmBtn.innerText = '✅ เลือก';
           }
         };
+        const payloadChar = Object.assign({}, selectedCharObj, { skinFilter: selectedSkinFilter || '' });
         if (lobbyMode === 'create') {
           google.script.run.withSuccessHandler(res => {
             resetBtn();
@@ -1199,7 +1252,7 @@
               document.getElementById('char-detail-modal').style.display = 'none';
               myRoomCode = res.roomCode; myPlayerId = res.myId; enterGameRoom(true);
             } else alert((res && res.msg) || 'สร้างห้องไม่สำเร็จ');
-          }).withFailureHandler(() => { resetBtn(); alert('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้'); }).createRoom(selectedCharObj.name, selectedCharObj);
+          }).withFailureHandler(() => { resetBtn(); alert('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้'); }).createRoom(payloadChar.name, payloadChar);
         } else {
           const code = document.getElementById('roomCodeInput').value.trim();
           google.script.run.withSuccessHandler(res => {
@@ -1208,8 +1261,43 @@
               document.getElementById('char-detail-modal').style.display = 'none';
               myRoomCode = res.roomCode; myPlayerId = res.myId; enterGameRoom(false);
             } else alert((res && res.msg) || 'เข้าห้องไม่สำเร็จ');
-          }).withFailureHandler(() => { resetBtn(); alert('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้'); }).joinRoom(code, selectedCharObj.name, selectedCharObj);
+          }).withFailureHandler(() => { resetBtn(); alert('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้'); }).joinRoom(code, payloadChar.name, payloadChar);
         }
+      }
+
+      function goHomeScreen() {
+        if (myRoomCode && !confirm('ต้องการออกจากห้องเกมปัจจุบันและกลับไปหน้าหลักใช่หรือไม่?')) return;
+        clearTimeout(pollingTimer); clearTimeout(watchdogTimer); clearTimeout(afkTimerId);
+        if (quizTimerInterval) { clearInterval(quizTimerInterval); quizTimerInterval = null; }
+        myRoomCode = ''; myPlayerId = -1; gameData = null; prevDataStr = '';
+        isMyTurnProcessing = false; isPollInFlight = false; lastStateVersion = null; activeTurnId = -1;
+        document.querySelectorAll('.modal-bg').forEach(m => m.style.display = 'none');
+        document.getElementById('pvp-cutscene').style.display = 'none';
+        document.getElementById('action-cutscene').style.display = 'none';
+        document.getElementById('start-overlay').style.display = 'none';
+        document.getElementById('game-screen').style.display = 'none';
+        document.getElementById('char-select-screen').style.display = 'none';
+        document.getElementById('settings-panel').style.display = 'none';
+        document.getElementById('init-screen').style.display = 'block';
+      }
+
+      function addBotToRoom() {
+        const btn = document.getElementById('addBotBtn');
+        if (!myRoomCode || myPlayerId !== 0) return;
+        if (btn) { btn.disabled = true; btn.innerText = '⏳ กำลังเพิ่มบอท...'; }
+        google.script.run.withSuccessHandler(res => {
+          if (btn) { btn.disabled = false; btn.innerText = '🤖 เพิ่มบอท (+1)'; }
+          if (res && res.success) {
+            showToast('🤖 เพิ่มบอทเข้าร่วมห้องแล้ว!');
+            lastStateVersion = null;
+            fetchGameState();
+          } else {
+            showToast((res && res.msg) || 'เพิ่มบอทไม่สำเร็จ');
+          }
+        }).withFailureHandler(() => {
+          if (btn) { btn.disabled = false; btn.innerText = '🤖 เพิ่มบอท (+1)'; }
+          showToast('❌ ติดต่อเซิร์ฟเวอร์ไม่ได้');
+        }).addBot(myRoomCode);
       }
 
       function copyTextWithFallback(text, okMsg) {
@@ -1235,8 +1323,15 @@
       function enterGameRoom(isHost) { 
           document.getElementById('char-select-screen').style.display = 'none'; document.getElementById('game-screen').style.display = 'block'; buildBoard(); 
           const overlay = document.getElementById('start-overlay'); overlay.style.display = 'flex'; document.getElementById('lobby-room-code').innerText = myRoomCode; 
-          if(isHost) { document.getElementById('giantStartBtn').style.display = 'inline-block'; document.getElementById('waiting-host-msg').style.display = 'none'; } 
-          else { document.getElementById('giantStartBtn').style.display = 'none'; document.getElementById('waiting-host-msg').style.display = 'block'; } 
+          if(isHost) {
+            document.getElementById('giantStartBtn').style.display = 'inline-block';
+            document.getElementById('waiting-host-msg').style.display = 'none';
+            document.getElementById('addBotBtn').style.display = 'inline-block';
+          } else {
+            document.getElementById('giantStartBtn').style.display = 'none';
+            document.getElementById('waiting-host-msg').style.display = 'block';
+            document.getElementById('addBotBtn').style.display = 'none';
+          } 
           lastStateVersion = null;
           fetchGameState(); 
       }
@@ -1280,7 +1375,7 @@
         titlesHtml += `</div>`;
 
         let rankings = [...gameData.players].sort((a, b) => b.power - a.power); const container = document.getElementById('victory-rankings-container'); container.innerHTML = '';
-        rankings.forEach((p, i) => { let status = p.lives > 0 ? `✨ ${p.power}` : '💀 ตายแล้ว'; let medal = i===0 ? '🥇' : i===1 ? '🥈' : i===2 ? '🥉' : ''; container.innerHTML += `<div style="font-size:20px; margin-bottom:10px; font-weight:bold;">${medal} <img src="${p.icon}" style="width:30px; border-radius:50%; vertical-align:middle; border: 2px solid #ccc; background:white;"> ${p.name} <span style="float:right;">${status}</span></div>`; });
+        rankings.forEach((p, i) => { let status = p.lives > 0 ? `✨ ${p.power}` : '💀 ตายแล้ว'; let medal = i===0 ? '🥇' : i===1 ? '🥈' : i===2 ? '🥉' : ''; container.innerHTML += `<div style="font-size:20px; margin-bottom:10px; font-weight:bold;">${medal} <img src="${p.icon}" style="width:30px; border-radius:50%; vertical-align:middle; border: 2px solid #ccc; background:white; filter:${p.skinFilter || 'none'};"> ${p.name} <span style="float:right;">${status}</span></div>`; });
         container.innerHTML += titlesHtml;
       }
 
@@ -1308,8 +1403,10 @@
           lastStateVersion = gameData.v || 0;
 
           if(document.getElementById('start-overlay').style.display === 'flex') {
-            let pNames = gameData.players.map(p => `🙋 ${p.name}`).join('<br>');
-            document.getElementById('lobby-players').innerHTML = "<b>ผู้เล่นในห้อง:</b><br>" + pNames;
+            let pNames = gameData.players.map(p => `${p.isBot ? '🤖' : '🙋'} ${p.name}`).join('<br>');
+            document.getElementById('lobby-players').innerHTML = "<b>ผู้เล่นในห้อง (" + gameData.players.length + "/4):</b><br>" + pNames;
+            const addBotBtn = document.getElementById('addBotBtn');
+            if (addBotBtn) addBotBtn.style.display = (myPlayerId === 0 && gameData.players.length < 4) ? 'inline-block' : 'none';
           }
           if(gameData.status === 'Finished') { showVictoryScreen(gameData.winner); return; }
 
@@ -1343,9 +1440,7 @@
           let me = gameData.players[myPlayerId];
           if (me && !me.buffsInitialized && gameData.status === 'Playing') {
               me.buffsInitialized = true; 
-              if (me.skillType === 'rich_start') { me.power += (me.skillVal || 1000); }
               if (me.skillType === 'start_shield') { me.shield = true; }
-              if (me.skillType === 'extra_life') { me.maxLives = (me.maxLives || 3) + 1; me.lives++; }
               if (me.skillType === 'start_item') { let ri = getRandomItemKey(); if(ri) { me.items.push(ri); } }
               prevDataStr = JSON.stringify(gameData);
               google.script.run.updateGameState(myRoomCode, JSON.stringify(gameData));
@@ -1359,16 +1454,25 @@
           else if (res.status === 'Playing') {
             document.getElementById('start-overlay').style.display = 'none'; 
             
-            if(gameData.players[gameData.turn].lives <= 0 && gameData.turn === myPlayerId) {
-                isMyTurnProcessing = true; gameData.turn = (gameData.turn + 1) % gameData.players.length; 
+            if(gameData.players[gameData.turn].lives <= 0 && (gameData.turn === myPlayerId || (gameData.players[gameData.turn].isBot && isBotController()))) {
+                isMyTurnProcessing = true; advanceTurnAndRound();
                 prevDataStr = JSON.stringify(gameData);
                 google.script.run.withSuccessHandler(()=>{ lastStateVersion = null; isMyTurnProcessing=false; fetchGameState(); }).updateGameState(myRoomCode, JSON.stringify(gameData)); 
                 return;
             }
 
-            const turnP = gameData.players[gameData.turn]; document.getElementById('center-turn-display').innerText = `ตาของ: ${turnP.name}`;
+            const turnP = gameData.players[gameData.turn];
+            document.getElementById('center-turn-display').innerText = `รอบ ${gameData.round || 1} • ตาของ: ${turnP.name}`;
             
             if(activeTurnId !== gameData.turn && !isMyTurnProcessing) { activeTurnId = gameData.turn; announceTurn(gameData.turn); }
+
+            if (turnP.isBot && turnP.lives > 0 && isBotController() && !isMyTurnProcessing) {
+              document.getElementById('rollBtn').disabled = true;
+              document.getElementById('rollBtn').style.display = 'none';
+              clearTimeout(afkTimerId);
+              runBotTurn(turnP);
+              return;
+            }
 
             if (gameData.turn === myPlayerId && !isMyTurnProcessing && turnP.lives > 0) {
               document.getElementById('rollBtn').disabled = false;
@@ -1380,7 +1484,7 @@
               if (me.skipTurns > 0) { 
                   isMyTurnProcessing = true; document.getElementById('rollBtn').disabled = true; document.getElementById('rollBtn').style.display = 'none';
                   setTimeout(() => { 
-                      me.skipTurns--; addGameLog(`🛑 <b>${me.name}</b> โดนพักเทิร์น!`); gameData.turn = (gameData.turn + 1) % gameData.players.length; 
+                      me.skipTurns--; addGameLog(`🛑 <b>${me.name}</b> โดนพักเทิร์น!`); advanceTurnAndRound();
                       prevDataStr = JSON.stringify(gameData);
                       google.script.run.withSuccessHandler(()=>{ lastStateVersion = null; isMyTurnProcessing=false; fetchGameState(); }).updateGameState(myRoomCode, JSON.stringify(gameData)); 
                   }, 1500); 
@@ -1436,10 +1540,20 @@
         }
       }
 
+      function getBountyLeaderId() {
+        if (!gameData || !gameData.players) return -1;
+        let topP = null;
+        gameData.players.forEach(p => {
+          if (p.lives > 0 && p.power >= 3000 && (!topP || p.power > topP.power)) topP = p;
+        });
+        return topP ? topP.id : -1;
+      }
+
       function updateUI() {
         const ui = document.getElementById('corner-ui'); ui.innerHTML = '';
+        const bountyId = getBountyLeaderId();
         gameData.players.forEach((p, idx) => {
-          let isTurn = gameData.turn === p.id ? 'active-turn' : ''; let shieldBadge = p.shield ? '🛡️' : ''; let evadeBadge = p.evade ? '🥷' : ''; let immuneBadge = p.immune ? '🌟' : ''; let reflectBadge = p.reflect ? '🪞' : ''; let silenceBadge = (p.silenced && p.silenced > 0) ? '🤐' : '';
+          let isTurn = gameData.turn === p.id ? 'active-turn' : ''; let crownBadge = (p.id === bountyId) ? '👑' : ''; let shieldBadge = p.shield ? '🛡️' : ''; let evadeBadge = p.evade ? '🥷' : ''; let immuneBadge = p.immune ? '🌟' : ''; let reflectBadge = p.reflect ? '🪞' : ''; let silenceBadge = (p.silenced && p.silenced > 0) ? '🤐' : '';
           let hearts = '❤️'.repeat(Math.max(0, p.lives)) + '🖤'.repeat(Math.max(0, p.maxLives - p.lives)); 
           
           let itemsHtml = '<div class="item-container">'; let maxCap = p.skillType === 'extra_item_slot' ? 4 : 3;
@@ -1464,19 +1578,20 @@
           }
 
           let glowClass = `glow-${p.id % 4}`; 
-          ui.innerHTML += `<div class="corner-card glass pos-${idx} ${isTurn} ${glowClass}"><img src="${p.icon}"><br><b>${shieldBadge}${evadeBadge}${immuneBadge}${reflectBadge}${silenceBadge} ${p.name}</b><br>${hearts}<br><span style="color:#0288d1; font-weight:bold;">✨ ${p.power}</span>${itemsHtml}${actSkillHtml}</div>`;
+          ui.innerHTML += `<div class="corner-card glass pos-${idx} ${isTurn} ${glowClass}"><img src="${p.icon}" style="filter:${p.skinFilter || 'none'};"><br><b>${crownBadge}${shieldBadge}${evadeBadge}${immuneBadge}${reflectBadge}${silenceBadge} ${p.name}</b><br>${hearts}<br><span style="color:#0288d1; font-weight:bold;">✨ ${p.power}</span>${itemsHtml}${actSkillHtml}</div>`;
         });
 
+        const bloodBonus = gameData.bloodMoonBonus || 0;
         for(let i=1; i<=totalCells; i++) {
             if(cellEvents[i] && cellEvents[i].bossPower > 0) {
                 let tag = document.getElementById('hover-boss-power-'+i);
                 let rebirthLvl = (gameData.bossLevels && gameData.bossLevels[i]) ? gameData.bossLevels[i] : 1;
                 let nerf = (gameData.bossNerfs && gameData.bossNerfs[i]) ? gameData.bossNerfs[i] : 0;
-                let currentBP = Math.max(0, (cellEvents[i].bossPower * rebirthLvl) - nerf);
+                let currentBP = Math.max(0, (cellEvents[i].bossPower * rebirthLvl) + bloodBonus - nerf);
                 if(tag) { tag.innerText = currentBP; if(nerf > 0) tag.style.color = "#ff1744"; else tag.style.color = "white"; }
                 let bToken = document.getElementById('boss-token-'+i);
                 if(bToken) { 
-                    if(rebirthLvl > 1) {
+                    if(rebirthLvl > 1 || bloodBonus > 0) {
                         bToken.classList.add('rebirth-aura');
                         let hue = (rebirthLvl - 1) * 70;
                         bToken.style.setProperty('--aura-hue', `${hue}deg`);
@@ -1494,7 +1609,8 @@
         gameData.players.forEach(p => {
           if(p.lives <= 0) { let t = document.getElementById('token-'+p.id); if(t) t.remove(); return; } 
           let token = document.getElementById('token-' + p.id);
-          if(!token) { token = document.createElement('div'); token.className = `token glow-token-${p.id % 4}`; token.id = 'token-' + p.id; token.innerHTML = `<img src="${p.icon}">`; tokensContainer.appendChild(token); }
+          if(!token) { token = document.createElement('div'); token.className = `token glow-token-${p.id % 4}`; token.id = 'token-' + p.id; token.innerHTML = `<img src="${p.icon}" style="filter:${p.skinFilter || 'none'};">`; tokensContainer.appendChild(token); }
+          else { const img = token.querySelector('img'); if (img) img.style.filter = p.skinFilter || 'none'; }
           if(!token.classList.contains('hopping')) { let coords = getCellCoords(p.pos); let offsetLeft = (p.id % 2 === 0) ? 7 : -7; let offsetTop = (p.id < 2) ? 7 : -7; token.style.top = (coords.row * CELL_SIZE) + offsetTop + 'px'; token.style.left = (coords.col * CELL_SIZE) + offsetLeft + 'px'; }
         });
       }
@@ -1923,6 +2039,15 @@
                 clearInterval(intv); 
                 display1.innerText = diceFaces[baseRoll1 - 1]; 
                 if(baseRoll2 > 0) display2.innerText = diceFaces[baseRoll2 - 1];
+                if (baseRoll1 === 6) {
+                  me.power += 100;
+                  bonusDisplay.innerHTML += (bonusDisplay.innerHTML ? ' • ' : '') + '<span style="color:#00c853;">🎲 คริติคอล +100✨</span>';
+                  showFloatingAnim('+100✨', '#00e676', me.pos);
+                } else if (baseRoll1 === 1 && baseRoll2 === 0) {
+                  me.power = Math.max(0, me.power - 50);
+                  bonusDisplay.innerHTML += (bonusDisplay.innerHTML ? ' • ' : '') + '<span style="color:#e53935;">💫 ดวงตก -50✨</span>';
+                  showFloatingAnim('-50✨', '#e53935', me.pos);
+                }
                 showToast(`ได้ ${totalRoll} แต้ม!`);
                 setTimeout(() => { modal.style.display = 'none'; processMyMove(totalRoll); }, 2500); 
             } 
@@ -1935,6 +2060,7 @@
         token.style.top = (coords.row * CELL_SIZE) + offsetTop + 'px'; token.style.left = (coords.col * CELL_SIZE) + offsetLeft + 'px'; token.classList.add('hopping'); playSound('jump'); await delay(400); token.classList.remove('hopping');
       }
 
+      let quizTimerInterval = null;
       function openQuiz(me, isBonusSpawn = false) {
         return new Promise(resolve => {
             try {
@@ -1945,18 +2071,39 @@
 
                 document.getElementById('quiz-q').innerText = qObj.q; const container = document.getElementById('quiz-choices'); container.innerHTML = '';
                 qObj.choices.forEach((choice, idx) => { container.innerHTML += `<button class="btn btn-create" style="background: #e1f5fe; color:#0288d1; border:2px solid #0288d1; margin-bottom:10px;" onclick="answerQuiz(${idx}, ${qObj.ans}, ${rewardScore})">${choice}</button>`; });
+
+                let timeLeft = 15;
+                const timerEl = document.getElementById('quiz-timer');
+                if (timerEl) timerEl.innerText = `⏱️ เหลือเวลา ${timeLeft} วินาที`;
+                if (quizTimerInterval) clearInterval(quizTimerInterval);
+                let quizDone = false;
+
                 modal.style.display = 'flex';
 
                 window.answerQuiz = async function(selected, correct, score) {
+                    if (quizDone) return;
+                    quizDone = true;
+                    if (quizTimerInterval) { clearInterval(quizTimerInterval); quizTimerInterval = null; }
                     modal.style.display = 'none';
                     if(selected === correct) { 
                         showToast(`🎉 ตอบถูก! รับพลัง +${score}`); showFloatingAnim(`+${score}✨`, '#00e676', me.pos); playSound('coin'); me.power += score; 
                         if(isBonusSpawn || me.skillType === 'quiz_master') { 
                             grantRandomItemToPlayer(me);
                         }
-                    } else { showToast(`❌ ผิด! หักพลัง -200`); showFloatingAnim(`-200✨`, '#e53935', me.pos); playSound('hurt'); triggerShake(); me.power = Math.max(0, me.power - 200); }
+                    } else {
+                        const timeoutText = selected === -1 ? '⏰ หมดเวลา! หักพลัง -200' : '❌ ผิด! หักพลัง -200';
+                        showToast(timeoutText); showFloatingAnim(`-200✨`, '#e53935', me.pos); playSound('hurt'); triggerShake(); me.power = Math.max(0, me.power - 200);
+                    }
                     await delay(1000); resolve();
-                }
+                };
+
+                quizTimerInterval = setInterval(() => {
+                  timeLeft--;
+                  if (timerEl) timerEl.innerText = `⏱️ เหลือเวลา ${Math.max(0, timeLeft)} วินาที`;
+                  if (timeLeft <= 0) {
+                    window.answerQuiz(-1, qObj.ans, rewardScore);
+                  }
+                }, 1000);
             } catch(e) { resolve(); }
         });
       }
@@ -2077,14 +2224,14 @@
                     await delay(600);
                 }
 
-                await playPvPCutscene(me.icon, op.icon);
+                await playPvPCutscene(me.icon, op.icon, me.skinFilter, op.skinFilter);
                 
                 try {
                     let fightResult = await new Promise(res => {
                       const modal = document.getElementById('combat-modal');
                       document.getElementById('combat-actions').style.display = 'block'; document.getElementById('combat-result-text').style.display = 'none'; 
-                      document.getElementById('combat-me-img').src = me.icon; document.getElementById('combat-me-name').innerText = me.name; document.getElementById('combat-me-power').innerText = me.power; document.getElementById('combat-me-lives').innerText = '❤️'.repeat(Math.max(0, me.lives));
-                      document.getElementById('combat-op-img').src = op.icon; document.getElementById('combat-op-name').innerText = op.name; document.getElementById('combat-op-power').innerText = op.power; document.getElementById('combat-op-lives').innerText = '❤️'.repeat(Math.max(0, op.lives));
+                      document.getElementById('combat-me-img').src = me.icon; document.getElementById('combat-me-img').style.filter = me.skinFilter || 'none'; document.getElementById('combat-me-name').innerText = me.name; document.getElementById('combat-me-power').innerText = me.power; document.getElementById('combat-me-lives').innerText = '❤️'.repeat(Math.max(0, me.lives));
+                      document.getElementById('combat-op-img').src = op.icon; document.getElementById('combat-op-img').style.filter = op.skinFilter || 'none'; document.getElementById('combat-op-name').innerText = op.name; document.getElementById('combat-op-power').innerText = op.power; document.getElementById('combat-op-lives').innerText = '❤️'.repeat(Math.max(0, op.lives));
                       
                       const renderPvpItems = () => {
                         const itemBox = document.getElementById('combat-items-container'); itemBox.innerHTML = '';
@@ -2147,8 +2294,15 @@
                     } else if (fightResult.action === 'fight') {
                       triggerShake(); await delay(200);
                       if(fightResult.mTot > fightResult.oTot) { 
+                          const bountyId = getBountyLeaderId();
+                          const stealRatio = (op.id === bountyId) ? 0.15 : 0.10;
+                          const maxSteal = (op.id === bountyId) ? 600 : 350;
+                          const stolenPow = Math.min(op.power, Math.min(maxSteal, Math.max(100, Math.floor(op.power * stealRatio))));
                           if (applyClientDamage(op, 1, me)) {
-                              playSound('hurt'); addGameLog(`⚔️ <b>${me.name}</b> อัด <b>${op.name}</b> เลือดลด!`); 
+                              op.power = Math.max(0, op.power - stolenPow);
+                              me.power += stolenPow;
+                              showFloatingAnim(`+${stolenPow}✨`, '#ffca28', me.pos);
+                              playSound('hurt'); addGameLog(`⚔️ <b>${me.name}</b> ชนะ <b>${op.name}</b> ชิงพลัง +${stolenPow}✨!`); 
                               if (me.skillType === 'vampire_strike') { me.lives = Math.min(me.maxLives, me.lives+1); showFloatingAnim('+❤️', '#ff1744', me.pos); }
                               if (me.skillType === 'item_stealer' && op.items.length > 0) {
                                   const maxCap = me.skillType === 'extra_item_slot' ? 4 : 3;
@@ -2157,8 +2311,12 @@
                               if (op.skillType === 'combat_bonus') { let val = op.skillVal || 0; op.power += val; showFloatingAnim(`+${val}✨`, '#00e676', op.pos); }
                           }
                       } else if(fightResult.mTot < fightResult.oTot) { 
+                          const stolenPow = Math.min(me.power, Math.min(350, Math.max(100, Math.floor(me.power * 0.10))));
                           if (applyClientDamage(me, 1, op)) {
-                              playSound('hurt'); addGameLog(`💥 <b>${me.name}</b> แพ้ <b>${op.name}</b>!`); 
+                              me.power = Math.max(0, me.power - stolenPow);
+                              op.power += stolenPow;
+                              showFloatingAnim(`+${stolenPow}✨`, '#ffca28', op.pos);
+                              playSound('hurt'); addGameLog(`💥 <b>${me.name}</b> แพ้ <b>${op.name}</b> เสียพลัง -${stolenPow}✨!`); 
                               if (me.skillType === 'counter_attack' && Math.random() < 0.5) { showToast("พลังสวนกลับ!"); applyClientDamage(op, 1, me); }
                               if (me.skillType === 'reflect_chance' && (Math.random()*100) < (me.skillVal||0)) { showToast("พลังสะท้อนกลับทำงาน!"); applyClientDamage(op, 1, me); }
                               if (me.skillType === 'combat_bonus') { let val = me.skillVal || 0; me.power += val; showFloatingAnim(`+${val}✨`, '#00e676', me.pos); }
@@ -2196,7 +2354,7 @@
                   showFloatingAnim(`+${val}✨`, '#00e676', me.pos);
                   await delay(600);
               }
-              await playPvPCutscene(me.icon, bossConfig.bossImg);
+              await playPvPCutscene(me.icon, bossConfig.bossImg, me.skinFilter, '');
 
               const modal = document.getElementById('boss-modal'); document.getElementById('boss-result-text').style.display = 'none'; document.getElementById('boss-me-dice').style.display = 'none'; document.getElementById('boss-op-dice').style.display = 'none';
               
@@ -2208,13 +2366,14 @@
               }
               
               let rebirthLvl = (gameData.bossLevels && gameData.bossLevels[me.pos]) ? gameData.bossLevels[me.pos] : 1; let nerf = (gameData.bossNerfs && gameData.bossNerfs[me.pos]) ? gameData.bossNerfs[me.pos] : 0;
+              let bloodBonus = gameData.bloodMoonBonus || 0;
               let bossPowerRef = {
-                val: bossConfig.isSpecial ? bossConfig.bossPower : Math.max(0, (bossConfig.bossPower * rebirthLvl) - nerf),
+                val: bossConfig.isSpecial ? (bossConfig.bossPower + bloodBonus) : Math.max(0, (bossConfig.bossPower * rebirthLvl) + bloodBonus - nerf),
                 basePower: bossConfig.bossPower,
                 isSpecial: Boolean(bossConfig.isSpecial)
               };
               
-              document.getElementById('boss-name-display').innerText = bossConfig.bossName; document.getElementById('boss-me-img').src = me.icon; document.getElementById('boss-my-power').innerText = me.power; document.getElementById('boss-me-lives').innerText = '❤️'.repeat(Math.max(0, me.lives)); document.getElementById('boss-img-display').src = bossConfig.bossImg; document.getElementById('boss-base-power').innerText = bossPowerRef.val;
+              document.getElementById('boss-name-display').innerText = bossConfig.bossName; document.getElementById('boss-me-img').src = me.icon; document.getElementById('boss-me-img').style.filter = me.skinFilter || 'none'; document.getElementById('boss-my-power').innerText = me.power; document.getElementById('boss-me-lives').innerText = '❤️'.repeat(Math.max(0, me.lives)); document.getElementById('boss-img-display').src = bossConfig.bossImg; document.getElementById('boss-base-power').innerText = bossPowerRef.val;
               
               const renderBossItems = () => {
                 const itemBox = document.getElementById('boss-items-container'); itemBox.innerHTML = '';
@@ -2410,6 +2569,237 @@
         }
       }
 
+      function isBotController() {
+        if (!gameData || !gameData.players) return false;
+        const firstAliveHuman = gameData.players.find(p => !p.isBot && p.lives > 0);
+        if (firstAliveHuman) return firstAliveHuman.id === myPlayerId;
+        const firstHuman = gameData.players.find(p => !p.isBot);
+        return firstHuman ? firstHuman.id === myPlayerId : false;
+      }
+
+      function advanceTurnAndRound() {
+        if (!gameData || !gameData.players || gameData.players.length === 0) return;
+        const nextTurn = (gameData.turn + 1) % gameData.players.length;
+        if (nextTurn <= gameData.turn) {
+          gameData.round = (gameData.round || 1) + 1;
+          if (gameData.round % 5 === 0) {
+            gameData.bloodMoonBonus = (gameData.bloodMoonBonus || 0) + 200;
+            gameData.players.forEach(p => {
+              if (p.lives > 0 && p.power > 1000 && p.skillType !== 'world_event_immune') {
+                const tax = Math.floor(p.power * 0.1);
+                p.power = Math.max(0, p.power - tax);
+                showFloatingAnim(`-${tax}✨`, '#e53935', p.pos);
+              }
+            });
+            addGameLog(`🌕 <b>จันทรุปราคารอบ ${gameData.round}!</b> บอสเก่งขึ้น +200✨ และเก็บภาษีเวทย์ 10%!`);
+            showToast(`🌕 จันทรุปราคารอบ ${gameData.round}! บอสคลั่งขึ้น!`);
+          }
+        }
+        gameData.turn = nextTurn;
+      }
+
+      async function runBotTurn(bot) {
+        if (!bot || bot.lives <= 0 || isMyTurnProcessing) return;
+        isMyTurnProcessing = true;
+        clearTimeout(pollingTimer);
+        clearTimeout(afkTimerId);
+        resetWatchdog();
+
+        try {
+          if (!bot.buffsInitialized) {
+            bot.buffsInitialized = true;
+            if (bot.skillType === 'start_shield') bot.shield = true;
+            if (bot.skillType === 'start_item') grantRandomItemToPlayer(bot);
+          }
+
+          if (bot.skipTurns > 0) {
+            bot.skipTurns--;
+            addGameLog(`🛑 <b>${bot.name}</b> โดนพักเทิร์น!`);
+            await delay(900);
+          } else {
+            // Bot smart item use (heal / shield / power_up)
+            if (bot.items && bot.items.length > 0 && !(bot.silenced > 0)) {
+              let useIdx = bot.items.findIndex(k => itemsConfig[k] && (
+                (bot.lives < bot.maxLives && ['heal', 'max_heal'].includes(itemsConfig[k].type)) ||
+                (!bot.shield && itemsConfig[k].type === 'shield') ||
+                ['power_up', 'power'].includes(itemsConfig[k].type)
+              ));
+              if (useIdx !== -1 && Math.random() < 0.65) {
+                const k = bot.items.splice(useIdx, 1)[0];
+                const itm = itemsConfig[k];
+                bot.itemsUsed = (bot.itemsUsed || 0) + 1;
+                if (['power_up', 'power'].includes(itm.type)) bot.power += (itm.val || 500);
+                else if (itm.type === 'shield') bot.shield = true;
+                else if (itm.type === 'heal') bot.lives = Math.min(bot.maxLives, bot.lives + (itm.val || 1));
+                else if (itm.type === 'max_heal') bot.lives = bot.maxLives;
+                addGameLog(`🤖 <b>${bot.name}</b> ใช้ไอเท็ม ${itm.name}`);
+                updateUI();
+                await delay(600);
+              }
+            }
+
+            bot.status = bot.status || [];
+            let bonus = bot.skillType === 'roll_bonus' ? (bot.skillVal || 1) : 0;
+            if (bot.status.includes('move_boost')) {
+              bonus += (bot.activeSkillVal > 0 ? bot.activeSkillVal : 3);
+              bot.status = bot.status.filter(s => s !== 'move_boost');
+            }
+            let penalty = 0;
+            if (bot.status.includes('reduce_dice')) {
+              penalty = 2;
+              bot.status = bot.status.filter(s => s !== 'reduce_dice');
+            }
+
+            const r1 = Math.floor(Math.random() * 6) + 1;
+            const r2 = (bot.skillType === 'dice_master' || bot.doubleDice) ? Math.floor(Math.random() * 6) + 1 : 0;
+            bot.doubleDice = false;
+            if (r1 === 6) { bot.power += 100; showFloatingAnim('+100✨', '#00e676', bot.pos); }
+            else if (r1 === 1 && r2 === 0) { bot.power = Math.max(0, bot.power - 50); showFloatingAnim('-50✨', '#e53935', bot.pos); }
+
+            const steps = Math.max(1, r1 + r2 + bonus - penalty);
+            showToast(`🤖 ${bot.name} ทอยได้ ${steps} แต้ม!`);
+            addGameLog(`🎲 <b>${bot.name}</b> ทอยได้ ${steps} แต้ม`);
+            await delay(700);
+
+            for (let s = 0; s < steps; s++) {
+              bot.pos++;
+              if (bot.skillType === 'power_step') bot.power += (bot.skillVal || 10);
+              if (bot.pos > totalCells) {
+                bot.pos = 1;
+                const loopB = bot.skillType === 'loop_power' ? (bot.skillVal || 0) : 0;
+                bot.power += 500 + loopB;
+                if (bot.skillType === 'loop_item') grantRandomItemToPlayer(bot);
+                if (bot.skillType === 'passive_heal') bot.lives = Math.min(bot.maxLives, bot.lives + 1);
+                if (bot.skillType === 'start_shield') bot.shield = true;
+                showFloatingAnim(`+${500 + loopB}✨`, '#ffea00', bot.pos);
+              }
+              await animateStep(bot.id, bot.pos);
+            }
+
+            // Resolve landing cell for bot without interactive modals
+            if (bot.lives > 0) {
+              const isQuiz = (bot.pos === 9 || bot.pos === 17 || bot.pos === 25);
+              if (isQuiz) {
+                const qObj = loadedQuestions[Math.floor(Math.random() * loadedQuestions.length)];
+                let rScore = qObj.reward || 500;
+                if (bot.skillType === 'double_reward' || bot.skillType === 'quiz_master') rScore *= 2;
+                if (Math.random() < 0.65) {
+                  bot.power += rScore;
+                  if (bot.skillType === 'quiz_master') grantRandomItemToPlayer(bot);
+                  showFloatingAnim(`+${rScore}✨`, '#00e676', bot.pos);
+                  addGameLog(`📜 <b>${bot.name}</b> ตอบคำถามถูก +${rScore}✨`);
+                } else {
+                  bot.power = Math.max(0, bot.power - 200);
+                  showFloatingAnim('-200✨', '#e53935', bot.pos);
+                  addGameLog(`📜 <b>${bot.name}</b> ตอบคำถามผิด -200✨`);
+                }
+              } else if (cellEvents[bot.pos]) {
+                const evt = cellEvents[bot.pos];
+                bot.power += evt.power;
+                if (evt.damage > 0) applyClientDamage(bot, evt.damage);
+                if (evt.warpTo > 0) { bot.pos = evt.warpTo; await animateStep(bot.id, bot.pos); }
+                if (evt.skip > 0) bot.skipTurns = evt.skip;
+                if (evt.isChest) grantRandomItemToPlayer(bot);
+                if (evt.isEvent) await triggerWorldEvent();
+                if (evt.isShop && bot.lives > 0) {
+                  if (bot.skillType === 'shop_investor') bot.power += (bot.skillVal || 500);
+                  const maxCap = bot.skillType === 'extra_item_slot' ? 4 : 3;
+                  const affordable = Object.keys(itemsConfig).filter(k => {
+                    let pr = itemsConfig[k].price || 200;
+                    if (bot.skillType === 'discount_shop') pr = Math.floor(pr * 0.8);
+                    return bot.power >= pr;
+                  });
+                  if (bot.items.length < maxCap && affordable.length > 0 && Math.random() < 0.7) {
+                    const pick = affordable[Math.floor(Math.random() * affordable.length)];
+                    let pr = itemsConfig[pick].price || 200;
+                    if (bot.skillType === 'discount_shop') pr = Math.floor(pr * 0.8);
+                    bot.power -= pr;
+                    bot.items.push(pick);
+                    addGameLog(`⛩️ <b>${bot.name}</b> ซื้อ ${itemsConfig[pick].name}`);
+                  }
+                }
+                if (evt.bossPower > 0 && bot.lives > 0) {
+                  if (bot.evade) { bot.evade = false; }
+                  else {
+                    if (bot.skillType === 'combat_power') bot.power += (bot.skillVal || 100);
+                    const rebirthLvl = (gameData.bossLevels && gameData.bossLevels[bot.pos]) ? gameData.bossLevels[bot.pos] : 1;
+                    const nerf = (gameData.bossNerfs && gameData.bossNerfs[bot.pos]) ? gameData.bossNerfs[bot.pos] : 0;
+                    const bp = Math.max(0, (evt.bossPower * rebirthLvl) + (gameData.bloodMoonBonus || 0) - nerf);
+                    const bRoll = Math.floor(Math.random() * 6) + 1;
+                    const mRoll = Math.floor(Math.random() * 6) + 1;
+                    const diceMult = (bot.skillType === 'boss_slayer') ? 200 : 100;
+                    if (bot.power + mRoll * diceMult >= bp + bRoll * 100) {
+                      bot.power += 100;
+                      bot.bossKills = (bot.bossKills || 0) + 1;
+                      if (!gameData.bossLevels) gameData.bossLevels = {};
+                      gameData.bossLevels[bot.pos] = rebirthLvl * 2;
+                      if (!gameData.bossNerfs) gameData.bossNerfs = {};
+                      gameData.bossNerfs[bot.pos] = 0;
+                      grantRandomItemToPlayer(bot);
+                      addGameLog(`👹 <b>${bot.name}</b> ปราบบอส ${evt.bossName} สำเร็จ!`);
+                    } else {
+                      applyClientDamage(bot, 1);
+                      if (bot.skillType === 'combat_bonus') bot.power += (bot.skillVal || 200);
+                      addGameLog(`👹 <b>${bot.name}</b> แพ้บอส ${evt.bossName}!`);
+                    }
+                  }
+                }
+              }
+
+              // Bot PvP auto resolution
+              if (bot.lives > 0 && bot.pos !== 1) {
+                const enemies = gameData.players.filter(p => p.id !== bot.id && p.pos === bot.pos && p.lives > 0 && !(p.status && p.status.includes('invisible')));
+                for (let op of enemies) {
+                  if (bot.lives <= 0) break;
+                  if (bot.evade) { bot.evade = false; break; }
+                  if (bot.skillType === 'combat_power') bot.power += (bot.skillVal || 100);
+                  if (op.skillType === 'combat_power') op.power += (op.skillVal || 100);
+                  await playPvPCutscene(bot.icon, op.icon, bot.skinFilter, op.skinFilter);
+                  if (bot.power > op.power) {
+                    const st = Math.min(op.power, Math.min(350, Math.max(100, Math.floor(op.power * 0.10))));
+                    if (applyClientDamage(op, 1, bot)) {
+                      op.power = Math.max(0, op.power - st);
+                      bot.power += st;
+                      addGameLog(`⚔️ <b>${bot.name}</b> ชนะ PvP เหนือ <b>${op.name}</b>!`);
+                    }
+                  } else if (bot.power < op.power) {
+                    const st = Math.min(bot.power, Math.min(350, Math.max(100, Math.floor(bot.power * 0.10))));
+                    if (applyClientDamage(bot, 1, op)) {
+                      bot.power = Math.max(0, bot.power - st);
+                      op.power += st;
+                      addGameLog(`💥 <b>${bot.name}</b> แพ้ PvP ให้ <b>${op.name}</b>!`);
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          if (bot.tempBuff && bot.tempBuff > 0) { bot.power = Math.max(0, bot.power - bot.tempBuff); bot.tempBuff = 0; }
+          bot.immune = false; bot.silenced = 0;
+          if (bot.status && bot.status.includes('burn')) { bot.status = bot.status.filter(s => s !== 'burn'); applyClientDamage(bot, 1); }
+          if (bot.status && bot.status.includes('poison')) { bot.status = bot.status.filter(s => s !== 'poison'); applyClientDamage(bot, 1); }
+          if (bot.status) bot.status = bot.status.filter(s => s !== 'invisible' && s !== 'peace');
+          if (bot.currentCooldown > 0) bot.currentCooldown--;
+        } catch (err) {
+          console.error('Bot Turn Error:', err);
+        } finally {
+          if (!checkWinCondition()) {
+            advanceTurnAndRound();
+            updateUI();
+            isMyTurnProcessing = false;
+            clearTimeout(watchdogTimer);
+            prevDataStr = JSON.stringify(gameData);
+            google.script.run.withSuccessHandler(res => {
+              if (res && res.v) lastStateVersion = res.v;
+              scheduleNextPoll(700);
+            }).withFailureHandler(() => {
+              scheduleNextPoll(1800);
+            }).updateGameState(myRoomCode, JSON.stringify(gameData));
+          }
+        }
+      }
+
       function finishTurn() {
         let me = gameData.players[myPlayerId];
         me.status = me.status || [];
@@ -2433,7 +2823,7 @@
         
         if(checkWinCondition()) return; 
         
-        gameData.turn = (gameData.turn + 1) % gameData.players.length; 
+        advanceTurnAndRound();
         updateUI(); isMyTurnProcessing = false; clearTimeout(pollingTimer); clearTimeout(watchdogTimer); clearTimeout(afkTimerId);
         document.getElementById('rollBtn').disabled = true;
         document.getElementById('rollBtn').style.display = 'none';
