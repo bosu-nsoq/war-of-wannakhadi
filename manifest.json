@@ -1,0 +1,25 @@
+{
+  "name": "War of Wannakhadi",
+  "short_name": "War of Wannakhadi",
+  "description": "มหาศึกวรรณคดี (War of Wannakhadi) เกมเพื่อความสนุกและการเรียนรู้",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1a1a2e",
+  "theme_color": "#1a1a2e",
+  "icons": [
+    {
+      "src": "https://i.postimg.cc/V6m5HSRD/wow.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://i.postimg.cc/V6m5HSRD/wow.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,2342 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <title>War of Wannakhadi</title>
+    <meta name="description" content="มหาศึกวรรณคดี (War of Wannakhadi) เกมเพื่อความสนุกและการเรียนรู้">
+    <link rel="icon" type="image/png" href="https://i.postimg.cc/V6m5HSRD/wow.png">
+    <link rel="shortcut icon" type="image/png" href="https://i.postimg.cc/V6m5HSRD/wow.png">
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="War of Wannakhadi">
+    <link rel="apple-touch-icon" href="https://i.postimg.cc/V6m5HSRD/wow.png">
+    <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+      :root { --board-rot: -45deg; --inv-rot: 45deg; --board-scale: 1; }
+
+      body { 
+        font-family: 'Mali', sans-serif; background-color: #1a1a2e; 
+        background-image: url('https://i.postimg.cc/tTFLndvv/Gemini_Generated_Image_gi9fhngi9fhngi9f.png'); 
+        background-size: cover; background-position: center; background-attachment: fixed; 
+        margin: 0; color: #333; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; touch-action: manipulation;
+      }
+      body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.15); z-index: -1; pointer-events: none; }
+      .glass { background: rgba(255, 255, 255, 0.9); border: 2px solid rgba(255, 255, 255, 0.6); border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); color: #333; }
+      
+      #init-screen, #char-select-screen { margin-top: 5vh; padding: 30px; text-align: center; width: 90%; max-width: 450px; z-index: 1000; position: relative;}
+      input { width: 85%; padding: 12px; font-size: 16px; margin-bottom: 15px; border-radius: 10px; border: 2px solid #ce93d8; text-align: center; font-family: 'Mali', sans-serif; outline: none; transition: 0.3s;}
+      input:focus { border-color: #ba68c8; box-shadow: 0 0 10px #ba68c8; }
+      .btn { padding: 15px 20px; font-size: 18px; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 10px; font-family: 'Mali', sans-serif; box-shadow: 0 6px 0px rgba(0,0,0,0.15); transition: 0.1s; }
+      .btn:active { transform: translateY(4px); box-shadow: 0 2px 0px rgba(0,0,0,0.15); } 
+      .btn-create { background: #ffca28; color: #5d4037; } .btn-join { background: #69f0ae; color: #1b5e20; }
+
+      #game-screen { display: none; width: 100%; height: 100vh; position: relative; }
+      #corner-ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 200; }
+      .corner-card { position: absolute; width: 230px; text-align: center; padding: 15px 10px; border-radius: 15px; transition: 0.3s; pointer-events: auto;}
+      .pos-0 { top: 20px; right: 20px; } .pos-1 { bottom: 20px; right: 20px; } .pos-2 { bottom: 20px; left: 20px; } .pos-3 { top: 120px; left: 20px; }
+      
+      .glow-0 { border: 3px solid #00b0ff; } .glow-1 { border: 3px solid #00e676; } .glow-2 { border: 3px solid #ffea00; } .glow-3 { border: 3px solid #d500f9; }
+      .corner-card img { width: 55px; height: 55px; border-radius: 50%; object-fit: contain; background: transparent; }
+      .corner-card.active-turn { background: rgba(255, 249, 196, 0.95); transform: scale(1.05); color: #333; box-shadow: 0 0 20px #ffca28;}
+      
+      .char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; max-height: 50vh; overflow-y: auto; padding-right: 5px; }
+      .char-grid::-webkit-scrollbar { width: 6px; } .char-grid::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 10px; } .char-grid::-webkit-scrollbar-thumb { background: #ce93d8; border-radius: 10px; }
+
+      .char-btn { display: flex; align-items: center; background: rgba(255,255,255,0.7); border: 3px solid transparent; border-radius: 15px; padding: 10px; cursor: pointer; transition: 0.2s;}
+      .char-btn img { width: 50px; height: 50px; border-radius: 50%; object-fit: contain; margin-right: 10px; border: 2px solid #ccc; background: transparent;}
+      
+      .item-container { display: flex; justify-content: center; gap: 8px; margin-top: 10px; flex-wrap: wrap;}
+      .item-slot { width: 35px; height: 35px; background: rgba(0,0,0,0.1); border-radius: 8px; display: flex; justify-content: center; align-items: center; border: 1px solid rgba(0,0,0,0.2); font-size: 20px; cursor: pointer;}
+      .item-slot.usable { border-color: #69f0ae; background: #e8f5e9; box-shadow: 0 0 10px #69f0ae;} .item-slot.usable:hover { transform: scale(1.1); }
+      .item-slot.viewable { border-color: #90caf9; background: #e3f2fd; } .item-slot.viewable:hover { transform: scale(1.05); }
+
+      /* ปุ่ม Active Skill */
+      .active-skill-btn { background: #d500f9; color: white; border: 2px solid #fff; border-radius: 8px; padding: 6px; font-size: 13px; font-family: 'Mali', sans-serif; font-weight: bold; cursor: pointer; width: 100%; margin-top: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: 0.2s;}
+      .active-skill-btn.disabled { background: #ccc; border-color: #999; color: #666; cursor: not-allowed; box-shadow: none; }
+      .active-skill-btn:active:not(.disabled) { transform: translateY(2px); }
+      
+      #center-turn-display { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); font-size: 26px; font-weight: bold; padding: 10px 40px; border-bottom: 4px solid #ffca28; z-index: 300; background: white;}
+      
+      /* --- เมนูตั้งค่าแบบยุบรวม (ปุ่มฟันเฟือง) --- */
+      #settings-menu { position: absolute; top: 20px; left: 20px; z-index: 4000; pointer-events: auto; }
+      .gear-btn { font-size: 24px; width: 50px; height: 50px; border-radius: 50%; background: #e1f5fe; border: 2px solid #0288d1; color: #0288d1; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: transform 0.3s; display: flex; justify-content: center; align-items: center; }
+      .gear-btn:hover { transform: rotate(90deg); background: #0288d1; color: white; }
+      #settings-panel { display: none; position: absolute; top: 60px; left: 0; background: rgba(255,255,255,0.95); padding: 15px; border-radius: 15px; border: 2px solid #0288d1; box-shadow: 0 5px 15px rgba(0,0,0,0.3); flex-direction: column; gap: 10px; width: max-content; }
+      .settings-row { display: flex; gap: 5px; justify-content: center; }
+      .settings-btn { padding: 8px 12px; font-size: 14px; border-radius: 8px; border: 1px solid #ccc; background: white; cursor: pointer; font-family: 'Mali', sans-serif; font-weight: bold; transition: 0.2s;}
+      .settings-btn:hover { background: #eee; }
+
+      #flash-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff59d; z-index: 9999; pointer-events: none; opacity: 0; display: none; }
+      .flash-anim { display: block !important; animation: flashEffect 0.6s ease-out; }
+      @keyframes flashEffect { 0% { opacity: 0; } 20% { opacity: 0.7; } 100% { opacity: 0; } }
+
+      /* Cutscenes */
+      #pvp-cutscene, #action-cutscene { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: none; align-items: center; justify-content: center; overflow: hidden; pointer-events:none;}
+      .vs-text { position: absolute; font-size: 120px; color: #ff1744; font-weight: bold; text-shadow: 5px 5px 0px #fff, 0 0 30px #ffca28; z-index: 10; transform: scale(0); animation: popVS 0.5s 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+      .fighter-cut-l, .fighter-cut-r { position: absolute; width: 200px; height: 200px; border-radius: 50%; border: 8px solid white; box-shadow: 0 0 30px rgba(0,0,0,0.8); z-index: 5; background: white; }
+      .fighter-cut-l { left: -250px; animation: slideL 0.6s forwards; } .fighter-cut-r { right: -250px; animation: slideR 0.6s forwards; }
+      
+      .action-box { background: rgba(255, 255, 255, 0.95); padding: 40px; border-radius: 20px; text-align: center; border: 5px solid #ffca28; animation: popVS 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; box-shadow: 0 0 50px rgba(255, 202, 40, 0.5); width: 80%; max-width: 500px;}
+      
+      @keyframes popVS { 0% { transform: scale(0) rotate(-20deg); } 100% { transform: scale(1) rotate(0deg); } }
+      @keyframes slideL { 0% { left: -250px; transform: scale(1); } 60% { left: 50%; transform: translateX(-150%) scale(1.2); } 100% { left: 50%; transform: translateX(-120%) scale(1.1); } }
+      @keyframes slideR { 0% { right: -250px; transform: scale(1); } 60% { right: 50%; transform: translateX(150%) scale(1.2); } 100% { right: 50%; transform: translateX(120%) scale(1.1); } }
+      @keyframes clashL { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(45px) scale(1.1); } }
+      @keyframes clashR { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(-45px) scale(1.1); } }
+
+      .float-anim-text { font-size: 32px; font-weight: bold; white-space: nowrap; line-height: 1.2; padding: 5px; width: max-content; text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 0 6px 12px rgba(0,0,0,0.6); animation: floatUpText 2.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+      @keyframes floatUpText { 0% { transform: translate(-50%, 0) scale(0.5); opacity: 0; } 15% { transform: translate(-50%, -40px) scale(1.3); opacity: 1; } 85% { transform: translate(-50%, -100px) scale(1); opacity: 1; } 100% { transform: translate(-50%, -130px) scale(1); opacity: 0; } }
+
+      .scene { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 10; perspective: 3500px;} 
+      #game-container { position: relative; width: 540px; height: 540px; transform: scale(var(--board-scale)) rotateX(55deg) rotateZ(var(--board-rot)); transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1); transform-origin: center center;}
+      #board-inner, #tokens-container, #bosses-container, #anim-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform-style: preserve-3d; pointer-events: none; }
+
+      .center-dragon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) translateZ(30px) rotateZ(var(--inv-rot)) rotateX(-55deg); width: 300px; transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1); pointer-events: none; z-index: 50; animation: floatDragon 4s ease-in-out infinite; }
+      @keyframes floatDragon { 0%, 100% { transform: translate(-50%, -50%) translateZ(30px) rotateZ(var(--inv-rot)) rotateX(-55deg); } 50% { transform: translate(-50%, -50%) translateZ(50px) rotateZ(var(--inv-rot)) rotateX(-55deg); filter: drop-shadow(0 40px 15px rgba(0,0,0,0.3)); } }
+
+      .cell { position: absolute; width: 50px; height: 50px; transform-style: preserve-3d; transform: translateZ(20px); cursor: pointer; pointer-events: auto; background-color: #81c784; border: 1px solid rgba(0,0,0,0.2); box-sizing: border-box; display: flex; align-items: center; justify-content: center; }
+      .cell-face { position: absolute; box-sizing: border-box; background-color: inherit; border: 1px solid rgba(0,0,0,0.2); }
+      .face-front { width: 50px; height: 20px; bottom: -20px; left: -1px; transform-origin: top; transform: rotateX(-90deg); filter: brightness(0.7); } .face-back { width: 50px; height: 20px; top: -20px; left: -1px; transform-origin: bottom; transform: rotateX(90deg); filter: brightness(0.5); } .face-left { width: 20px; height: 50px; top: -1px; left: -20px; transform-origin: right; transform: rotateY(-90deg); filter: brightness(0.8); } .face-right { width: 20px; height: 50px; top: -1px; right: -20px; transform-origin: left; transform: rotateY(90deg); filter: brightness(0.6); }
+      
+      .cell > span { position: absolute; display: inline-block; transform: translateZ(15px) rotateZ(var(--inv-rot)) rotateX(-55deg); transition: transform 0.6s; pointer-events:none; z-index:5; font-weight: bold; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); font-size: 22px; } 
+      
+      .cell-start { background-color: #ffca28; } .cell-shop { background-color: #00acc1; } .cell-special { background-color: #4fc3f7; } .cell-event { background-color: #ff8a65; } .cell-world-event { background-color: #ab47bc; } .cell-chest { background-color: #ffb74d; }
+      
+      .cell:hover .cell-info { display: block; animation: signPopUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+      .cell-info { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) translateZ(60px) rotateZ(var(--inv-rot)) rotateX(-55deg); margin-top: -80px; background: #8d6e63; color: white; padding: 12px; border-radius: 8px; width: 170px; text-align: center; font-size: 14px; font-weight: normal; pointer-events: none; z-index: 2000; text-shadow: none; border: 2px solid #5d4037; box-shadow: 0 15px 25px rgba(0,0,0,0.6); transition: transform 0.6s; font-style: normal; transform-style: flat; }
+      .cell-info::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: 6px; height: 20px; background: #5d4037; border-radius: 2px; }
+      @keyframes signPopUp { 0% { transform: translate(-50%, -50%) translateZ(60px) rotateZ(var(--inv-rot)) rotateX(-55deg) scale(0); margin-top: -40px;} 100% { transform: translate(-50%, -50%) translateZ(60px) rotateZ(var(--inv-rot)) rotateX(-55deg) scale(1); margin-top: -80px;} }
+      
+      .token { position: absolute; width: 45px; height: 60px; z-index: 100; transform: translateZ(45px) rotateZ(var(--inv-rot)) rotateX(-55deg); display: flex; align-items: center; justify-content: center; transition: top 0.4s ease-out, left 0.4s ease-out, transform 0.6s; }
+      .token img { width: 100%; height: 100%; border-radius: 8px; object-fit: contain; background: transparent; filter: none; z-index: 2; }
+      .token::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 35px; height: 35px; border-radius: 50%; z-index: -1; filter: blur(6px); }
+      .glow-token-0::before { background: #00b0ff; box-shadow: 0 0 15px 5px #00b0ff; } .glow-token-1::before { background: #00e676; box-shadow: 0 0 15px 5px #00e676; } .glow-token-2::before { background: #ffea00; box-shadow: 0 0 15px 5px #ffea00; } .glow-token-3::before { background: #d500f9; box-shadow: 0 0 15px 5px #d500f9; }
+      
+      .token.hopping { animation: hop 0.3s cubic-bezier(0.25, 1.5, 0.5, 1); }
+      @keyframes hop { 0%, 100% {} 50% { transform: translateZ(85px) rotateZ(var(--inv-rot)) rotateX(-55deg) scale(1.1); } }
+
+      .boss-token { position: absolute; width: 45px; height: 60px; z-index: 90; transform: translateZ(40px) rotateZ(var(--inv-rot)) rotateX(-55deg); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.6s; }
+      .boss-token img { width: 100%; height: 100%; border-radius: 8px; object-fit: contain; background: transparent; filter: none; z-index: 2; }
+      .boss-token::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 35px; height: 35px; border-radius: 50%; z-index: -1; background: rgba(255, 23, 68, 0.4); box-shadow: 0 0 10px 4px rgba(255, 23, 68, 0.5); animation: pulseRedSoft 2s infinite; filter: blur(4px); transition: 0.5s; }
+      @keyframes pulseRedSoft { 0%, 100% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.5; } 50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.8; } }
+      .boss-token.rebirth-aura::before { background: rgba(33, 33, 33, 0.9); box-shadow: 0 0 10px 5px #ff3d00; animation: pulseRebirth 1.5s infinite alternate; filter: blur(2px) hue-rotate(var(--aura-hue, 0deg)); width: 30px; height: 30px; }
+      @keyframes pulseRebirth { 0% { transform: translate(-50%, -50%) scale(0.8); box-shadow: 0 0 8px 3px #ff3d00; } 100% { transform: translate(-50%, -50%) scale(1.05); box-shadow: 0 0 15px 8px #d50000; } }
+
+      .shake-anim { animation: screenShake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+      @keyframes screenShake { 0%, 100% { transform: translate(0, 0); } 20% { transform: translate(-10px, 5px) rotate(-2deg); } 40% { transform: translate(10px, -5px) rotate(2deg); } 60% { transform: translate(-10px, -5px) rotate(-2deg); } 80% { transform: translate(10px, 5px) rotate(2deg); } }
+      .clash-left { animation: clashL 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; } .clash-right { animation: clashR 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+      
+      .controls { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 300; width: 80%; max-width: 400px;}
+      .modal-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 10px; box-sizing: border-box;}
+      #item-confirm-modal { z-index: 2500 !important; }
+      #skill-confirm-modal { z-index: 2600 !important; }
+      
+      .dice-box { padding: 40px; text-align: center; width: 350px; background: white; position: relative; box-sizing: border-box; max-height: 90vh; overflow-y: auto;}
+      .dice-number { font-size: 150px; color: #69f0ae; width: 150px; line-height: 150px; border-radius: 35px; margin: 0 auto; text-shadow: 2px 5px 10px rgba(0,0,0,0.2);}
+      .shop-item-btn { display: flex; align-items: center; justify-content: space-between; background: #fff3e0; border: 2px solid #ffca28; padding: 10px; margin-bottom: 10px; border-radius: 10px; cursor: pointer; color: #5d4037; font-size: 16px; transition: 0.2s; font-weight: bold; text-align: left;}
+      .shop-item-btn:hover { background: #ffe082; transform: scale(1.02); }
+      .combat-fighter { display: flex; flex-direction: column; align-items: center; flex: 1; transition: transform 0.2s; }
+      .combat-fighter img { width: 80px; height: 80px; border-radius: 50%; object-fit: contain; background: rgba(255,255,255,0.8); box-shadow: 0 5px 10px rgba(0,0,0,0.2); margin-bottom: 10px;}
+      .combat-dice-slot { font-size: 50px; color: #e53935; line-height: 50px; height: 50px; margin-top: 10px; display: none;}
+
+      #toast { visibility: hidden; min-width: 250px; background-color: #ffca28; color: #5d4037; text-align: center; border-radius: 10px; padding: 16px; position: fixed; z-index: 3000; top: 80px; left: 50%; transform: translate(-50%, -20px); font-weight: bold; font-size: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: 0.4s; border: 2px solid white;}
+      #toast.show { visibility: visible; transform: translate(-50%, 0); }
+      #status-board { background: #fff9c4; color: #f57f17; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-weight: bold; border: 1px dashed #f57f17;}
+
+      .log-entry { margin: 4px 0; font-size: 14px; border-bottom: 1px dashed #ccc; padding-bottom: 4px; text-align: left;}
+      .log-entry:last-child { border: none; }
+
+      #start-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 2500; flex-direction: column; text-align: center; color: white;}
+      .giant-start-btn { font-size: 40px; padding: 25px 60px; border-radius: 50px; background: #69f0ae; color: #1b5e20; border: 5px solid white; cursor: pointer; font-family: 'Mali', sans-serif; font-weight: bold; box-shadow: 0 10px 30px rgba(105, 240, 174, 0.5); animation: giantPulse 1.5s infinite; margin-top: 30px; transition: 0.2s;}
+      .giant-start-btn:hover { transform: scale(1.1); }
+      @keyframes giantPulse { 0% { box-shadow: 0 0 0 0 rgba(105, 240, 174, 0.7); } 70% { box-shadow: 0 0 0 30px rgba(105, 240, 174, 0); } 100% { box-shadow: 0 0 0 0 rgba(105, 240, 174, 0); } }
+
+      /* Turn Announcer */
+      #turn-announcer { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(0); background: rgba(0,0,0,0.9); color: white; padding: 20px 50px; border-radius: 20px; font-size: 40px; font-weight: bold; border: 5px solid #ffca28; z-index: 5000; text-shadow: 0 5px 10px rgba(0,0,0,0.5); pointer-events: none; transition: 0.3s; text-align: center; }
+      .announce-anim { transform: translate(-50%, -50%) scale(1) !important; animation: pulseAnnounce 0.5s infinite alternate; }
+      @keyframes pulseAnnounce { from { box-shadow: 0 0 20px rgba(255,202,40,0.5); } to { box-shadow: 0 0 50px rgba(255,202,40,1); transform: translate(-50%, -50%) scale(1.05); } }
+
+      /* ========================================================= */
+      /* ส่วนที่ 1: การตั้งค่าสำหรับหน้าจอมือถือ */
+      /* ========================================================= */
+      @media (max-width: 1080px) {
+        :root { --board-scale: 0.3; } 
+        
+        body, html { 
+            overflow: hidden !important; 
+            touch-action: none; 
+            width: 100vw; 
+            height: 100vh;
+        }
+
+        #corner-ui { position: absolute; top: 0; left: 0; width: 100%; display: block; overflow: visible; padding: 0; pointer-events: none; z-index: 500; height: auto; }
+        
+        .corner-card:not(.active-turn) { display: none !important; }
+        
+        .corner-card.active-turn { 
+            position: absolute !important; 
+            top: 70px !important;
+            left: 50% !important; 
+            transform: translateX(-50%) scale(0.9) !important; 
+            
+            display: flex !important; 
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+            justify-content: center !important;
+            align-items: center !important;
+            
+            width: 95% !important; 
+            max-width: 95vw !important; 
+            
+            height: auto !important; 
+            min-height: min-content !important; 
+            
+            margin: 0 !important; 
+            padding: 15px !important; 
+            gap: 5px;
+            
+            font-size: 14px; 
+            box-sizing: border-box; 
+            pointer-events: auto; 
+            scroll-snap-align: none; 
+            border-radius: 15px; 
+            border: 3px solid #69f0ae; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+            z-index: 1000 !important; 
+            background-color: rgba(255, 255, 255, 0.95); 
+        }
+        
+        .corner-card.active-turn > br { display: none; }
+        .corner-card img { width: 35px; height: 35px; margin-bottom: 5px;}
+        .item-slot { width: 30px; height: 30px; font-size: 14px; }
+        
+        .item-container { 
+            display: flex;
+            gap: 8px; 
+            margin-top: 5px; 
+            justify-content: center; 
+            flex-wrap: wrap; 
+            width: 100%; 
+        } 
+        
+        .active-skill-btn { font-size: 13px; padding: 6px 12px; margin-top: 5px;}
+        
+        .scene { align-items: flex-start; padding-top: 15vh; }
+        
+        #game-container { 
+            position: absolute !important;
+            top: -10% !important;
+            bottom: 0 !important;
+            left: -18% !important;
+            right: 0 !important;
+            margin: auto !important; 
+            transform-origin: center center !important; 
+        }
+        
+        #settings-menu { display: none !important; }
+        
+        #center-turn-display { 
+            font-size: 16px; 
+            padding: 5px 15px; 
+            top: 15px !important; 
+            bottom: auto !important; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            white-space: nowrap; 
+            width: max-content; 
+            max-width: 80%; 
+            border-radius: 10px; 
+            z-index: 5000;
+        }
+        
+        .controls { 
+            position: absolute;
+            bottom: 0 !important; 
+            left: 50%;
+            transform: translateX(-50%); 
+            width: 100% !important; 
+            max-width: 400px; 
+            z-index: 1500; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: flex-end;
+            background: rgba(255,255,255,0.95); 
+            padding: 10px 10px 15px 10px; 
+            box-sizing: border-box;
+            border-top-left-radius: 20px; 
+            border-top-right-radius: 20px;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.2);
+        }
+        #rollBtn { 
+            margin-bottom: 5px !important; 
+            font-size: 22px !important; 
+            padding: 12px 20px !important; 
+            border-radius: 20px; 
+            width: 100%; 
+            box-sizing: border-box;
+        }
+        #sys-log { font-size: 12px; padding: 8px; margin-bottom: env(safe-area-inset-bottom, 2px); height: 50px; margin-top: 0;}
+        
+        .dice-box { width: 100% !important; max-width: 100%; padding: 15px !important; box-sizing: border-box; }
+        #combat-modal .dice-box, #boss-modal .dice-box { width: 100% !important; }
+        .shop-flex { flex-direction: column !important; }
+        .shop-detail-area { border-left: none !important; border-top: 2px dashed #ccc; padding-left: 0 !important; padding-top: 10px; margin-top: 10px; }
+        .shop-list-area { max-height: 150px !important; }
+        .combat-fighter img { width: 50px; height: 50px; margin-bottom: 5px; }
+        .combat-dice-slot { font-size: 30px; height: 30px; line-height: 30px; }
+        .vs-text { font-size: 60px; } .fighter-cut-l, .fighter-cut-r { width: 100px; height: 100px; }
+        .action-box { padding: 20px; width: 90%; } .action-box h1 { font-size: 28px !important; } .action-box p { font-size: 16px !important; }
+        .giant-start-btn { font-size: 24px; padding: 15px 30px; }
+        #start-overlay h1 { font-size: 35px !important; }
+        #turn-announcer { font-size: 30px; padding: 15px 30px; width: 80%; z-index: 2000; }
+        .dice-number { font-size: 100px !important; width: 100px !important; line-height: 100px !important; }
+      }
+
+      /* ========================================================= */
+      /* ส่วนที่ 2: หน้า Splash Screen */
+      /* ========================================================= */
+      #splash-screen {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background-color: #1a1a2e;
+        background-image: url('https://i.postimg.cc/tTFLndvv/Gemini_Generated_Image_gi9fhngi9fhngi9f.png');
+        background-size: cover; background-position: center;
+        z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        cursor: pointer;
+      }
+      #splash-screen::before {
+        content: ''; position: absolute; top:0; left:0; width:100%; height:100%;
+        background: rgba(0,0,0,0.6); z-index: -1;
+      }
+
+      .splash-title-img {
+        max-width: 85%;
+        max-height: 40vh;
+        object-fit: contain;
+        animation: splashPulseGlow 1.5s infinite alternate;
+        filter: drop-shadow(0 0 15px rgba(255, 202, 40, 0.5));
+      }
+
+      .splash-subtitle {
+        font-family: 'Mali', sans-serif;
+        font-size: 24px; color: #fff; margin-top: 30px;
+        animation: splashBlink 1s infinite alternate;
+        text-shadow: 0 0 10px rgba(0,0,0,0.8);
+      }
+
+      @keyframes splashPulseGlow {
+        from { 
+          transform: scale(1); 
+          filter: drop-shadow(0 0 15px rgba(255, 202, 40, 0.6)) drop-shadow(0 0 30px rgba(255, 143, 0, 0.4)); 
+        }
+        to { 
+          transform: scale(1.08); 
+          filter: drop-shadow(0 0 25px rgba(255, 202, 40, 1)) drop-shadow(0 0 60px rgba(255, 143, 0, 0.8)); 
+        }
+      }
+
+      @keyframes splashBlink {
+        from { opacity: 1; }
+        to { opacity: 0.3; }
+      }
+
+      /* ========================================================= */
+      /* ส่วนที่ 3: บังคับตั้งค่าเฉพาะตอนถือมือถือแนวตั้ง (Portrait) */
+      /* ========================================================= */
+      @media (max-width: 1080px) and (orientation: portrait) {
+        :root { --board-scale: 0.55; } 
+        .scene { padding-top: 20vh; }
+        .splash-subtitle { font-size: 20px; }
+      }
+    </style>
+  </head>
+  <body>
+
+    <div id="splash-screen" onclick="enterInitScreen()">
+      <img class="splash-title-img" src="https://i.postimg.cc/PqJ18T2g/mhas-k-wrrn-khd.png" alt="โลโก้มหาศึกวรรณคดี">
+      <div class="splash-subtitle">แตะหน้าจอเพื่อเล่น</div>
+    </div>
+
+    <div id="settings-menu">
+        <button class="gear-btn" onclick="toggleSettings()" title="ตั้งค่าและมุมกล้อง">⚙️</button>
+        <div id="settings-panel">
+            <div style="font-weight:bold; color:#0288d1; text-align:center; margin-bottom:5px;">มุมกล้อง</div>
+            <div class="settings-row">
+                <button class="settings-btn" onclick="zoomBoard(0.1)" title="ขยาย">🔍+</button>
+                <button class="settings-btn" onclick="zoomBoard(-0.1)" title="ย่อ">🔍-</button>
+            </div>
+            <div class="settings-row">
+                <button class="settings-btn" onclick="rotateCam(-90)">↺ ซ้าย</button>
+                <button class="settings-btn" onclick="rotateCam(90)">ขวา ↻</button>
+            </div>
+            <div class="settings-row" style="margin-top:5px; border-top:1px dashed #0288d1; padding-top:10px;">
+                <button id="bgmToggleBtn" class="settings-btn" onclick="toggleBgm()" title="เปิด/ปิดเสียง">🔇 เสียง</button>
+                <button class="settings-btn" onclick="toggleFullScreen()" title="เต็มจอ">⛶ จอ</button>
+                <button class="settings-btn" onclick="emergencyUnstuck(true)" title="รีเฟรชข้อมูล" style="background:#ffca28; color:#5d4037;">🔄 รีเฟรช</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="turn-announcer">ตาของคุณแล้ว!</div>
+    <audio id="bgmAudio" loop src="https://files.catbox.moe/5rp9jw.mp3" preload="auto"></audio>
+
+    <div id="pvp-cutscene"><img id="cut-l-img" class="fighter-cut-l" src=""><div class="vs-text">VS</div><img id="cut-r-img" class="fighter-cut-r" src=""></div>
+    <div id="action-cutscene"><div class="action-box"><h1 id="ac-title" style="color: #e53935; margin: 0; font-size: 35px;">Title</h1><div id="ac-icon" style="font-size: 80px; margin: 15px 0;">✨</div><p id="ac-desc" style="font-size: 20px; font-weight: bold; color: #1a237e; margin: 0; background: #e8eaf6; padding: 10px; border-radius: 10px;">Desc</p></div></div>
+    <div id="flash-overlay"></div><div id="toast">แจ้งเตือน</div>
+
+    <div id="init-screen" class="glass" style="display:none;">
+      <div style="text-align: center; margin-top: 0; margin-bottom: 15px;">
+        <img src="https://i.postimg.cc/PqJ18T2g/mhas-k-wrrn-khd.png" alt="โลโก้มหาศึกวรรณคดี" style="max-width: 90%; height: 180px; object-fit: contain; filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.15));">
+      </div>
+      
+      <div id="status-board">⏳ กำลังเตรียมกระดานหิมพานต์...</div>
+      <button class="btn btn-create" onclick="goToCharSelect('create')">⚔️ สร้างห้องใหม่</button>
+      <button class="btn btn-join" style="background:#81c784; color:white;" onclick="openRules()">📜 อ่านกติกาการเล่น</button>
+      <hr style="border-color: #eee; margin: 25px 0;">
+      <input type="text" id="roomCodeInput" placeholder="รหัสห้อง 4 หลัก">
+      <button class="btn btn-join" onclick="goToCharSelect('join')">🛡️ เข้าร่วมปาร์ตี้</button>
+    </div>
+
+    <div id="rules-modal" class="modal-bg">
+      <div class="dice-box glass" style="width: 95%; max-width: 600px; text-align: left; max-height: 80vh; overflow-y: auto;">
+        <h2 style="color:#0288d1; margin-top:0; text-align: center;">📜 กติกามหาศึกวรรณคดี</h2>
+        <div style="font-size: 14px; line-height: 1.6;">
+          
+          <h3 style="color:#e53935;">🎯 การเล่นและการชนะ</h3>
+          <ul style="margin-top:0;">
+            <li><b>การเดินหมาก:</b> ผลัดกันทอยลูกเต๋าเพื่อเดินบนกระดาน แวะสะสมพลังเวทย์ (✨) ตอบคำถามปริศนาชิงรางวัล ซื้อไอเท็มที่แท่นอธิษฐาน</li>
+            <li><b>ระบบชีวิตและเกราะ:</b> ผู้เล่นมีชีวิต (❤️) จำกัด หากชีวิตเหลือ 0 จะตายและกลับไปเริ่มใหม่ที่จุดเริ่มต้น (พลังหายหมด)! หากมีเกราะ (🛡️) จะช่วยกันดาเมจได้ 1 ครั้ง</li>
+            <li><b>วิธีชนะ:</b> สะสมพลังเวทย์ให้ถึง <b>10,000 ✨</b> เป็นคนแรก หรือ เอาชนะคู่แข่งจนเป็น <b>ผู้รอดชีวิตคนสุดท้าย</b> บนกระดาน!</li>
+          </ul>
+
+          <h3 style="color:#f57f17;">⚔️ การต่อสู้ (PVP & สู้บอส)</h3>
+          <ul style="margin-top:0;">
+            <li><b>สู้ผู้เล่น (PVP):</b> เมื่อตกช่องเดียวกัน จะเกิดการประลอง! วัดผลจาก "พลังเวทย์" ใครน้อยกว่า <b>เสีย 1 ชีวิต</b> (ถ้ามีสกิลหลบหลีก/สะท้อน/อมตะ จะเกิดผลตามนั้น)</li>
+            <li><b>สู้บอส (PVE):</b> เมื่อตกช่องบอส ต้องทอยเต๋า 1 ลูกนำแต้มไปคูณเพิ่มพลังเวทย์ เพื่อสู้กับบอส ชนะได้รางวัลมหาศาลและบอสจะเก่งขึ้นเรื่อยๆ!</li>
+          </ul>
+
+          <h3 style="color:#4caf50;">🎒 ประเภทไอเท็มเวทมนตร์</h3>
+          <ul style="margin-top:0;">
+            <li><b>ฟื้นฟูและป้องกัน:</b> เพิ่มเลือด, ฮีลเต็มหลอด, กางโล่ป้องกันการโจมตี, หรือรับสถานะอมตะ</li>
+            <li><b>บัฟพลัง:</b> เพิ่มพลังเวทย์โดยตรง, พลัง x2 หรือ x3, และล็อกแต้มลูกเต๋า</li>
+            <li><b>ก่อกวนศัตรู:</b> ลดพลังเป้าหมาย, ขโมยหรือทำลายไอเท็ม, ทำให้ติดใบ้ (ห้ามใช้ไอเท็ม), หรือสาปหยุดเดิน</li>
+            <li><b>เคลื่อนย้าย:</b> วาร์ปสุ่ม, ระบุช่อง, สลับตำแหน่ง, หรือวาร์ปทุกคน</li>
+          </ul>
+
+          <h3 style="color:#9c27b0;">🌟 สกิลตัวละคร (Passive & Active)</h3>
+          <ul style="margin-top:0;">
+            <li><b>Passive (ติดตัว):</b> เช่น รับของฟรีเมื่อผ่านจุดเริ่มต้น, เพิ่มช่องกระเป๋า, สะท้อนดาเมจ, กันสถานะผิดปกติ, โบนัสทอยเต๋า, หรือคืนชีพฟรี</li>
+            <li><b>Active (กดใช้):</b> จ่ายพลังเวทย์เพื่อร่ายสกิลสุดโกง เช่น โจมตีทะลุโล่, ขโมยทรัพยากร, สลับร่าง, กางกำแพง (มีคูลดาวน์)</li>
+          </ul>
+
+          <h3 style="color:#00acc1;">🌍 เหตุการณ์โลก (World Events)</h3>
+          <ul style="margin-top:0;">
+            <li><b>เหตุการณ์ด้านบวก:</b> ทุกคนได้พลังเพิ่ม, ได้ฮีลเลือด, โล่ศักดิ์สิทธิ์ปกป้อง, สายรุ้งสุ่มบัฟ</li>
+            <li><b>เหตุการณ์ปั่นป่วน:</b> โดนพายุพัดถอยหลัง, มิติผันผวนวาร์ปสุ่มทุกคน, พลังโดนหารครึ่ง, ไอเท็มตกหล่นหาย</li>
+          </ul>
+
+        </div>
+        <button class="btn" style="background:#e0e0e0; margin-top:15px; color:#333; width:100%;" onclick="closeRules()">เข้าใจแล้ว พร้อมลุย!</button>
+      </div>
+    </div>
+
+    <div id="char-select-screen" class="glass" style="display:none;"><h1 style="color: #0288d1; margin-top:0;">🎭 เลือกผู้กล้า</h1><div class="char-grid" id="char-grid-container"></div><button class="btn btn-join" style="background: #e0e0e0; color: #333; margin-top:10px;" onclick="goBackToInit()">⬅️ กลับ</button></div>
+    
+    <div id="char-detail-modal" class="modal-bg">
+        <div class="dice-box glass" style="width: 380px;">
+            <h2 id="modal-char-name" style="margin-top:0; color:#0288d1;">ชื่อตัวละคร</h2>
+            <img id="modal-char-img" src="" style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid #ccc; margin-bottom: 10px; background: white; object-fit: contain;">
+            <p id="modal-char-basepower" style="color:#00897b; font-weight:bold; margin:5px 0; font-size:16px; background: #e0f2f1; padding: 5px; border-radius: 8px;"></p>
+            <p id="modal-char-skill" style="color:#e53935; font-weight:bold; margin:10px 0; font-size:14px; line-height: 1.4; text-align: left; background: rgba(0,0,0,0.05); padding: 10px; border-radius: 10px;"></p>
+            <p id="modal-char-active-skill" style="color:#6a1b9a; font-weight:bold; margin:10px 0; font-size:14px; line-height: 1.4; text-align: left; background: rgba(106, 27, 154, 0.1); padding: 10px; border-radius: 10px;"></p>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn btn-create" style="background:#4caf50; color:white; flex:1;" onclick="confirmSelection()">✅ เลือก</button>
+                <button class="btn btn-join" style="background:#e0e0e0; color:#333; flex:1;" onclick="closeCharModal()">❌ ปิด</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="start-overlay"><h1 style="font-size: 50px; margin: 0; color: #ffca28; text-shadow: 2px 2px 10px rgba(0,0,0,0.5);">🎲 ห้องรอล็อบบี้</h1><p style="font-size: 24px;">รหัสห้อง: <span id="lobby-room-code" style="color: #69f0ae; font-weight: bold; font-size: 35px;">----</span></p><div id="lobby-players" style="margin: 20px 0; font-size: 20px;">กำลังโหลด...</div><button id="giantStartBtn" class="giant-start-btn" onclick="requestStartGame()" style="display: none;">🚀 เริ่มเกมสิ! 🚀</button><p id="waiting-host-msg" style="display: none; color: #ffab00; font-size: 24px; font-weight: bold; margin-top: 30px;">⏳ รอหัวหน้าปาร์ตี้กดเริ่มเกม...</p></div>
+
+    <div id="game-screen">
+      <div id="center-turn-display" class="glass">รอเริ่มเกม...</div>
+      <div id="corner-ui"></div>
+      
+      <div class="scene">
+        <div id="game-container">
+          <img src="https://i.postimg.cc/Ghn7W1fF/อน_นตนาคราช.png" class="center-dragon" alt="พญานาค">
+          <div id="board-inner"></div><div id="tokens-container"></div><div id="bosses-container"></div><div id="anim-layer"></div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="rollBtn" class="btn btn-create glass" style="display: none; width: auto; padding: 15px 50px; font-size: 26px; border-radius: 30px; border: 4px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.2);" onclick="rollDice()" disabled>🎲 ทอยลูกเต๋า</button>
+        <div id="sys-log" style="margin-top: 10px; color: #5d4037; font-size: 14px; background: rgba(255,255,255,0.9); padding: 5px 15px; border-radius: 10px; font-weight:bold; height: 60px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-start; text-align: left;"></div>
+      </div>
+    </div>
+
+    <div id="dice-modal" class="modal-bg"><div class="dice-box glass"><h2 style="margin-top:0; color:#0288d1;">ลุ้นแต้ม...</h2><div id="diceDisplayContainer" style="display:flex; justify-content:center; gap:20px;"><div class="dice-number" id="diceDisplay1">⚀</div><div class="dice-number" id="diceDisplay2" style="display:none;">⚀</div></div><div id="dice-bonus-display" style="color:#ff8f00; font-weight:bold; margin-top:10px; font-size:22px;"></div></div></div>
+    <div id="quiz-modal" class="modal-bg"><div class="dice-box glass" style="width: 450px;"><h2 style="color: #0288d1; margin-top:0;">📜 ตอบคำถามชิงพลัง</h2><p id="quiz-q" style="font-size: 20px; font-weight: bold; margin-bottom: 20px;">คำถามจะแสดงที่นี่?</p><div id="quiz-choices" style="display:flex; flex-direction:column; gap:10px;"></div></div></div>
+    <div id="shop-modal" class="modal-bg"><div class="dice-box glass" style="width: 550px; max-height: 80vh; overflow-y: auto;"><h2 style="color: #8e24aa; margin-top:0;">⛩️ ร้านค้าเวทมนตร์</h2><p>พลังของคุณ: <span id="shop-power-display" style="color:#0288d1; font-weight:bold; font-size:20px;">0</span> ✨</p><div id="shop-items-container"></div><button class="btn btn-join" style="background: #e0e0e0; color:#333; margin-top:15px; width:100%;" onclick="closeShop()">❌ ออกจากร้านค้า</button></div></div>
+    
+    <div id="item-confirm-modal" class="modal-bg"><div class="dice-box glass"><h2 style="color:#4caf50; margin-top:0;">🪄 ข้อมูลไอเท็ม</h2><div style="font-size: 50px; margin: 10px 0;" id="item-confirm-icon">📦</div><h3 id="item-confirm-name" style="margin:0; color:#333; font-size: 22px;">ชื่อ</h3><div id="item-confirm-desc" style="color:#1a237e; font-size:14px; margin: 15px 0; padding: 10px; background: #e8eaf6; border-radius: 8px; font-weight: bold; line-height:1.5;">คำอธิบาย</div><div style="display:flex; gap:10px; margin-top:20px;"><button id="btn-confirm-use" class="btn btn-create" style="background: #4caf50; color:white; flex:1;" onclick="confirmUseItem()">ใช้งาน</button><button id="btn-cancel-use" class="btn btn-join" style="background: #e0e0e0; color:#333; flex:1;" onclick="cancelUseItem()">ยกเลิก</button></div></div></div>
+    
+    <div id="skill-confirm-modal" class="modal-bg"><div class="dice-box glass"><h2 style="color:#d500f9; margin-top:0;">⚡ สกิลพิเศษ</h2><div style="font-size: 50px; margin: 10px 0;" id="skill-confirm-icon">✨</div><h3 id="skill-confirm-name" style="margin:0; color:#333; font-size: 22px;">ชื่อ</h3><div id="skill-confirm-desc" style="color:#1a237e; font-size:14px; margin: 15px 0; padding: 10px; background: #e8eaf6; border-radius: 8px; font-weight: bold; line-height:1.5;">คำอธิบาย</div><div style="display:flex; gap:10px; margin-top:20px;"><button id="btn-confirm-skill" class="btn btn-create" style="background: #d500f9; color:white; flex:1;" onclick="confirmUseSkill()">ใช้งาน</button><button id="btn-cancel-skill" class="btn btn-join" style="background: #e0e0e0; color:#333; flex:1;" onclick="cancelUseSkill()">ยกเลิก</button></div></div></div>
+    
+    <div id="target-modal" class="modal-bg"><div class="dice-box glass"><h2 style="color:#e53935; margin-top:0;">🎯 เลือกเป้าหมาย</h2><div id="target-list" style="display:flex; flex-direction:column; gap:10px;"></div><button class="btn" style="background:#e0e0e0; margin-top:15px; color:#333;" onclick="closeTargetModal()">ยกเลิก</button></div></div>
+    <div id="dice-chooser-modal" class="modal-bg"><div class="dice-box glass" style="width: 250px;"><h2 style="color:#0288d1; margin-top:0;">🎲 เลือกล็อกแต้ม</h2><div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;"><button class="btn glass" style="font-size:30px; padding:5px;" onclick="resolveDiceChoice(1)">⚀</button><button class="btn glass" style="font-size:30px; padding:5px;" onclick="resolveDiceChoice(2)">⚁</button><button class="btn glass" style="font-size:30px; padding:5px;" onclick="resolveDiceChoice(3)">⚂</button><button class="btn glass" style="font-size:30px; padding:5px;" onclick="resolveDiceChoice(4)">⚃</button><button class="btn glass" style="font-size:30px; padding:5px;" onclick="resolveDiceChoice(5)">⚄</button><button class="btn glass" style="font-size:30px; padding:5px;" onclick="resolveDiceChoice(6)">⚅</button></div><button class="btn" style="background:#e0e0e0; margin-top:15px; color:#333;" onclick="closeDiceChooser()">ยกเลิก</button></div></div>
+
+    <div id="combat-modal" class="modal-bg">
+      <div class="dice-box glass" style="width: 480px;">
+        <h2 style="color: #e53935; margin-top:0;">⚔️ ประจันหน้า! (วัดพลังเวทย์)</h2>
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin: 20px 0; position:relative;">
+           <div id="combat-me" class="combat-fighter">
+               <div style="font-weight:bold; color:#0288d1; margin-bottom:2px;" id="combat-me-name">Me</div>
+               <div id="combat-me-lives" style="font-size:12px; margin-bottom:5px; letter-spacing:1px;">❤️❤️❤️</div>
+               <img id="combat-me-img" src="" style="border: 3px solid #0288d1;">
+               <div style="font-size:22px; font-weight:bold; margin-top:5px;">✨<span id="combat-me-power">0</span></div>
+           </div>
+           <div style="font-size:35px; font-weight:bold; color:#e53935; z-index:10; text-shadow: 0 2px 5px rgba(0,0,0,0.2); margin-top:40px;">VS</div>
+           <div id="combat-op" class="combat-fighter">
+               <div style="font-weight:bold; color:#f57f17; margin-bottom:2px;" id="combat-op-name">Op</div>
+               <div id="combat-op-lives" style="font-size:12px; margin-bottom:5px; letter-spacing:1px;">❤️❤️❤️</div>
+               <img id="combat-op-img" src="" style="border: 3px solid #f57f17;">
+               <div style="font-size:22px; font-weight:bold; margin-top:5px;">✨<span id="combat-op-power">0</span></div>
+           </div>
+        </div>
+        <div style="color:#555; font-size:12px; margin-bottom:10px;">*สามารถใช้ไอเท็มบัฟตัวเองหรือป่วนศัตรูก่อนตัดสินได้!</div>
+        <div id="combat-result-text" style="font-size: 28px; font-weight:bold; margin: 15px 0; color:#e53935; display:none;">ผลลัพธ์!</div>
+        <div id="combat-items-container" style="display:flex; justify-content:center; gap:10px; margin-bottom:15px; background:rgba(0,0,0,0.05); padding:10px; border-radius:10px; flex-wrap:wrap;"></div>
+        <div id="combat-actions">
+            <button class="btn btn-create" style="background: #e53935; color:white; width: 100%;" onclick="resolveCombat('fight')">⚔️ วัดพลังเวทย์!</button>
+            <button class="btn" style="background: #9e9e9e; color:white; width: 100%; margin-top: 10px;" onclick="resolveCombat('flee')">🏃♂️ หลบหนีการต่อสู้</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="boss-modal" class="modal-bg">
+      <div class="dice-box glass" style="width: 480px;">
+        <h2 style="color: #e53935; margin-top:0;">👹 <span id="boss-name-display">อสูรกาย</span> โผล่มา!</h2>
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin: 20px 0; position:relative;">
+           <div id="boss-me" class="combat-fighter">
+               <div style="font-weight:bold; color:#0288d1; margin-bottom:2px;">คุณ</div>
+               <div id="boss-me-lives" style="font-size:12px; margin-bottom:5px; letter-spacing:1px;">❤️❤️❤️</div>
+               <img id="boss-me-img" src="" style="border: 3px solid #0288d1;">
+               <div style="font-size:22px; font-weight:bold; margin-top:5px;">✨<span id="boss-my-power">0</span></div>
+               <div id="boss-me-dice" class="combat-dice-slot">⚀</div>
+           </div>
+           <div style="font-size:35px; font-weight:bold; color:#e53935; z-index:10; text-shadow: 0 2px 5px rgba(0,0,0,0.2); margin-top:40px;">VS</div>
+           <div id="boss-monster" class="combat-fighter">
+               <div style="font-weight:bold; color:#c62828; margin-bottom:2px;">บอส</div>
+               <div style="font-size:12px; margin-bottom:5px; visibility:hidden;">❤️</div>
+               <img id="boss-img-display" src="" style="border: 3px solid #e53935;">
+               <div style="font-size:22px; font-weight:bold; margin-top:5px;">✨<span id="boss-base-power">0</span></div>
+               <div id="boss-op-dice" class="combat-dice-slot" style="color:#c62828; display:block;">⚀</div>
+           </div>
+        </div>
+        <div id="boss-result-text" style="font-size: 28px; font-weight:bold; margin: 15px 0; color:#e53935; display:none;">ผลลัพธ์!</div>
+        <div id="boss-items-container" style="display:flex; justify-content:center; gap:10px; margin-bottom:15px; background:rgba(0,0,0,0.05); padding:10px; border-radius:10px; flex-wrap:wrap;"></div>
+        <div id="boss-actions">
+            <button class="btn btn-create" style="background: #e53935; color:white; width: 100%;" onclick="resolveBossFight('fight')">🎲 ทอยเต๋าสู้มัน!</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="victory-screen" class="modal-bg" style="flex-direction: column;">
+        <div class="glass" style="padding: 40px; text-align:center; width: 80%; max-width: 500px; max-height:85vh; overflow-y:auto;">
+            <h1 style="color: #ffa000; font-size:40px; margin-top:0;">🎉 ผู้ชนะ 🎉</h1>
+            <h2 id="winner-name-display" style="color: #0288d1; font-size:30px;"></h2>
+            <div id="victory-rankings-container" style="background:rgba(0,0,0,0.05); padding:20px; border-radius:10px; text-align:left; margin-bottom:20px;"></div>
+            <button class="btn btn-create" onclick="location.reload()">🔄 กลับหน้าแรก</button>
+        </div>
+    </div>
+
+    <script>
+      // =========================================================================
+      // GAS Web App API Bridge (สำหรับการรันบน GitHub Pages เชื่อมต่อ Google Sheets)
+      // =========================================================================
+      const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbwwXGoXfZDeP7u6HwTxlU-xbP-TeIDORu-Vg75M004aEisrxOD5Y0ocVeyir4AlWxDBMA/exec';
+      const GAS_READ_ACTIONS = { getGameConfig: true, getGameState: true };
+
+      function getGasUrl() {
+        const params = new URLSearchParams(window.location.search);
+        const qUrl = params.get('gasUrl');
+        if (qUrl && qUrl.startsWith('https://script.google.com/')) {
+          localStorage.setItem('wow_gas_url', qUrl);
+        }
+        return localStorage.getItem('wow_gas_url') || DEFAULT_GAS_URL;
+      }
+
+      function createGasProxy(successFn, failureFn) {
+        const runner = {
+          successFn: successFn || function() {},
+          failureFn: failureFn || function(err) { console.warn('GAS API Error:', err); },
+          withSuccessHandler: function(fn) { return createGasProxy(fn, this.failureFn); },
+          withFailureHandler: function(fn) { return createGasProxy(this.successFn, fn); }
+        };
+
+        return new Proxy(runner, {
+          get: function(target, prop) {
+            if (prop in target) return target[prop];
+            return function(...args) {
+              const gasUrl = getGasUrl();
+              let reqPromise;
+              if (GAS_READ_ACTIONS[prop]) {
+                const url = `${gasUrl}?action=${encodeURIComponent(prop)}&args=${encodeURIComponent(JSON.stringify(args))}`;
+                reqPromise = fetch(url, { method: 'GET', cache: 'no-store' });
+              } else {
+                reqPromise = fetch(gasUrl, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                  body: JSON.stringify({ action: prop, args: args })
+                });
+              }
+
+              reqPromise
+                .then(res => {
+                  if (!res.ok) throw new Error('HTTP ' + res.status);
+                  return res.json();
+                })
+                .then(data => {
+                  if (data && data.error) target.failureFn(new Error(data.error));
+                  else target.successFn(data);
+                })
+                .catch(err => target.failureFn(err));
+            };
+          }
+        });
+      }
+
+      if (!window.google || !window.google.script || !window.google.script.run) {
+        window.google = window.google || {};
+        window.google.script = window.google.script || {};
+        window.google.script.run = createGasProxy();
+      }
+
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js').catch(() => {});
+        });
+      }
+
+      function enterInitScreen() {
+          document.getElementById('splash-screen').style.display = 'none';
+          document.getElementById('init-screen').style.display = 'block';
+          toggleBgm(true);
+      }
+
+      const ROAMING_MONSTER_IMG = "https://i.postimg.cc/LsR1djBd/สม_นย_กษ_ฟ_า.png";
+
+      let audioCtx = null; let isBgmPlaying = false;
+      let afkTimerId = null; 
+      
+      const allowedCombatTypes = ['power_up', 'power_down_single', 'power_down_all', 'shield', 'heal', 'damage', 'attack', 'double_power', 'temp_double_power', 'power', 'ลดชีวิต', 'destroy_item', 'swap_power', 'max_heal', 'immune_1_turn', 'reflect', 'vampire', 'silence', 'reset_boss', 'x3_power', 'half_op_power', 'shield_all', 'random_buff'];
+      
+      const movementItems = ['move', 'warp', 'warp_start', 'teleport_all'];
+      const targetPlayerOnly = ['swap_pos', 'steal_item', 'destroy_item', 'swap_power', 'vampire', 'silence', 'skip_turn', 'half_op_power']; 
+      const targetBossOnly = ['reset_boss'];
+      const targetBoth = ['power_down_single', 'attack', 'damage', 'ลดชีวิต'];
+
+      let itemBag = [];
+      function getRandomItemKey() {
+        let keys = Object.keys(itemsConfig);
+        if (keys.length === 0) return null;
+        if (itemBag.length === 0) {
+          itemBag = [...keys];
+          for (let i = itemBag.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [itemBag[i], itemBag[j]] = [itemBag[j], itemBag[i]];
+          }
+        }
+        return itemBag.pop();
+      }
+
+      let eventBag = [];
+      function getRandomEventKey() {
+        let keys = Object.keys(eventsConfig);
+        if (keys.length === 0) return null;
+        if (eventBag.length === 0) {
+          eventBag = [...keys];
+          for (let i = eventBag.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [eventBag[i], eventBag[j]] = [eventBag[j], eventBag[i]];
+          }
+        }
+        return eventBag.pop();
+      }
+
+      function grantRandomItemToPlayer(player, toastMsg) {
+        const maxCap = player.skillType === 'extra_item_slot' ? 4 : 3;
+        const rItem = getRandomItemKey();
+        if (rItem && player.items.length < maxCap) {
+          player.items.push(rItem);
+          if (player.skillType === 'bonus_chest' && player.items.length < maxCap) {
+            const r2 = getRandomItemKey();
+            if (r2) player.items.push(r2);
+          }
+          if (toastMsg) setTimeout(() => showToast(toastMsg), 1000);
+          return true;
+        }
+        return false;
+      }
+
+      function applyClientDamage(target, damage, attacker = null) {
+        if (target.immune) { showFloatingAnim('🌟 Blocked', '#fff', target.pos); return false; }
+        if (target.evade) { target.evade = false; showFloatingAnim('🥷 หลบได้!', '#9e9e9e', target.pos); return false; }
+        if (target.reflect && attacker) {
+          target.reflect = false;
+          showFloatingAnim('🪞 สะท้อน!', '#4fc3f7', target.pos);
+          attacker.lives -= damage;
+          showFloatingAnim('💔', '#ff1744', attacker.pos);
+          if (attacker.lives <= 0) resetPlayer(attacker);
+          return false;
+        }
+        if (target.status && target.status.includes('tank')) {
+          target.status = target.status.filter(s => s !== 'tank');
+          showFloatingAnim('🛡️❌', '#ccc', target.pos);
+          return false;
+        }
+        if (target.shield) {
+          target.shield = false;
+          showFloatingAnim('🛡️❌', '#ccc', target.pos);
+          return false;
+        }
+        target.lives -= damage;
+        showFloatingAnim('💔', '#ff1744', target.pos);
+        if (target.lives <= 0) resetPlayer(target);
+        return true;
+      }
+
+      function getItemDescInfo(item) {
+          let desc = "ไอเท็มเวทมนตร์"; let t = item.type;
+          let tag = "🟢 [ทั่วไป]";
+          
+          if(movementItems.includes(t)) tag = "🌀 [เคลื่อนที่/ย้าย - ห้ามใช้ตอนต่อสู้]";
+          else if(targetBossOnly.includes(t)) tag = "👹 [ใช้ได้กับบอสเท่านั้น]";
+          else if(targetPlayerOnly.includes(t)) tag = "🎯 [ใช้ได้กับผู้เล่นเท่านั้น]";
+          else if(targetBoth.includes(t)) tag = "⚔️ [ใช้ได้ทั้งบอสและผู้เล่น]";
+          else tag = "✨ [บัฟตัวเอง / ทั่วไป]";
+
+          if(t === 'power_up' || t === 'power') desc = `เพิ่มพลังเวทย์ +${item.val || 500}`; 
+          else if (t === 'shield') desc = "กางโล่ป้องกันความเสียหายได้ 1 ครั้ง"; 
+          else if (t === 'heal') desc = `ฟื้นฟูพลังชีวิต +${item.val || 1} ดวง`; 
+          else if (t === 'attack' || t === 'damage' || t === 'ลดชีวิต') desc = "ใช้ปลิดชีพบอสทันที หรือใช้ลดเลือดผู้เล่นคนอื่น 1 ดวง"; 
+          else if (t === 'loaded_dice') desc = "เลือกล็อกแต้มลูกเต๋าในการเดินครั้งต่อไปได้"; 
+          else if (t === 'evade') desc = "ซ่อนตัว หลีกเลี่ยงการต่อสู้ 1 ครั้ง"; 
+          else if (t === 'double_power') desc = "เพิ่มพลังเวทย์ปัจจุบันเป็น 2 เท่าถาวร"; 
+          else if (t === 'warp_start' || t === 'ประตูมิติ') desc = "วาร์ปกลับไปที่จุดเริ่มต้นทันที";
+          else if (t === 'power_down_single') desc = `เลือกลดพลังเป้าหมาย (ผู้เล่นหรือบอส) -${item.val || 500}`;
+          else if (t === 'power_down_all') desc = `ลดพลังเวทย์ศัตรูทุกคน -${item.val || 500}`;
+          else if (t === 'move') desc = `เดินหน้าไปตั้งหลัก ${item.val || 1} ช่องทันที`;
+          else if (t === 'warp') desc = `วาร์ปย้ายช่องทันที (สุ่ม หรือ ระบุช่อง)`;
+          else if (t === 'swap_pos') desc = `เลือกผู้เล่น 1 คนเพื่อสลับตำแหน่งกันทันที!`;
+          else if (t === 'temp_double_power') desc = `พลังเวทย์ x2 ชั่วคราว (กลับเป็นปกติเมื่อจบเทิร์น)`;
+          else if (t === 'trigger_world_event') desc = `สุ่มเรียกเหตุการณ์โลกขึ้นมาแกล้งทุกคน!`;
+          else if (t === 'steal_item') desc = `สุ่มขโมยไอเท็มจากเป้าหมาย 1 ชิ้น มาเข้ากระเป๋าเรา`;
+          else if (t === 'destroy_item') desc = `สุ่มทำลายไอเท็มเป้าหมายทิ้ง 1 ชิ้น`;
+          else if (t === 'swap_power') desc = `สลับค่าพลังเวทย์กับเป้าหมาย`;
+          else if (t === 'max_heal') desc = `ฟื้นฟูหัวใจจนเต็มหลอด`;
+          else if (t === 'immune_1_turn') desc = `อมตะ 1 เทิร์น (ป้องกันการโจมตีและการขโมย)`;
+          else if (t === 'double_dice') desc = `การเดินครั้งต่อไป ทอยลูกเต๋า 2 ลูก (เอาแต้มบวกกัน)`;
+          else if (t === 'reflect') desc = `สะท้อนความเสียหาย 1 ครั้งกลับไปหาคนโจมตี`;
+          else if (t === 'vampire') desc = `ลดเลือดเป้าหมาย 1 ดวง แล้วนำมาเพิ่มให้ตัวเอง`;
+          else if (t === 'silence') desc = `สาปใบ้เป้าหมาย! (ห้ามใช้ไอเท็มในตาถัดไป)`;
+          else if (t === 'reset_boss') desc = `รีเซ็ตการจุติของบอส กลับไปเป็นร่างแรกสุด`;
+          else if (t === 'teleport_all') desc = `ทำให้ทุกคนบนกระดานสุ่มวาร์ปไปช่องอื่นทันที`;
+          else if (t === 'skip_turn') desc = `สาปให้เป้าหมายหยุดเดิน (ถูกข้าม 1 เทิร์น)`;
+          else if (t === 'revive') desc = `เก็บไว้ในกระเป๋า: คืนชีพตัวเองแบบอัตโนมัติเมื่อตาย (ฟื้นด้วยเลือด 1 ดวง)`;
+          else if (t === 'x3_power') desc = `พลังเวทย์ x3 ชั่วคราว 1 เทิร์น`;
+          else if (t === 'half_op_power') desc = `ลดพลังเวทย์เป้าหมายลงครึ่งหนึ่ง (หารสอง)`;
+          else if (t === 'shield_all') desc = `ใจบุญ กางโล่ให้ผู้เล่นทุกคนคนละ 1 อัน`;
+          else if (t === 'random_buff') desc = `สุ่มรับบัฟ 1 อย่าง (พลังเวทย์, โล่ป้องกัน, หรือ เพิ่มเลือด)`;
+          return `<span style="color:#e53935;">${tag}</span><br>${desc}`;
+      }
+
+      function getEventDesc(ev) {
+          if(ev.type === 'power_all') return `ทุกคนได้รับพลังเวทย์เพิ่ม!`;
+          if(ev.type === 'damage_all') return `ทุกคนเสียเลือด!`;
+          if(ev.type === 'heal_all') return `ทุกคนได้รับการฟื้นฟูเลือด!`;
+          if(ev.type === 'drop_item_1') return `ทุกคนทำไอเท็มตกหล่นหาย 1 ชิ้น!`;
+          if(ev.type === 'drop_item_all') return `ทุกคนทำไอเท็มหล่นหายเกลี้ยงกระเป๋า!`;
+          if(ev.type === 'halve_power_all') return `พลังเวทย์ของทุกคนถูกจับหารครึ่ง!`;
+          if(ev.type === 'move_all') return `ทุกคนถูกพัดให้ย้ายตำแหน่ง!`;
+          if(ev.type === 'storm_back') return `พายุพัดพาทุกคนถอยหลัง!`;
+          if(ev.type === 'rainbow_blessing') return `สายรุ้งประทานพร สุ่มรับบัฟ!`;
+          if(ev.type === 'divine_shield') return `โล่ศักดิ์สิทธิ์ปกป้องทุกคน!`;
+          if(ev.type === 'dimension_rift') return `มิติผันผวน ทุกคนถูกวาร์ปสุ่ม!`;
+          if(ev.type === 'healing_spring') return `น้ำพุแห่งการรักษา ฮีลทุกคนเต็มหลอด!`;
+          if(ev.type === 'black_market') return `ตลาดมืดขโมยไอเท็มทุกคน 1 ชิ้น!`;
+          if(ev.type === 'silent_curse') return `คำสาปแห่งความเงียบ ทุกคนติดสถานะใบ้!`;
+          return "เกิดผลลัพธ์ลึกลับกับทุกคน!";
+      }
+
+      function toggleFullScreen() { 
+          let doc = window.document;
+          let docEl = doc.documentElement;
+
+          let requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+          let cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+          if(!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+              if(requestFullScreen) {
+                  requestFullScreen.call(docEl).catch(() => { showToast("เบราว์เซอร์นี้ไม่รองรับ Fullscreen"); });
+              } else {
+                  showToast("เบราว์เซอร์นี้ไม่รองรับ Fullscreen");
+              }
+          } else if(cancelFullScreen) {
+              cancelFullScreen.call(doc);
+          }
+      }
+
+      function toggleBgm(forcePlay = false) { 
+          const bgm = document.getElementById('bgmAudio'); 
+          const btn = document.getElementById('bgmToggleBtn'); 
+          try {
+              if(forcePlay) { 
+                  bgm.volume = 0.5; let p = bgm.play(); 
+                  if(p && p.then) p.then(() => { isBgmPlaying = true; btn.innerText = "🔊 เสียง"; }).catch(()=>{}); 
+              } else { 
+                  if(isBgmPlaying) { 
+                      bgm.pause(); btn.innerText = "🔇 เสียง"; isBgmPlaying = false; 
+                  } else { 
+                      bgm.volume = 0.5; let p = bgm.play(); 
+                      if(p && p.then) p.then(()=>{ btn.innerText = "🔊 เสียง"; isBgmPlaying = true; }).catch(()=>{}); 
+                      else { btn.innerText = "🔊 เสียง"; isBgmPlaying = true; } 
+                  } 
+              } 
+          } catch(e) {}
+      }
+
+      function toggleSettings() {
+          const panel = document.getElementById('settings-panel');
+          panel.style.display = panel.style.display === 'flex' ? 'none' : 'flex';
+      }
+
+      function playSound(type) { 
+        try { 
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
+            if (audioCtx.state === 'suspended') audioCtx.resume(); 
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); 
+            osc.connect(gain); gain.connect(audioCtx.destination); 
+            if (type === 'jump') { osc.type = 'sine'; osc.frequency.setValueAtTime(300, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.15); gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2); osc.start(); osc.stop(audioCtx.currentTime + 0.2); } 
+            else if (type === 'coin') { osc.type = 'sine'; osc.frequency.setValueAtTime(987.77, audioCtx.currentTime); osc.frequency.setValueAtTime(1318.51, audioCtx.currentTime + 0.1); gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3); osc.start(); osc.stop(audioCtx.currentTime + 0.3); } 
+            else if (type === 'hit') { osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.3); gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3); osc.start(); osc.stop(audioCtx.currentTime + 0.3); } 
+            else if (type === 'hurt') { osc.type = 'square'; osc.frequency.setValueAtTime(100, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.4); gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4); osc.start(); osc.stop(audioCtx.currentTime + 0.4); } 
+            else if (type === 'levelup') { osc.type = 'sine'; osc.frequency.setValueAtTime(440, audioCtx.currentTime); osc.frequency.setValueAtTime(554.37, audioCtx.currentTime + 0.1); osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.2); osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.3); gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6); osc.start(); osc.stop(audioCtx.currentTime + 0.6); } 
+        } catch(e) {} 
+      }
+      
+      function triggerShake() { const screen = document.getElementById('game-screen'); screen.classList.add('shake-anim'); setTimeout(() => screen.classList.remove('shake-anim'), 400); }
+      
+      function showFloatingAnim(text, color, posId) { 
+        const layer = document.getElementById('anim-layer'); 
+        const coords = getCellCoords(posId); 
+        
+        if (!window.floatingStack) window.floatingStack = {};
+        let now = Date.now();
+        if(!window.floatingStack[posId] || now - window.floatingStack[posId].time > 1000) {
+            window.floatingStack[posId] = { count: 0, time: now };
+        }
+        let stackOffset = window.floatingStack[posId].count * 30;
+        window.floatingStack[posId].count++;
+        window.floatingStack[posId].time = now;
+
+        let wrapper = document.createElement('div'); 
+        wrapper.style.position = 'absolute'; 
+        wrapper.style.top = (coords.row * CELL_SIZE + CELL_SIZE/2 - stackOffset) + 'px'; 
+        wrapper.style.left = (coords.col * CELL_SIZE + CELL_SIZE/2) + 'px'; 
+        wrapper.style.transform = `rotateZ(var(--inv-rot)) rotateX(-55deg)`; 
+        wrapper.style.zIndex = '5000'; 
+        wrapper.style.pointerEvents = 'none'; 
+        let textDiv = document.createElement('div'); 
+        textDiv.className = 'float-anim-text'; 
+        textDiv.innerText = text; 
+        textDiv.style.color = color; 
+        wrapper.appendChild(textDiv); 
+        layer.appendChild(wrapper); 
+        setTimeout(() => wrapper.remove(), 2600); 
+      }
+      
+      function playPvPCutscene(imgLeft, imgRight) { 
+          return new Promise(res => { 
+              const cut = document.getElementById('pvp-cutscene'); document.getElementById('cut-l-img').src = imgLeft; document.getElementById('cut-r-img').src = imgRight; 
+              cut.style.display = 'flex'; playSound('hit'); setTimeout(() => { triggerShake(); }, 600); setTimeout(() => { cut.style.display = 'none'; res(); }, 1800); 
+          }); 
+      }
+      
+      let lastBroadcastId = 0;
+      function playBroadcastCutscene(bcast) {
+          return new Promise(res => {
+              const cut = document.getElementById('action-cutscene');
+              document.getElementById('ac-title').innerText = bcast.title; 
+              
+              if(bcast.title === '🌍 เหตุการณ์โลก!') {
+                  document.getElementById('ac-title').style.fontSize = '45px';
+                  document.getElementById('ac-title').style.color = '#9c27b0';
+              } else {
+                  document.getElementById('ac-title').style.fontSize = '35px';
+                  document.getElementById('ac-title').style.color = '#e53935';
+              }
+              
+              document.getElementById('ac-icon').innerText = bcast.img || '✨'; document.getElementById('ac-desc').innerText = bcast.desc || '';
+              cut.style.display = 'flex'; playSound('levelup'); triggerShake(); setTimeout(() => { cut.style.display = 'none'; res(); }, 2500);
+          });
+      }
+
+      function addGameLog(msg) {
+          if (!gameData.logs) gameData.logs = [];
+          gameData.logs.unshift(`<div class="log-entry">${msg}</div>`);
+          if(gameData.logs.length > 3) gameData.logs.length = 3;
+          document.getElementById('sys-log').innerHTML = gameData.logs.join('');
+      }
+
+      let currentCamRot = 45; 
+      function rotateCam(deg) { 
+          currentCamRot += deg; 
+          document.documentElement.style.setProperty('--board-rot', `${-currentCamRot}deg`); 
+          document.documentElement.style.setProperty('--inv-rot', `${currentCamRot}deg`); 
+      }
+
+      function zoomBoard(delta) {
+          let root = document.documentElement;
+          let currentScaleStr = getComputedStyle(root).getPropertyValue('--board-scale').trim();
+          let scale = currentScaleStr ? parseFloat(currentScaleStr) : (window.innerWidth <= 1080 ? 0.45 : 1);
+          scale += delta;
+          if(scale < 0.2) scale = 0.2;
+          if(scale > 2.5) scale = 2.5;
+          root.style.setProperty('--board-scale', scale);
+      }
+      
+      function openRules() { document.getElementById('rules-modal').style.display = 'flex'; }
+      function closeRules() { document.getElementById('rules-modal').style.display = 'none'; }
+
+      let watchdogTimer = null;
+      function resetWatchdog() {
+          clearTimeout(watchdogTimer);
+          watchdogTimer = setTimeout(() => { if (isMyTurnProcessing) { showToast("⚠️ ระบบพบการค้าง รีเซ็ตตัวเองอัตโนมัติ..."); emergencyUnstuck(false); } }, 45000); 
+      }
+
+      function handleAfkTimeout() {
+          if(gameData.turn !== myPlayerId || isMyTurnProcessing) return;
+          isMyTurnProcessing = true;
+          document.getElementById('rollBtn').disabled = true;
+          document.getElementById('rollBtn').style.display = 'none';
+          document.querySelectorAll('.modal-bg').forEach(m => m.style.display = 'none');
+          
+          let me = gameData.players[myPlayerId];
+          me.afkCount = (me.afkCount || 0) + 1;
+          
+          if(me.afkCount >= 2) {
+              showToast("⏳ คุณ AFK 2 ครั้งติดกัน! ถูกลงโทษให้ออกจากเกม (ตาย)!");
+              addGameLog(`💀 <b>${me.name}</b> ยืนหลับจนตาย! (AFK)`);
+              me.lives = 0; me.pos = 1; me.power = 0; me.items = []; me.shield = false; me.immune = false; me.reflect = false; me.tempBuff = 0;
+              me.afkCount = 0; 
+          } else {
+              showToast("⏳ หมดเวลา 30 วินาที! ข้ามตาของคุณ (AFK 1/2)");
+              addGameLog(`⏳ <b>${me.name}</b> ยืนเหม่อเกิน 30 วิ! ถูกข้ามตา`);
+          }
+          
+          gameData.turn = (gameData.turn + 1) % gameData.players.length;
+          prevDataStr = JSON.stringify(gameData);
+          google.script.run.withSuccessHandler(res => { 
+              if (res && res.v) lastStateVersion = res.v;
+              isMyTurnProcessing = false; 
+              fetchGameState(); 
+          }).updateGameState(myRoomCode, JSON.stringify(gameData));
+      }
+
+      function emergencyUnstuck(isManual = false) {
+          clearTimeout(afkTimerId);
+          if(isManual && !confirm("🛠️ ถ้าหน้าจอค้างให้กด [OK] เพื่อโหลดข้อมูลใหม่\n\nแต่ถ้าต้องการ 'ข้ามตาเพื่อน' ที่หลุดไป ให้กด [Cancel]")) {
+              if(confirm("⚠️ ยืนยันเตะข้ามตาผู้เล่นคนปัจจุบันใช่หรือไม่?")) {
+                  showToast("⏩ กำลังข้ามตา..."); gameData.turn = (gameData.turn + 1) % gameData.players.length; isMyTurnProcessing = false; document.querySelectorAll('.modal-bg').forEach(m => m.style.display = 'none'); clearTimeout(pollingTimer);
+                  prevDataStr = JSON.stringify(gameData);
+                  google.script.run.withSuccessHandler(()=>{ lastStateVersion = null; fetchGameState(); }).updateGameState(myRoomCode, JSON.stringify(gameData));
+              }
+              return;
+          }
+          showToast("🔄 รีเฟรชข้อมูล..."); isMyTurnProcessing = false; isPollInFlight = false; lastStateVersion = null;
+          document.querySelectorAll('.modal-bg').forEach(m => m.style.display = 'none');
+          document.getElementById('pvp-cutscene').style.display = 'none'; document.getElementById('action-cutscene').style.display = 'none'; document.getElementById('rollBtn').disabled = false; 
+          clearTimeout(pollingTimer); clearTimeout(watchdogTimer); fetchGameState();
+      }
+
+      const totalCells = 32; const CELL_SIZE = 60; 
+      let cellEvents = {}; let itemsConfig = {}; let eventsConfig = {}; let loadedCharacters = []; let selectedCharObj = null; let loadedQuestions = []; 
+      let myRoomCode = "", myPlayerId = -1, gameData = null; let prevDataStr = "";
+      let pollingTimer = null, isMyTurnProcessing = false;
+      let isPollInFlight = false, lastStateVersion = null;
+      let lobbyMode = ''; let forcedDiceRoll = 0; const diceFaces = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+
+      let activeTurnId = -1;
+      function announceTurn(turnId) {
+          const ann = document.getElementById('turn-announcer');
+          const rollBtn = document.getElementById('rollBtn');
+          if(turnId === myPlayerId) { 
+              ann.innerHTML = "🎲 ตาของคุณแล้ว!<br><span style='font-size:24px; color:#69f0ae;'>ทอยเต๋าได้เลย</span>"; 
+              ann.style.borderColor = "#69f0ae"; 
+          } else { 
+              let pName = gameData.players[turnId].name; 
+              ann.innerHTML = `⏳ ตาของ<br><span style='color:#ffca28;'>${pName}</span>`; 
+              ann.style.borderColor = "#ffca28"; 
+              rollBtn.style.display = 'none';
+          }
+          ann.classList.add('announce-anim'); playSound('levelup'); 
+          setTimeout(() => { 
+              ann.classList.remove('announce-anim');
+              if(turnId === myPlayerId && gameData && gameData.players[turnId] && gameData.players[turnId].lives > 0) {
+                  rollBtn.style.display = 'inline-block';
+              }
+          }, 2500);
+      }
+
+      window.onload = function() {
+        const statusBoard = document.getElementById('status-board');
+        google.script.run.withSuccessHandler(res => { 
+          if(res && res.error) { statusBoard.innerHTML = "❌ โหลดข้อมูลพัง: " + res.error; statusBoard.style.color = "#c62828"; } 
+          else if(res) {
+            statusBoard.innerHTML = "✅ กระดานหิมพานต์พร้อมแล้ว!"; statusBoard.style.color = "#2e7d32";
+            cellEvents = res.board; itemsConfig = res.items; eventsConfig = res.events; loadedCharacters = res.characters;
+            loadedQuestions = res.questions && res.questions.length > 0 ? res.questions : [{q: "วรรณคดีเรื่องใดมี 'หนุมาน' เป็นทหารเอก?", choices: ["พระอภัยมณี", "รามเกียรติ์", "ขุนช้างขุนแผน", "อิเหนา"], ans: 1, reward: 500}];
+            const grid = document.getElementById('char-grid-container'); grid.innerHTML = '';
+            loadedCharacters.forEach((char, idx) => { grid.innerHTML += `<div class="char-btn" id="char-btn-${idx}" onclick="selectChar(this, ${idx})"><img src="${char.img}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1004/1004313.png';"><div>${char.name}</div></div>`; });
+          }
+        }).withFailureHandler(() => { statusBoard.innerHTML = "🚨 ติดต่อเซิร์ฟเวอร์ไม่ได้"; statusBoard.style.color = "#c62828"; }).getGameConfig();
+      };
+
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && myRoomCode && !isMyTurnProcessing) {
+          clearTimeout(pollingTimer);
+          fetchGameState();
+        }
+      });
+
+      function getSkillDescription(charObj) {
+          const skillCode = charObj.skillType;
+          const val = charObj.skillVal || 0;
+          const map = {
+              'item_immunity': 'ไม่ติดดีบัฟจากไอเท็มเวทมนตร์ทุกชนิด',
+              'world_event_immune': 'ไม่ได้รับผลกระทบแง่ลบจากเหตุการณ์โลก',
+              'roll_bonus': 'ทอยเต๋าบวกแต้มพิเศษเสมอ',
+              'extra_item_slot': 'กระเป๋าใหญ่ พกไอเท็มได้ 4 ชิ้น',
+              'combat_power': `เพิ่มพลังเวทย์ ${val}✨ ทุกครั้งก่อนต่อสู้`,
+              'loop_power': `รับโบนัสพลัง ${val}✨ เมื่อเดินผ่านจุดเริ่มต้น`,
+              'start_item': 'เริ่มเกมมาพร้อมกับไอเท็มแบบสุ่ม 1 ชิ้น',
+              'revive_once': 'ตายครั้งแรก คืนชีพฟรีพร้อมหลอดเลือดเต็ม 1 ครั้ง',
+              'start_shield': 'เริ่มเกมพร้อมโล่ และได้รับโล่เพิ่มเมื่อผ่านจุดเริ่มต้น',
+              'loop_item': 'รับไอเท็มฟรี 1 ชิ้นทุกครั้งที่ผ่านจุดเริ่มต้น',
+              'combat_bonus': `เมื่อต่อสู้แพ้จะได้รับพลังเพิ่ม ${val}✨`,
+              'extra_life': 'เริ่มต้นด้วยพลังชีวิต +1 ดวง',
+              'bonus_chest': 'ทุกครั้งที่ได้รับไอเท็ม จะได้รับเพิ่มอีก 1 ชิ้น',
+              'discount_shop': 'ซื้อไอเท็มในร้านค้าราคาถูกลง 20%',
+              'vampire_strike': 'สู้ชนะ PvP จะดูดเลือดคู่ต่อสู้มาเพิ่มให้ตัวเอง 1 ดวง',
+              'counter_attack': 'ถ้าแพ้ PvP มีโอกาส 50% ที่จะสะท้อนความเสียหาย',
+              'double_reward': 'ตอบคำถามถูกได้พลังเวทย์เพิ่มขึ้น',
+              'quiz_master': 'ตอบคำถามถูกได้พลังเพิ่มสองเท่า แถมได้ไอเท็ม 1 ชิ้น',
+              'boss_slayer': 'เมื่อต่อสู้กับบอส พลังแต้มลูกเต๋าจะถูกคูณ 200 (ปกติ 100)',
+              'item_stealer': 'สู้ชนะ PvP จะขโมยไอเท็มศัตรูมา 1 ชิ้น',
+              'passive_heal': 'ฮีลเลือด 1 ดวงทุกครั้งที่เดินผ่านจุดเริ่มต้น',
+              'dice_master': 'ทอยลูกเต๋า 2 ลูกเสมอในการเดินหมาก',
+              'escape_artist': 'สามารถเลือกหลบหนีการต่อสู้กับบอสได้ชัวร์ 100%',
+              'rich_start': 'เริ่มต้นเกมพร้อมพลังเวทย์มหาศาล',
+              'reflect_chance': `แพ้ต่อสู้ มีโอกาส ${val}% ที่จะสะท้อนความเสียหาย 1 ดวงกลับไป`,
+              'power_step': `ได้พลัง ${val}✨ ตามทุกๆ 1 ช่องที่เดินบนกระดาน`,
+              'event_healer': `เมื่อเกิดเหตุการณ์โลกเมื่อไหร่ ฮีลเลือด ${val} ดวงทันที`,
+              'last_stand': 'เมื่อใกล้ตายจะฮึดสู้ ฟื้นคืน 1 ดวงพร้อมเพิ่มพลังเวทย์ 1 ครั้ง',
+              'shop_investor': `รับโบนัสพลัง ${val || 500}✨ ทุกครั้งที่เข้าร้านค้า`,
+          };
+          return map[skillCode] || "ไม่มีสกิลติดตัว (Passive)";
+      }
+
+      function getActiveSkillDesc(typeCode) {
+          if (!typeCode) return "-";
+          const map = {
+              'stun': 'ทำให้เป้าหมายหยุดเดิน 1 เทิร์น',
+              'damage_pierce': 'โจมตีทะลุโล่ป้องกัน ลดพลังชีวิตเป้าหมาย 1 ดวง',
+              'damage_stun': 'ลดพลังชีวิตเป้าหมาย 1 ดวง และทำให้หยุดเดิน 1 เทิร์น',
+              'crit_execute': 'ปลิดชีพเป้าหมายทันทีหากพลังชีวิตเหลือน้อย (หรือลดพลังชีวิต 2 ดวง)',
+              'burn_area': 'สร้างเพลิงเผาไหม้ใส่เป้าหมาย ทำให้เสียพลังชีวิต 1 ดวงในเทิร์นถัดไป',
+              'steal_money': 'ขโมยพลังเวทย์จากเป้าหมายมาเป็นของตัวเอง',
+              'break_buff': 'ทำลายโล่ป้องกันและบัฟสถานะดีทั้งหมดของเป้าหมาย',
+              'damage_water': 'โจมตีด้วยพลังน้ำ ลดพลังชีวิตเป้าหมาย 1 ดวง',
+              'evade': 'หลบหลีกการโจมตีหรือการตกช่องอันตรายได้ 1 ครั้ง',
+              'immune': 'ได้รับสถานะอมตะ ป้องกันการโจมตีและขโมย 1 เทิร์น',
+              'heal_aoe': 'ฟื้นฟูพลังชีวิต 1 ดวง ให้ตัวเองและพันธมิตรบนกระดาน',
+              'shield_hp': 'กางโล่ป้องกันความเสียหายให้ตัวเอง 1 ครั้ง',
+              'reflect': 'สะท้อนความเสียหายหรือผลสกิลกลับไปหาผู้ร่าย 1 ครั้ง',
+              'cleanse_heal': 'ลบล้างสถานะผิดปกติทั้งหมดและฟื้นฟูพลังชีวิต 1 ดวง',
+              'revive': 'ฟื้นคืนชีพทันทีพร้อมพลังชีวิต 1 ดวงเมื่อถูกสังหาร',
+              'pull_target': 'ดึงเป้าหมายบนกระดานให้วาร์ปมาตกที่ช่องเดียวกัน',
+              'reduce_dice': 'ลดจำนวนแต้มลูกเต๋าในการเดินของเป้าหมายในเทิร์นถัดไป',
+              'steal_buff': 'ขโมยโล่ป้องกันหรือบัฟจากเป้าหมายมาเป็นของตัวเอง',
+              'swap_pos': 'สลับตำแหน่งช่องที่ยืนบนกระดานกับเป้าหมาย',
+              'invis': 'พรางตัว ไม่สามารถถูกเลือกเป็นเป้าหมายโจมตีหรือขโมยได้ 1 เทิร์น',
+              'shuffle_item': 'สุ่มสลับไอเทมทั้งหมดที่มีของผู้เล่นบนกระดาน',
+              'poison_blind': 'เป้าหมายติดพิษ เสียพลังชีวิต 1 ดวงในเทิร์นถัดไป',
+              'discard_item': 'สุ่มทำลายไอเทมของเป้าหมายทิ้ง 1 ชิ้น',
+              'buff_stats': 'เพิ่มพลังเวทย์มหาศาลให้ตัวเอง',
+              'move_boost': 'เพิ่มระยะการเดินพิเศษ เดินข้ามช่องไปข้างหน้าบนกระดาน',
+              'warp_check': 'วาร์ปย้ายตัวเองไปยังช่องที่กำหนดบนกระดานทันที',
+              'summon_tank': 'อัญเชิญตัวแทนมารับการโจมตีลดพลังชีวิตแทนตนเอง 1 ครั้ง',
+              'cancel_combat': 'ยกเลิกการต่อสู้ (PvE/PvP) และรอดพ้นจากการปะทะทันที'
+          };
+          return map[typeCode.toLowerCase()] || 'อัญเชิญพลังเวทมนตร์วิเศษ';
+      }
+
+      function selectChar(element, idx) { 
+          selectedCharObj = loadedCharacters[idx]; 
+          document.getElementById('modal-char-name').innerText = selectedCharObj.name; 
+          document.getElementById('modal-char-img').src = selectedCharObj.img;
+          
+          let passDesc = getSkillDescription(selectedCharObj);
+          document.getElementById('modal-char-skill').innerHTML = `🌟 <b>Passive Skill (สกิลติดตัว)</b><br>${passDesc}`;
+          
+          let hasActive = selectedCharObj.skill_name && selectedCharObj.skill_name !== '-' && selectedCharObj.skill_name !== 'none' && selectedCharObj.skill_name !== '';
+          let effCode = selectedCharObj.effect_type || (selectedCharObj.skill_name === 'ควบม้าสีหมอก' ? 'move_boost' : '');
+          let effectDesc = getActiveSkillDesc(effCode);
+          let actDesc = hasActive ? `⚡ <b>${selectedCharObj.skill_name}</b><br>รายละเอียด: <span style="color:#2e7d32;">${effectDesc}</span><br>ค่าร่าย: ${selectedCharObj.activeCost || 0} ✨ | คูลดาวน์: ${selectedCharObj.activeCooldown || 0} ตา` : "ไม่มีสกิลกดใช้ (Active)";
+          document.getElementById('modal-char-active-skill').innerHTML = `${actDesc}`;
+
+          document.getElementById('modal-char-basepower').innerText = `🔋 พลังเริ่มต้น: ${selectedCharObj.basePower !== undefined ? selectedCharObj.basePower : 200} ✨`;
+          document.getElementById('char-detail-modal').style.display = 'flex';
+      }
+
+      function closeCharModal() { document.getElementById('char-detail-modal').style.display = 'none'; }
+      function goToCharSelect(mode) { 
+          lobbyMode = mode; if (mode === 'join' && !document.getElementById('roomCodeInput').value) return alert("กรุณากรอกรหัสห้องก่อนครับ!"); 
+          toggleBgm(true); document.getElementById('init-screen').style.display = 'none'; document.getElementById('char-select-screen').style.display = 'block'; 
+      }
+      function goBackToInit() { document.getElementById('char-select-screen').style.display = 'none'; document.getElementById('init-screen').style.display = 'block'; }
+      function confirmSelection() {
+        if(!selectedCharObj) return alert("รอโหลดตัวละครแป๊บนะครับ!");
+        document.getElementById('char-detail-modal').style.display = 'none';
+        if (lobbyMode === 'create') {
+          google.script.run.withSuccessHandler(res => {
+            if(res && res.success) { myRoomCode = res.roomCode; myPlayerId = res.myId; enterGameRoom(true); }
+            else alert((res && res.msg) || 'สร้างห้องไม่สำเร็จ');
+          }).withFailureHandler(() => alert('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้')).createRoom(selectedCharObj.name, selectedCharObj);
+        } else {
+          const code = document.getElementById('roomCodeInput').value.trim();
+          google.script.run.withSuccessHandler(res => {
+            if(res && res.success) { myRoomCode = res.roomCode; myPlayerId = res.myId; enterGameRoom(false); }
+            else alert((res && res.msg) || 'เข้าห้องไม่สำเร็จ');
+          }).withFailureHandler(() => alert('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้')).joinRoom(code, selectedCharObj.name, selectedCharObj);
+        }
+      }
+      function showToast(msg) { const toast = document.getElementById("toast"); toast.innerText = msg; toast.className = "show"; setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000); }
+      
+      function enterGameRoom(isHost) { 
+          document.getElementById('char-select-screen').style.display = 'none'; document.getElementById('game-screen').style.display = 'block'; buildBoard(); 
+          const overlay = document.getElementById('start-overlay'); overlay.style.display = 'flex'; document.getElementById('lobby-room-code').innerText = myRoomCode; 
+          if(isHost) { document.getElementById('giantStartBtn').style.display = 'inline-block'; document.getElementById('waiting-host-msg').style.display = 'none'; } 
+          else { document.getElementById('giantStartBtn').style.display = 'none'; document.getElementById('waiting-host-msg').style.display = 'block'; } 
+          lastStateVersion = null;
+          fetchGameState(); 
+      }
+
+      function requestStartGame() {
+        const startBtn = document.getElementById('giantStartBtn');
+        const waitMsg = document.getElementById('waiting-host-msg');
+        startBtn.style.display = "none";
+        waitMsg.innerText = "⏳ กำลังเริ่มเกม...";
+        waitMsg.style.display = "block";
+        google.script.run.withSuccessHandler(() => {
+          document.getElementById('start-overlay').style.display = 'none';
+          lastStateVersion = null;
+          fetchGameState();
+        }).withFailureHandler(() => {
+          startBtn.style.display = "inline-block";
+          waitMsg.style.display = "none";
+          showToast("❌ เริ่มเกมไม่สำเร็จ กรุณาลองใหม่");
+        }).startGame(myRoomCode);
+        toggleBgm(true);
+      }
+
+      function checkWinCondition() {
+        if(!gameData || gameData.status === 'Finished') return true;
+        let alive = gameData.players.filter(p => p.lives > 0); let maxPowerP = gameData.players.find(p => p.power >= 10000); let winner = null;
+        if(maxPowerP) winner = maxPowerP; else if(alive.length === 1 && gameData.players.length > 1) winner = alive[0];
+        if(winner) { gameData.status = 'Finished'; gameData.winner = winner; prevDataStr = JSON.stringify(gameData); google.script.run.updateGameState(myRoomCode, JSON.stringify(gameData)); showVictoryScreen(winner); return true; }
+        return false;
+      }
+
+      function showVictoryScreen(winner) {
+        clearTimeout(pollingTimer); clearTimeout(watchdogTimer); clearTimeout(afkTimerId); document.getElementById('victory-screen').style.display = 'flex'; document.getElementById('winner-name-display').innerText = winner ? winner.name : '';
+        
+        let titlesHtml = `<div style="font-size:16px; color:#555; margin-top:5px; background:rgba(0,0,0,0.05); padding:10px; border-radius:10px;"><b>🏆 ฉายาเกียรติยศ:</b><br>`;
+        let richest = [...gameData.players].sort((a,b)=>b.power - a.power)[0];
+        let mostItems = [...gameData.players].sort((a,b)=>(b.itemsUsed||0) - (a.itemsUsed||0))[0];
+        let bossKiller = [...gameData.players].sort((a,b)=>(b.bossKills||0) - (a.bossKills||0))[0];
+        if(richest && richest.power > 0) titlesHtml += `💰 <b>เศรษฐีพลัง:</b> ${richest.name}<br>`;
+        if(mostItems && (mostItems.itemsUsed||0) > 0) titlesHtml += `🎒 <b>คนมันมีของ:</b> ${mostItems.name}<br>`;
+        if(bossKiller && (bossKiller.bossKills||0) > 0) titlesHtml += `👹 <b>นักฆ่าบอส:</b> ${bossKiller.name}<br>`;
+        titlesHtml += `</div>`;
+
+        let rankings = [...gameData.players].sort((a, b) => b.power - a.power); const container = document.getElementById('victory-rankings-container'); container.innerHTML = '';
+        rankings.forEach((p, i) => { let status = p.lives > 0 ? `✨ ${p.power}` : '💀 ตายแล้ว'; let medal = i===0 ? '🥇' : i===1 ? '🥈' : i===2 ? '🥉' : ''; container.innerHTML += `<div style="font-size:20px; margin-bottom:10px; font-weight:bold;">${medal} <img src="${p.icon}" style="width:30px; border-radius:50%; vertical-align:middle; border: 2px solid #ccc; background:white;"> ${p.name} <span style="float:right;">${status}</span></div>`; });
+        container.innerHTML += titlesHtml;
+      }
+
+      function scheduleNextPoll(delayMs) {
+        clearTimeout(pollingTimer);
+        if (isMyTurnProcessing || document.hidden) return;
+        pollingTimer = setTimeout(fetchGameState, delayMs);
+      }
+
+      function fetchGameState() {
+        if (isMyTurnProcessing || isPollInFlight) return;
+        clearTimeout(pollingTimer);
+        isPollInFlight = true;
+
+        google.script.run.withSuccessHandler(async res => {
+          isPollInFlight = false;
+          if (!res || isMyTurnProcessing) return;
+
+          if (res.unchanged) {
+            scheduleNextPoll(1000);
+            return;
+          }
+
+          gameData = res.data;
+          lastStateVersion = gameData.v || 0;
+
+          if(document.getElementById('start-overlay').style.display === 'flex') {
+            let pNames = gameData.players.map(p => `🙋 ${p.name}`).join('<br>');
+            document.getElementById('lobby-players').innerHTML = "<b>ผู้เล่นในห้อง:</b><br>" + pNames;
+          }
+          if(gameData.status === 'Finished') { showVictoryScreen(gameData.winner); return; }
+
+          if(!gameData.logs) gameData.logs = [];
+          document.getElementById('sys-log').innerHTML = gameData.logs.length > 0 ? gameData.logs.join('') : '-';
+
+          let hasNewBroadcast = (gameData.broadcast && gameData.broadcast.id !== lastBroadcastId);
+          if (hasNewBroadcast) {
+              lastBroadcastId = gameData.broadcast.id;
+              if (gameData.broadcast.pId !== myPlayerId) {
+                  isMyTurnProcessing = true;
+                  await playBroadcastCutscene(gameData.broadcast);
+                  isMyTurnProcessing = false;
+              }
+          }
+
+          if (prevDataStr && gameData.status === 'Playing') {
+              let oldData = JSON.parse(prevDataStr);
+              gameData.players.forEach((p) => {
+                  let op = oldData.players.find(x => x.id === p.id);
+                  if(op && (p.power !== op.power || p.lives !== op.lives)) {
+                      if(p.power > op.power) showFloatingAnim(`+${p.power - op.power}✨`, '#00e676', p.pos);
+                      else if(p.power < op.power) showFloatingAnim(`${p.power - op.power}✨`, '#e53935', p.pos);
+                      if(p.lives < op.lives) showFloatingAnim(`💔`, '#ff1744', p.pos);
+                      else if(p.lives > op.lives && op.lives > 0) showFloatingAnim(`❤️`, '#00e676', p.pos);
+                  }
+              });
+          }
+          prevDataStr = JSON.stringify(gameData);
+          
+          let me = gameData.players[myPlayerId];
+          if (me && !me.buffsInitialized && gameData.status === 'Playing') {
+              me.buffsInitialized = true; 
+              if (me.skillType === 'rich_start') { me.power += (me.skillVal || 1000); }
+              if (me.skillType === 'start_shield') { me.shield = true; }
+              if (me.skillType === 'extra_life') { me.maxLives = (me.maxLives || 3) + 1; me.lives++; }
+              if (me.skillType === 'start_item') { let ri = getRandomItemKey(); if(ri) { me.items.push(ri); } }
+              prevDataStr = JSON.stringify(gameData);
+              google.script.run.updateGameState(myRoomCode, JSON.stringify(gameData));
+          }
+
+          updateUI(); 
+
+          if (gameData.status === 'Playing' && checkWinCondition()) return;
+          
+          if (res.status === 'Waiting') { document.getElementById('center-turn-display').innerText = `รอเริ่มเกม... (${gameData.players.length}/4 คน)`; } 
+          else if (res.status === 'Playing') {
+            document.getElementById('start-overlay').style.display = 'none'; 
+            
+            if(gameData.players[gameData.turn].lives <= 0 && gameData.turn === myPlayerId) {
+                isMyTurnProcessing = true; gameData.turn = (gameData.turn + 1) % gameData.players.length; 
+                prevDataStr = JSON.stringify(gameData);
+                google.script.run.withSuccessHandler(()=>{ lastStateVersion = null; isMyTurnProcessing=false; fetchGameState(); }).updateGameState(myRoomCode, JSON.stringify(gameData)); 
+                return;
+            }
+
+            const turnP = gameData.players[gameData.turn]; document.getElementById('center-turn-display').innerText = `ตาของ: ${turnP.name}`;
+            
+            if(activeTurnId !== gameData.turn && !isMyTurnProcessing) { activeTurnId = gameData.turn; announceTurn(gameData.turn); }
+
+            if (gameData.turn === myPlayerId && !isMyTurnProcessing && turnP.lives > 0) {
+              document.getElementById('rollBtn').disabled = false;
+              if (activeTurnId === gameData.turn && !document.getElementById('turn-announcer').classList.contains('announce-anim')) {
+                  document.getElementById('rollBtn').style.display = 'inline-block';
+              }
+              clearTimeout(afkTimerId);
+              
+              if (me.skipTurns > 0) { 
+                  isMyTurnProcessing = true; document.getElementById('rollBtn').disabled = true; document.getElementById('rollBtn').style.display = 'none';
+                  setTimeout(() => { 
+                      me.skipTurns--; addGameLog(`🛑 <b>${me.name}</b> โดนพักเทิร์น!`); gameData.turn = (gameData.turn + 1) % gameData.players.length; 
+                      prevDataStr = JSON.stringify(gameData);
+                      google.script.run.withSuccessHandler(()=>{ lastStateVersion = null; isMyTurnProcessing=false; fetchGameState(); }).updateGameState(myRoomCode, JSON.stringify(gameData)); 
+                  }, 1500); 
+                  return; 
+              } else {
+                  afkTimerId = setTimeout(handleAfkTimeout, 30000);
+              }
+            } else if (gameData.turn !== myPlayerId) { 
+              document.getElementById('rollBtn').disabled = true; 
+              document.getElementById('rollBtn').style.display = 'none';
+              clearTimeout(afkTimerId);
+            }
+          }
+          
+          if (!isMyTurnProcessing) { scheduleNextPoll(1000); } 
+        }).withFailureHandler(() => {
+          isPollInFlight = false;
+          if (!isMyTurnProcessing) scheduleNextPoll(2500);
+        }).getGameState(myRoomCode, lastStateVersion);
+      }
+
+      function getCellCoords(pos) { let r, c; if (pos <= 9) { r = 0; c = pos - 1; } else if (pos <= 17) { r = pos - 9; c = 8; } else if (pos <= 25) { r = 8; c = 8 - (pos - 17); } else { r = 8 - (pos - 25); c = 0; } return { row: r, col: c }; }
+
+      function buildBoard() {
+        const board = document.getElementById('board-inner'); board.innerHTML = ''; const bossesContainer = document.getElementById('bosses-container'); bossesContainer.innerHTML = '';
+        for(let i = 1; i <= totalCells; i++) {
+          let cell = document.createElement('div'); cell.className = 'cell'; let infoText = `ช่องที่ ${i}`;
+          let isQuizForced = (i === 9 || i === 17 || i === 25);
+          if(i === 1) { cell.classList.add('cell-start'); infoText += "<br>จุดเริ่มต้น"; }
+          else if(isQuizForced) { cell.classList.add('cell-event'); infoText += "<br>📜 ตอบคำถามชิงรางวัล!"; }
+          else if(cellEvents[i]) { 
+            if(cellEvents[i].isChest) { cell.classList.add('cell-chest'); infoText += "<br>🎁 หีบสมบัติสุ่มไอเท็ม!"; }
+            else if(cellEvents[i].isShop) { cell.classList.add('cell-shop'); infoText += "<br>⛩️ แท่นอธิษฐาน"; } 
+            else if(cellEvents[i].isEvent) { cell.classList.add('cell-world-event'); infoText += "<br>🌍 เหตุการณ์โลกลี้ลับ!"; } 
+            else if(cellEvents[i].power !== 0 || cellEvents[i].damage !== 0 || cellEvents[i].warpTo > 0 || cellEvents[i].skip > 0) { cell.classList.add('cell-special'); }
+            
+            if(cellEvents[i].msg) infoText += `<br>💬 ${cellEvents[i].msg}`; if(cellEvents[i].power !== 0) infoText += `<br>✨ พลัง ${cellEvents[i].power > 0 ? '+'+cellEvents[i].power : cellEvents[i].power}`; if(cellEvents[i].damage > 0) infoText += `<br>💔 ดาเมจ -${cellEvents[i].damage}`;
+            if(cellEvents[i].bossPower > 0) { 
+                let bToken = document.createElement('div'); bToken.className = 'boss-token'; bToken.id = 'boss-token-' + i; 
+                bToken.innerHTML = `<img src="${cellEvents[i].bossImg}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3204/3204642.png'">`; 
+                let bCoords = getCellCoords(i); bToken.style.top = (bCoords.row * CELL_SIZE) + 'px'; bToken.style.left = (bCoords.col * CELL_SIZE) + 'px'; 
+                bossesContainer.appendChild(bToken); 
+                infoText += `<br>👹 บอส: ${cellEvents[i].bossName}<br>⚡ พลังบอส: <span id="hover-boss-power-${i}">${cellEvents[i].bossPower}</span>`; 
+            }
+          }
+          cell.innerHTML = `<div class="cell-face face-front"></div><div class="cell-face face-back"></div><div class="cell-face face-left"></div><div class="cell-face face-right"></div><span>${i}</span>`; 
+          let infoBox = document.createElement('div'); infoBox.className = 'cell-info'; infoBox.innerHTML = infoText; cell.appendChild(infoBox);
+          let coords = getCellCoords(i); cell.style.top = (coords.row * CELL_SIZE) + 'px'; cell.style.left = (coords.col * CELL_SIZE) + 'px'; board.appendChild(cell);
+        }
+      }
+
+      function updateUI() {
+        const ui = document.getElementById('corner-ui'); ui.innerHTML = '';
+        gameData.players.forEach((p, idx) => {
+          let isTurn = gameData.turn === p.id ? 'active-turn' : ''; let shieldBadge = p.shield ? '🛡️' : ''; let evadeBadge = p.evade ? '🥷' : ''; let immuneBadge = p.immune ? '🌟' : ''; let reflectBadge = p.reflect ? '🪞' : ''; let silenceBadge = (p.silenced && p.silenced > 0) ? '🤐' : '';
+          let hearts = '❤️'.repeat(Math.max(0, p.lives)) + '🖤'.repeat(Math.max(0, p.maxLives - p.lives)); 
+          
+          let itemsHtml = '<div class="item-container">'; let maxCap = p.skillType === 'extra_item_slot' ? 4 : 3;
+          for(let i=0; i<maxCap; i++) { 
+              if(p.items[i]) { 
+                  let canActUse = (gameData.turn === myPlayerId && p.id === myPlayerId && !isMyTurnProcessing && p.lives>0);
+                  let canUseClass = canActUse ? 'usable' : 'viewable'; 
+                  itemsHtml += `<div class="item-slot ${canUseClass}" onclick="promptUseItem('${p.items[i]}', ${i}, 'board', null, ${canActUse})" title="${itemsConfig[p.items[i]]?itemsConfig[p.items[i]].name:''}">${itemsConfig[p.items[i]]?itemsConfig[p.items[i]].icon:'📦'}</div>`; 
+              } 
+              else { itemsHtml += `<div class="item-slot"></div>`; } 
+          }
+          itemsHtml += '</div>';
+
+          let actSkillHtml = '';
+          if (p.skill_name && p.skill_name !== '-' && p.skill_name !== 'none' && p.skill_name !== '') {
+              let isCd = p.currentCooldown > 0;
+              let noPower = p.power < (p.activeCost || 0);
+              let isDisabled = (isCd || noPower || p.id !== myPlayerId || isMyTurnProcessing || gameData.turn !== myPlayerId || p.lives <= 0 || p.skipTurns > 0) ? true : false;
+              let btnClass = isDisabled ? 'active-skill-btn disabled' : 'active-skill-btn';
+              let cdText = isCd ? `⏳ รอ ${p.currentCooldown} ตา` : (noPower ? `❌ พลังไม่พอ` : `⚡ สกิลพิเศษ`);
+              actSkillHtml = `<button class="${btnClass}" onclick="window.promptActiveSkill()" ${isDisabled?'disabled':''} title="${p.skill_name}">${cdText}</button>`;
+          }
+
+          let glowClass = `glow-${p.id % 4}`; 
+          ui.innerHTML += `<div class="corner-card glass pos-${idx} ${isTurn} ${glowClass}"><img src="${p.icon}"><br><b>${shieldBadge}${evadeBadge}${immuneBadge}${reflectBadge}${silenceBadge} ${p.name}</b><br>${hearts}<br><span style="color:#0288d1; font-weight:bold;">✨ ${p.power}</span>${itemsHtml}${actSkillHtml}</div>`;
+        });
+
+        for(let i=1; i<=totalCells; i++) {
+            if(cellEvents[i] && cellEvents[i].bossPower > 0) {
+                let tag = document.getElementById('hover-boss-power-'+i);
+                let rebirthLvl = (gameData.bossLevels && gameData.bossLevels[i]) ? gameData.bossLevels[i] : 1;
+                let nerf = (gameData.bossNerfs && gameData.bossNerfs[i]) ? gameData.bossNerfs[i] : 0;
+                let currentBP = Math.max(0, (cellEvents[i].bossPower * rebirthLvl) - nerf);
+                if(tag) { tag.innerText = currentBP; if(nerf > 0) tag.style.color = "#ff1744"; else tag.style.color = "white"; }
+                let bToken = document.getElementById('boss-token-'+i);
+                if(bToken) { 
+                    if(rebirthLvl > 1) {
+                        bToken.classList.add('rebirth-aura');
+                        let hue = (rebirthLvl - 1) * 70;
+                        bToken.style.setProperty('--aura-hue', `${hue}deg`);
+                        bToken.style.filter = 'none';
+                    } else {
+                        bToken.classList.remove('rebirth-aura');
+                        bToken.style.filter = 'none';
+                        bToken.style.removeProperty('--aura-hue');
+                    }
+                }
+            }
+        }
+
+        const tokensContainer = document.getElementById('tokens-container');
+        gameData.players.forEach(p => {
+          if(p.lives <= 0) { let t = document.getElementById('token-'+p.id); if(t) t.remove(); return; } 
+          let token = document.getElementById('token-' + p.id);
+          if(!token) { token = document.createElement('div'); token.className = `token glow-token-${p.id % 4}`; token.id = 'token-' + p.id; token.innerHTML = `<img src="${p.icon}">`; tokensContainer.appendChild(token); }
+          if(!token.classList.contains('hopping')) { let coords = getCellCoords(p.pos); let offsetLeft = (p.id % 2 === 0) ? 7 : -7; let offsetTop = (p.id < 2) ? 7 : -7; token.style.top = (coords.row * CELL_SIZE) + offsetTop + 'px'; token.style.left = (coords.col * CELL_SIZE) + offsetLeft + 'px'; }
+        });
+      }
+
+      window.promptActiveSkill = function() {
+          let me = gameData.players[myPlayerId];
+          if(!me || !me.skill_name || me.skill_name === '-' || me.skill_name === 'none' || me.skill_name === '') return;
+          if(me.currentCooldown > 0) return;
+          if(me.power < (me.activeCost || 0)) { showToast("พลังเวทย์ไม่พอใช้สกิล!"); return; }
+
+          isMyTurnProcessing = true;
+          clearTimeout(pollingTimer);
+
+          let effCode = me.effect_type || (me.skill_name === 'ควบม้าสีหมอก' ? 'move_boost' : '');
+          let effectDesc = getActiveSkillDesc(effCode);
+          document.getElementById('skill-confirm-name').innerText = me.skill_name;
+          document.getElementById('skill-confirm-desc').innerHTML = `รายละเอียด: <span style="color:#2e7d32;">${effectDesc}</span><br>ค่าร่าย: ${me.activeCost || 0} ✨ | คูลดาวน์: ${me.activeCooldown || 0} ตา<br><br>คุณต้องการจ่ายพลังเวทย์เพื่อใช้สกิลนี้หรือไม่?`;
+          document.getElementById('skill-confirm-modal').style.display = 'flex';
+      };
+
+      window.cancelUseSkill = function() {
+          document.getElementById('skill-confirm-modal').style.display = 'none';
+          isMyTurnProcessing = false;
+          fetchGameState();
+      };
+
+      window.confirmUseSkill = async function() {
+          document.getElementById('skill-confirm-modal').style.display = 'none';
+          let me = gameData.players.find(p => p.id === myPlayerId);
+          let targetId = null;
+          let effectType = (me.effect_type || (me.skill_name === 'ควบม้าสีหมอก' ? 'move_boost' : '')).toLowerCase();
+
+          isMyTurnProcessing = true;
+          document.getElementById('rollBtn').disabled = true;
+          clearTimeout(pollingTimer);
+
+          const targetedSkills = [
+              'stun', 'damage_pierce', 'damage_stun', 'crit_execute', 'burn_area', 
+              'steal_money', 'break_buff', 'damage_water', 'pull_target', 'reduce_dice', 
+              'steal_buff', 'swap_pos', 'poison_blind', 'discard_item', 'damage', 'attack', 
+              'ลดชีวิต', 'power_down_single', 'half_op_power', 'vampire', 'silence', 'skip_turn'
+          ];
+
+          if (targetedSkills.includes(effectType)) {
+              let targetInfo = await openTargetSelector(me, 'act_target_player');
+              if(!targetInfo) {
+                  isMyTurnProcessing = false;
+                  document.getElementById('rollBtn').disabled = false;
+                  fetchGameState();
+                  return; 
+              }
+              targetId = targetInfo.id;
+              me = gameData.players.find(p => p.id === myPlayerId); 
+          }
+
+          let targetName = "";
+          if(targetId !== null) {
+              let tPlayer = gameData.players.find(x => x.id === targetId);
+              if(tPlayer) targetName = ` ใส่ ${tPlayer.name}`;
+          }
+          
+          let bcast = { 
+              id: Date.now(), 
+              pId: myPlayerId, 
+              title: `⚡ ${me.name} ใช้สกิล${targetName}!`, 
+              desc: `${me.skill_name}`, 
+              img: '✨' 
+          };
+          lastBroadcastId = bcast.id;
+          showToast("กำลังร่ายสกิล...");
+
+          google.script.run.withSuccessHandler(async res => {
+              if(res && res.success) {
+                  if(res.data) {
+                    gameData = res.data;
+                    lastStateVersion = gameData.v || null;
+                    if(gameData.broadcast) lastBroadcastId = gameData.broadcast.id;
+                    prevDataStr = JSON.stringify(gameData);
+                    updateUI();
+                  }
+                  await playBroadcastCutscene(bcast);
+                  isMyTurnProcessing = false;
+                  document.getElementById('rollBtn').disabled = false;
+                  showToast("ใช้สกิลสำเร็จ!");
+                  if(!checkWinCondition()) fetchGameState();
+              } else {
+                  isMyTurnProcessing = false;
+                  document.getElementById('rollBtn').disabled = false;
+                  showToast("❌ ล้มเหลว: " + ((res && res.msg) || 'ไม่ทราบสาเหตุ'));
+                  fetchGameState();
+              }
+          }).withFailureHandler(() => {
+              isMyTurnProcessing = false;
+              document.getElementById('rollBtn').disabled = false;
+              showToast("❌ เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+              fetchGameState();
+          }).useActiveSkill(myRoomCode, myPlayerId, targetId);
+      };
+
+      let pendingUseItem = null;
+      function promptUseItem(itemId, index, context, combatTargetId = null, canActuallyUse = false) {
+        let item = itemsConfig[itemId]; if(!item) return;
+        let me = gameData.players[myPlayerId];
+        
+        if(canActuallyUse && me.silenced && me.silenced > 0) { showToast("🤐 คุณติดสถานะใบ้ ใช้ไอเท็มไม่ได้!"); playSound('hurt'); return; }
+        
+        let desc = getItemDescInfo(item); 
+        document.getElementById('item-confirm-name').innerText = item.name; 
+        document.getElementById('item-confirm-desc').innerHTML = desc; 
+        document.getElementById('item-confirm-icon').innerText = item.icon; 
+        
+        if(canActuallyUse) {
+            document.getElementById('btn-confirm-use').style.display = 'block';
+            document.getElementById('btn-cancel-use').innerText = 'ยกเลิก';
+            pendingUseItem = { id: itemId, idx: index, ctx: context, targetId: combatTargetId }; 
+        } else {
+            document.getElementById('btn-confirm-use').style.display = 'none';
+            document.getElementById('btn-cancel-use').innerText = 'ปิดหน้าต่าง';
+            pendingUseItem = null;
+        }
+        document.getElementById('item-confirm-modal').style.display = 'flex';
+      }
+      function cancelUseItem() { document.getElementById('item-confirm-modal').style.display = 'none'; pendingUseItem = null; }
+      
+      function confirmUseItem() { 
+          document.getElementById('item-confirm-modal').style.display = 'none'; 
+          if(pendingUseItem) { 
+              if(pendingUseItem.ctx === 'board') { 
+                  useItem(pendingUseItem.id, pendingUseItem.idx); 
+              } else { 
+                  resolveCombatItem(pendingUseItem); 
+              } 
+              pendingUseItem = null; 
+          } 
+      }
+
+      function openTargetSelector(me, itemType = '') { 
+          return new Promise(res => { 
+              const modal = document.getElementById('target-modal'); const list = document.getElementById('target-list'); list.innerHTML = ''; 
+              const canTargetBoss = targetBossOnly.includes(itemType) || targetBoth.includes(itemType);
+
+              if(canTargetBoss && cellEvents[me.pos] && cellEvents[me.pos].bossPower > 0) { 
+                  list.innerHTML += `<button class="btn btn-create" style="background:#e53935; color:white;" onclick="resolveTarget('boss', 0)">👹 บอส: ${cellEvents[me.pos].bossName} (เป้าหมาย)</button>`; 
+              } 
+              
+              if (targetPlayerOnly.includes(itemType) || targetBoth.includes(itemType) || itemType === 'act_target_player') {
+                  gameData.players.forEach(p => { 
+                      if(p.id !== me.id && p.lives > 0) { 
+                          let isInvis = p.status && p.status.includes('invisible');
+                          let isImmune = (p.skillType === 'item_immunity') || isInvis; 
+                          let btnStyle = isImmune ? "background:#e0e0e0; color:#888; cursor:not-allowed;" : "background:#69f0ae; color:#1b5e20;"; 
+                          let label = isInvis ? '(พรางตัว)' : (p.skillType === 'item_immunity' ? '(อมตะ)' : '');
+                          list.innerHTML += `<button class="btn btn-join" style="${btnStyle}" onclick="resolveTarget('player', ${p.id}, ${isImmune})">⚔️ ผู้เล่น: ${p.name} ${label}</button>`; 
+                      } 
+                  });
+              }
+              
+              if(list.innerHTML === '') list.innerHTML = '<p style="color:#555;">ไม่มีเป้าหมายใกล้เคียง...</p>'; modal.style.display = 'flex'; 
+              window.resolveTarget = function(t, id, immune) { if(immune) { showToast("❌ เป้าหมายป้องกันได้!"); return; } modal.style.display = 'none'; res({type: t, id: id}); }; 
+              window.closeTargetModal = function() { modal.style.display = 'none'; res(null); }; 
+          }); 
+      }
+      function openDiceChooser() { return new Promise(res => { const modal = document.getElementById('dice-chooser-modal'); modal.style.display = 'flex'; window.resolveDiceChoice = function(num) { modal.style.display = 'none'; res(num); }; window.closeDiceChooser = function() { modal.style.display = 'none'; res(null); }; }); }
+
+      async function applyCombatItemEffect(me, targetOp, itm, currentBossPowerRef) {
+        if (['power_up', 'power'].includes(itm.type)) {
+          me.power += (itm.val || 500);
+        } else if (itm.type === 'shield') {
+          me.shield = true;
+        } else if (itm.type === 'shield_all') {
+          gameData.players.forEach(p => { if (p.lives > 0) p.shield = true; });
+        } else if (itm.type === 'heal') {
+          me.lives = Math.min(me.maxLives, me.lives + (itm.val || 1));
+        } else if (itm.type === 'max_heal') {
+          me.lives = me.maxLives;
+        } else if (itm.type === 'immune_1_turn') {
+          me.immune = true;
+        } else if (itm.type === 'reflect') {
+          me.reflect = true;
+        } else if (itm.type === 'double_power') {
+          me.power *= 2;
+        } else if (itm.type === 'temp_double_power') {
+          me.tempBuff = (me.tempBuff || 0) + me.power;
+          me.power *= 2;
+        } else if (itm.type === 'x3_power') {
+          me.tempBuff = (me.tempBuff || 0) + (me.power * 2);
+          me.power *= 3;
+        } else if (itm.type === 'random_buff') {
+          const r = Math.random();
+          if (r < 0.33) me.power += 500;
+          else if (r < 0.66) me.shield = true;
+          else me.lives = Math.min(me.maxLives, me.lives + 1);
+        } else if (itm.type === 'power_down_all') {
+          gameData.players.forEach(p => {
+            if (p.id !== me.id && p.lives > 0 && !p.immune && p.skillType !== 'item_immunity') {
+              p.power = Math.max(0, p.power - (itm.val || 500));
+            }
+          });
+        } else if (targetOp) {
+          if (['attack', 'damage', 'ลดชีวิต'].includes(itm.type)) {
+            applyClientDamage(targetOp, 1, me);
+          } else if (itm.type === 'power_down_single') {
+            targetOp.power = Math.max(0, targetOp.power - (itm.val || 500));
+            showFloatingAnim(`-${itm.val || 500}✨`, '#e53935', targetOp.pos);
+          } else if (itm.type === 'half_op_power') {
+            targetOp.power = Math.floor(targetOp.power / 2);
+            showFloatingAnim(`/2✨`, '#e53935', targetOp.pos);
+          } else if (itm.type === 'vampire') {
+            if (applyClientDamage(targetOp, 1, me)) {
+              me.lives = Math.min(me.maxLives, me.lives + 1);
+              showFloatingAnim('❤️', '#ff1744', me.pos);
+            }
+          } else if (itm.type === 'destroy_item' && targetOp.items.length > 0) {
+            targetOp.items.splice(Math.floor(Math.random() * targetOp.items.length), 1);
+            showFloatingAnim('🔥🎒', '#e53935', targetOp.pos);
+          } else if (itm.type === 'swap_power') {
+            const tP = me.power; me.power = targetOp.power; targetOp.power = tP;
+          } else if (itm.type === 'silence') {
+            targetOp.silenced = (targetOp.silenced || 0) + 1;
+          }
+        } else if (currentBossPowerRef) {
+          if (itm.type === 'power_down_single') {
+            if (!currentBossPowerRef.isSpecial) {
+              if (!gameData.bossNerfs) gameData.bossNerfs = {};
+              gameData.bossNerfs[me.pos] = (gameData.bossNerfs[me.pos] || 0) + (itm.val || 500);
+            }
+            currentBossPowerRef.val = Math.max(0, currentBossPowerRef.val - (itm.val || 500));
+          } else if (itm.type === 'reset_boss') {
+            if (gameData.bossLevels) gameData.bossLevels = {};
+            if (gameData.bossNerfs) gameData.bossNerfs = {};
+            currentBossPowerRef.val = currentBossPowerRef.basePower;
+          }
+        }
+      }
+
+      async function useItem(itemId, index) {
+        clearTimeout(afkTimerId);
+        let me = gameData.players[myPlayerId]; let item = itemsConfig[itemId]; 
+        me.afkCount = 0; 
+        
+        let isWarpStart = (item.type === 'warp_start' || item.type === 'ประตูมิติ'); 
+        let isTargetSkill = targetPlayerOnly.includes(item.type) || targetBoth.includes(item.type) || targetBossOnly.includes(item.type);
+        let isMovement = movementItems.includes(item.type);
+
+        let chosenDice = 0; let targetInfo = null;
+        if(item.type === 'loaded_dice') { chosenDice = await openDiceChooser(); if(!chosenDice) return; } 
+        else if (isTargetSkill) { targetInfo = await openTargetSelector(me, item.type); if(!targetInfo) return; }
+        
+        let actualIdx = me.items.indexOf(itemId);
+        if(actualIdx !== -1) me.items.splice(actualIdx, 1);
+        else me.items.splice(index, 1);
+        updateUI();
+
+        isMyTurnProcessing = true; document.getElementById('rollBtn').disabled = true; resetWatchdog();
+        me.itemsUsed = (me.itemsUsed || 0) + 1;
+        addGameLog(`🪄 <b>${me.name}</b> ใช้ไอเท็ม: ${item.name}`); playSound('coin');
+        
+        let targetName = ""; if(targetInfo && targetInfo.type === 'player') targetName = ` ใส่ ${gameData.players.find(x=>x.id===targetInfo.id).name}`; if(targetInfo && targetInfo.type==='boss') targetName = " ใส่บอส!";
+        let bcast = { id: Date.now(), pId: myPlayerId, title: `🪄 ${me.name} ใช้ไอเท็ม${targetName}`, desc: `${item.name}`, img: item.icon };
+        gameData.broadcast = bcast; lastBroadcastId = bcast.id; await playBroadcastCutscene(bcast);
+
+        try {
+            if (item.type === 'loaded_dice') { forcedDiceRoll = chosenDice; showToast(`ล็อกแต้ม: ${chosenDice}`); }
+            else if (isTargetSkill) {
+                if(targetInfo.type === 'player') { 
+                    let p = gameData.players.find(x => x.id === targetInfo.id); 
+                    
+                    if (p.immune || p.skillType === 'item_immunity') { showToast(`🌟 ${p.name} กันเวทย์ได้! ไอเท็มไร้ผล`); showFloatingAnim('🌟 Blocked', '#fff', p.pos); }
+                    else {
+                        if (item.type === 'power_down_single') { p.power = Math.max(0, p.power - (item.val || 500)); showToast(`ลดพลัง ${p.name}!`); showFloatingAnim(`-${item.val||500}✨`, '#e53935', p.pos); playSound('hit');
+                        } else if (item.type === 'half_op_power') { p.power = Math.floor(p.power / 2); showToast(`หารครึ่งพลัง ${p.name}!`); showFloatingAnim(`/2✨`, '#e53935', p.pos); playSound('hit');
+                        } else if (item.type === 'swap_pos') { let tempPos = me.pos; me.pos = p.pos; p.pos = tempPos; showToast(`สลับตำแหน่งกับ ${p.name}!`); playSound('jump'); triggerShake(); await animateStep(me.id, me.pos); await animateStep(p.id, p.pos);
+                        } else if (item.type === 'steal_item') { 
+                            if(p.items.length > 0) { 
+                                let stolen = p.items.splice(Math.floor(Math.random()*p.items.length), 1)[0]; 
+                                let maxCap = me.skillType === 'extra_item_slot' ? 4 : 3; 
+                                if(me.items.length < maxCap) { 
+                                    me.items.push(stolen); 
+                                    if(me.skillType === 'bonus_chest' && me.items.length < maxCap) {
+                                        let r2 = getRandomItemKey();
+                                        if(r2) me.items.push(r2);
+                                    }
+                                    showToast(`ขโมยไอเท็มสำเร็จ!`); 
+                                } else { 
+                                    showToast(`ขโมยมาได้แต่กระเป๋าเต็ม ไอเท็มพังทลาย!`); 
+                                } 
+                                showFloatingAnim('🎒-', '#e53935', p.pos); playSound('coin'); 
+                            } else { showToast(`${p.name} ไม่มีของให้ขโมย!`); }
+                        } else if (item.type === 'destroy_item') { if(p.items.length > 0) { p.items.splice(Math.floor(Math.random()*p.items.length), 1); showToast(`ทำลายของ ${p.name}!`); showFloatingAnim('🔥🎒', '#e53935', p.pos); playSound('hit'); } else { showToast(`${p.name} ไม่มีของ!`); }
+                        } else if (item.type === 'swap_power') { let tP = me.power; me.power = p.power; p.power = tP; showToast(`สลับพลังกับ ${p.name}!`); showFloatingAnim('🔄✨', '#00b0ff', p.pos);
+                        } else if (item.type === 'silence') { p.silenced = (p.silenced || 0) + 1; showToast(`ใบ้ ${p.name}!`); showFloatingAnim('🤐', '#9e9e9e', p.pos);
+                        } else if (item.type === 'skip_turn') { p.skipTurns = (p.skipTurns || 0) + 1; showToast(`สาปหยุดเดิน ${p.name}!`); showFloatingAnim('🛑', '#e53935', p.pos);
+                        } else if (item.type === 'vampire') {
+                            triggerShake(); playSound('hit');
+                            if (applyClientDamage(p, 1, me)) {
+                                me.lives = Math.min(me.maxLives, me.lives + 1); showFloatingAnim('❤️', '#ff1744', me.pos);
+                            }
+                        } else if (['attack','damage','ลดชีวิต'].includes(item.type)) {
+                            triggerShake(); playSound('hit'); 
+                            if (applyClientDamage(p, 1, me)) showToast(`${p.name} เลือดลด!`);
+                        }
+                    }
+                } else if (targetInfo.type === 'boss') { 
+                    if (item.type === 'power_down_single') { 
+                        if(!gameData.bossNerfs) gameData.bossNerfs = {}; gameData.bossNerfs[me.pos] = (gameData.bossNerfs[me.pos] || 0) + (item.val || 500); 
+                        showToast(`ลดพลังบอสลง ${item.val || 500}!`); showFloatingAnim(`-${item.val||500}✨`, '#ff1744', me.pos); playSound('hit');
+                    } else if (['attack','damage','ลดชีวิต'].includes(item.type)) { 
+                        let evt = cellEvents[me.pos]; triggerShake(); playSound('hit'); showToast(`ปลิดชีพบอส ${evt.bossName}!`); 
+                        me.power += 100; showFloatingAnim('+100✨', '#00e676', me.pos); me.bossKills = (me.bossKills || 0) + 1; 
+                        if (!gameData.bossLevels) gameData.bossLevels = {}; gameData.bossLevels[me.pos] = (gameData.bossLevels[me.pos] || 1) * 2; if (!gameData.bossNerfs) gameData.bossNerfs = {}; gameData.bossNerfs[me.pos] = 0; 
+                        if (me.skillType === 'combat_bonus') { let val = me.skillVal || 0; me.power += val; showFloatingAnim(`+${val}✨`, '#00e676', me.pos); }
+                        grantRandomItemToPlayer(me, '🎉 ได้รับไอเท็มจากบอส!');
+                    }
+                }
+            } 
+            else if (item.type === 'power_down_all') { gameData.players.forEach(p => { if(p.id !== me.id && p.lives > 0 && !p.immune && p.skillType !== 'item_immunity') { p.power = Math.max(0, p.power - (item.val || 500)); showFloatingAnim(`-${item.val||500}✨`, '#e53935', p.pos); }}); triggerShake(); playSound('hit'); }
+            else if (item.type === 'move') {
+              const stepsToMove = item.val || 1;
+              showToast(`เดินหน้า ${stepsToMove} ช่อง!`);
+              for (let s = 0; s < stepsToMove; s++) {
+                me.pos++;
+                if (me.pos > totalCells) {
+                  me.pos = 1;
+                  me.power += 500;
+                  showFloatingAnim('+500✨', '#ffea00', me.pos);
+                }
+                await animateStep(me.id, me.pos);
+              }
+            }
+            else if (item.type === 'warp') { me.pos = (item.val && item.val > 0 && item.val <= totalCells) ? item.val : Math.floor(Math.random() * totalCells) + 1; showToast(`วาร์ปไปช่องที่ ${me.pos}`); playSound('jump'); triggerShake(); await animateStep(me.id, me.pos); }
+            else if (item.type === 'teleport_all') { gameData.players.forEach(p => { if(p.lives > 0) p.pos = Math.floor(Math.random() * totalCells) + 1; }); showToast(`ทุกคนถูกวาร์ป!`); triggerShake(); playSound('jump'); }
+            else if (item.type === 'evade') { me.evade = true; showToast("สถานะซ่อนตัว!"); showFloatingAnim('🥷', '#9e9e9e', me.pos); } 
+            else if (item.type === 'immune_1_turn') { me.immune = true; showToast("สถานะอมตะ 1 เทิร์น!"); showFloatingAnim('🌟', '#fff', me.pos); } 
+            else if (item.type === 'reflect') { me.reflect = true; showToast("สถานะสะท้อนดาเมจ!"); showFloatingAnim('🪞', '#4fc3f7', me.pos); } 
+            else if (item.type === 'double_dice') { me.doubleDice = true; showToast("ตาหน้าทอยเต๋าคู่!"); showFloatingAnim('🎲x2', '#ffea00', me.pos); } 
+            else if (item.type === 'double_power') { me.power *= 2; showToast("พลัง x2 ถาวร!"); showFloatingAnim('x2✨', '#ffeb3b', me.pos); } 
+            else if (item.type === 'x3_power') { me.tempBuff = (me.tempBuff || 0) + (me.power * 2); me.power *= 3; showToast("พลัง x3 ชั่วคราว!"); showFloatingAnim('x3✨', '#ffeb3b', me.pos); } 
+            else if (item.type === 'temp_double_power') { me.tempBuff = (me.tempBuff || 0) + me.power; me.power *= 2; showToast("พลัง x2 ชั่วคราว!"); showFloatingAnim('x2✨', '#ffeb3b', me.pos); }
+            else if (item.type === 'power_up' || item.type === 'power') { me.power += (item.val || 500); showToast(`+${item.val || 500} พลัง!`); showFloatingAnim(`+${item.val||500}✨`, '#00e676', me.pos); } 
+            else if (item.type === 'shield') { me.shield = true; showToast("กางโล่!"); showFloatingAnim('🛡️', '#4fc3f7', me.pos); } 
+            else if (item.type === 'shield_all') { gameData.players.forEach(p => { if(p.lives > 0) { p.shield = true; showFloatingAnim('🛡️', '#4fc3f7', p.pos); }}); showToast("กางโล่ให้ทุกคน!"); } 
+            else if (item.type === 'heal') { me.lives = Math.min(me.maxLives, me.lives + (item.val || 1)); showToast(`ฮีลเลือด!`); showFloatingAnim('❤️', '#ff1744', me.pos); } 
+            else if (item.type === 'max_heal') { me.lives = me.maxLives; showToast(`ฮีลเต็มหลอด!`); showFloatingAnim('❤️MAX', '#ff1744', me.pos); } 
+            else if (item.type === 'random_buff') { 
+                let r = Math.random(); 
+                if(r < 0.33) { me.power += 500; showFloatingAnim('+500✨', '#00e676', me.pos); } 
+                else if (r < 0.66) { me.shield = true; showFloatingAnim('🛡️', '#4fc3f7', me.pos); } 
+                else { me.lives = Math.min(me.maxLives, me.lives + 1); showFloatingAnim('❤️', '#ff1744', me.pos); } 
+            }
+            else if (isWarpStart) { me.pos = 1; showToast("วาร์ปกลับจุดเริ่มต้น"); playSound('jump'); triggerShake(); await animateStep(me.id, me.pos); }
+            else if (item.type === 'trigger_world_event') { await triggerWorldEvent(); }
+            else if (item.type === 'reset_boss') { if(gameData.bossLevels) gameData.bossLevels = {}; if(gameData.bossNerfs) gameData.bossNerfs = {}; showToast("บอสทั้งหมดถูกรีเซ็ตพลัง!"); triggerShake(); }
+
+            updateUI(); 
+            if(isMovement) { 
+                await triggerCellEffect(me); 
+            }
+
+        } catch (error) {
+            console.error("Item Error:", error); showToast("⚠️ ขัดข้องระหว่างใช้ไอเท็ม แต่เกมยังเล่นต่อได้");
+        } finally {
+            if(!checkWinCondition()) {
+                prevDataStr = JSON.stringify(gameData);
+                google.script.run.withSuccessHandler(res => { 
+                    if (res && res.v) lastStateVersion = res.v;
+                    isMyTurnProcessing = false; document.getElementById('rollBtn').disabled = false; clearTimeout(watchdogTimer);
+                    scheduleNextPoll(800); 
+                }).withFailureHandler(()=>{
+                    isMyTurnProcessing = false; document.getElementById('rollBtn').disabled = false; clearTimeout(watchdogTimer);
+                    scheduleNextPoll(2000); 
+                }).updateGameState(myRoomCode, JSON.stringify(gameData));
+            }
+        }
+      }
+
+      function rollDice() {
+        clearTimeout(afkTimerId);
+        clearTimeout(pollingTimer); isMyTurnProcessing = true; document.getElementById('rollBtn').disabled = true; resetWatchdog(); document.getElementById('rollBtn').style.display = 'none';
+        let me = gameData.players[myPlayerId]; 
+        me.status = me.status || [];
+        
+        let bonus = 0; if (me.skillType === 'roll_bonus') bonus = me.skillVal || 1; 
+        if (me.status.includes('move_boost')) {
+          bonus += (me.activeSkillVal > 0 ? me.activeSkillVal : 3);
+          me.status = me.status.filter(s => s !== 'move_boost');
+        }
+        let penalty = 0;
+        if (me.status.includes('reduce_dice')) {
+          penalty = 2;
+          me.status = me.status.filter(s => s !== 'reduce_dice');
+        }
+        
+        if(me.skillType === 'dice_master') { me.doubleDice = true; showFloatingAnim('🎲x2', '#ffea00', me.pos); }
+        
+        me.afkCount = 0;
+
+        let baseRoll1 = forcedDiceRoll > 0 ? forcedDiceRoll : Math.floor(Math.random() * 6) + 1; 
+        forcedDiceRoll = 0; 
+        let baseRoll2 = 0;
+
+        if (me.doubleDice) {
+            baseRoll2 = Math.floor(Math.random() * 6) + 1;
+            me.doubleDice = false;
+        }
+
+        let totalRoll = Math.max(1, baseRoll1 + baseRoll2 + bonus - penalty);
+
+        const modal = document.getElementById('dice-modal'); 
+        const display1 = document.getElementById('diceDisplay1');
+        const display2 = document.getElementById('diceDisplay2');
+        const bonusDisplay = document.getElementById('dice-bonus-display'); 
+        
+        display1.style.display = 'block';
+        display2.style.display = baseRoll2 > 0 ? 'block' : 'none';
+
+        modal.style.display = 'flex';
+        bonusDisplay.innerHTML = penalty > 0 ? `<span style="color:#e53935;">🕸️ โดนลดระยะเดิน -${penalty}</span>` : (bonus > 0 ? `⚡ โบนัส +${bonus}` : "");
+        
+        let rollCount = 0; 
+        let intv = setInterval(() => { 
+            display1.innerText = diceFaces[Math.floor(Math.random() * 6)]; 
+            if(baseRoll2 > 0) display2.innerText = diceFaces[Math.floor(Math.random() * 6)]; 
+            
+            rollCount++; 
+            if(rollCount > 15) { 
+                clearInterval(intv); 
+                display1.innerText = diceFaces[baseRoll1 - 1]; 
+                if(baseRoll2 > 0) display2.innerText = diceFaces[baseRoll2 - 1];
+                showToast(`ได้ ${totalRoll} แต้ม!`);
+                setTimeout(() => { modal.style.display = 'none'; processMyMove(totalRoll); }, 2500); 
+            } 
+        }, 100); 
+      }
+
+      function delay(ms) { return new Promise(res => setTimeout(res, ms)); }
+      async function animateStep(playerId, targetPos) {
+        const token = document.getElementById('token-' + playerId); let coords = getCellCoords(targetPos); let offsetLeft = (playerId % 2 === 0) ? 7 : -7; let offsetTop = (playerId < 2) ? 7 : -7;
+        token.style.top = (coords.row * CELL_SIZE) + offsetTop + 'px'; token.style.left = (coords.col * CELL_SIZE) + offsetLeft + 'px'; token.classList.add('hopping'); playSound('jump'); await delay(400); token.classList.remove('hopping');
+      }
+
+      function openQuiz(me, isBonusSpawn = false) {
+        return new Promise(resolve => {
+            try {
+                const modal = document.getElementById('quiz-modal'); const qObj = loadedQuestions[Math.floor(Math.random() * loadedQuestions.length)]; 
+                let rewardScore = isBonusSpawn ? 200 : (qObj.reward || 500); 
+                
+                if (me.skillType === 'double_reward' || me.skillType === 'quiz_master') rewardScore *= 2;
+
+                document.getElementById('quiz-q').innerText = qObj.q; const container = document.getElementById('quiz-choices'); container.innerHTML = '';
+                qObj.choices.forEach((choice, idx) => { container.innerHTML += `<button class="btn btn-create" style="background: #e1f5fe; color:#0288d1; border:2px solid #0288d1; margin-bottom:10px;" onclick="answerQuiz(${idx}, ${qObj.ans}, ${rewardScore})">${choice}</button>`; });
+                modal.style.display = 'flex';
+
+                window.answerQuiz = async function(selected, correct, score) {
+                    modal.style.display = 'none';
+                    if(selected === correct) { 
+                        showToast(`🎉 ตอบถูก! รับพลัง +${score}`); showFloatingAnim(`+${score}✨`, '#00e676', me.pos); playSound('coin'); me.power += score; 
+                        if(isBonusSpawn || me.skillType === 'quiz_master') { 
+                            grantRandomItemToPlayer(me);
+                        }
+                    } else { showToast(`❌ ผิด! หักพลัง -200`); showFloatingAnim(`-200✨`, '#e53935', me.pos); playSound('hurt'); triggerShake(); me.power = Math.max(0, me.power - 200); }
+                    await delay(1000); resolve();
+                }
+            } catch(e) { resolve(); }
+        });
+      }
+
+      function openShop(me) { 
+        return new Promise(resolve => { 
+            try {
+                const shop = document.getElementById('shop-modal'); document.getElementById('shop-power-display').innerText = me.power; 
+                const container = document.getElementById('shop-items-container'); 
+                let shopHtml = `<div class="shop-flex" style="display:flex; gap:10px; text-align:left;"><div class="shop-list-area" style="flex:1; max-height: 250px; overflow-y: auto;" id="shop-list"></div><div class="shop-detail-area" style="flex:1; border-left: 2px dashed #ccc; padding-left:10px; display:flex; flex-direction:column; justify-content:space-between;" id="shop-detail"><div style="color:#888; text-align:center; margin-top:50px; font-size:14px;">👈 เลือกไอเท็มเพื่อดูรายละเอียด</div></div></div>`; container.innerHTML = shopHtml;
+                const listDiv = document.getElementById('shop-list'); let keys = Object.keys(itemsConfig); 
+                if(keys.length === 0) listDiv.innerHTML = '<p>ไม่มีไอเท็ม</p>'; else keys.forEach(k => { 
+                    let i = itemsConfig[k]; 
+                    let price = i.price || 200; 
+                    if(me.skillType === 'discount_shop') price = Math.floor(price * 0.8);
+                    listDiv.innerHTML += `<div class="shop-item-btn" style="font-size:14px;" onclick="previewShopItem('${k}', ${price})"><span>${i.icon} ${i.name}</span> <span style="color:#ff8f00;">${price}✨</span></div>`; 
+                }); 
+                
+                window.previewShopItem = function(k, price) {
+                    let i = itemsConfig[k]; let desc = getItemDescInfo(i); let detailDiv = document.getElementById('shop-detail');
+                    detailDiv.innerHTML = `<div><div style="font-size:40px; text-align:center;">${i.icon}</div><h3 style="margin:5px 0; text-align:center; color:#333; font-size:16px;">${i.name}</h3><p style="font-size:12px; color:#1a237e; background:#e8eaf6; padding:5px; border-radius:5px;">${desc}</p><p style="text-align:center; font-weight:bold; color:#ff8f00;">ราคา: ${price} ✨</p></div><button class="btn btn-create" style="background:#4caf50; color:white; padding:10px; font-size:16px;" onclick="buyItem('${k}', ${price})">✅ ยืนยันซื้อ</button>`;
+                };
+                shop.style.display = 'flex'; 
+                window.buyItem = function(k, price) { 
+                    let maxCap = me.skillType === 'extra_item_slot' ? 4 : 3; 
+                    if(me.power>=price) { 
+                        if(me.items.length<maxCap) { 
+                            me.power-=price; 
+                            me.items.push(k); 
+                            if(me.skillType === 'bonus_chest' && me.items.length < maxCap) {
+                                let r2 = getRandomItemKey();
+                                if(r2) me.items.push(r2);
+                            }
+                            showToast(`ซื้อสำเร็จ!`); playSound('coin'); document.getElementById('shop-power-display').innerText = me.power; document.getElementById('shop-detail').innerHTML = `<div style="color:#4caf50; text-align:center; margin-top:50px; font-weight:bold;">✨ ซื้อสำเร็จ!</div>`; 
+                        } else showToast("กระเป๋าเต็ม!"); 
+                    } else showToast("พลังไม่พอ!"); 
+                }; 
+                window.closeShop = function() { shop.style.display = 'none'; resolve(); }; 
+            } catch(e) { resolve(); }
+        }); 
+      }
+
+      async function triggerRandomSituation(me) {
+          try {
+              if(me.skillType === 'escape_artist' && Math.random() < 0.5) { showToast("🥷 ใช้ความไวหลบเหตุการณ์สุ่มมาได้!"); return; }
+
+              const situations = ['skip', 'move_1', 'warp_start', 'storm_back']; 
+              const sit = situations[Math.floor(Math.random() * situations.length)];
+              document.getElementById('flash-overlay').style.background = '#81c784'; document.getElementById('flash-overlay').classList.add('flash-anim'); setTimeout(() => { document.getElementById('flash-overlay').classList.remove('flash-anim'); document.getElementById('flash-overlay').style.background = '#fff59d'; }, 600);
+              
+              if (sit === 'skip') { me.skipTurns = 1; showToast("เหตุการณ์ไม่ปกติ! หยุดเดิน 1 ตา"); showFloatingAnim('🛑', '#e53935', me.pos); } 
+              else if (sit === 'move_1') { showToast("เหตุการณ์ไม่ปกติ! ถูกพัดเดินหน้า 1 ช่อง"); me.pos += 1; if(me.pos > totalCells) { me.pos = 1; me.power += 500; showFloatingAnim('+500✨', '#ffea00', me.pos); } await animateStep(me.id, me.pos); } 
+              else if (sit === 'warp_start') { showToast("เหตุการณ์ไม่ปกติ! ถูกวาร์ปสุ่ม"); me.pos = Math.floor(Math.random() * totalCells) + 1; playSound('jump'); triggerShake(); await animateStep(me.id, me.pos); } 
+              else if (sit === 'storm_back') { showToast("เหตุการณ์ไม่ปกติ! พายุพัดถอยหลัง 2 ช่อง"); me.pos -= 2; if(me.pos < 1) me.pos = 1; playSound('jump'); triggerShake(); await animateStep(me.id, me.pos); }
+              
+              addGameLog(`🎲 <b>${me.name}</b> เจอเหตุการณ์เคลื่อนที่สุ่ม!`); updateUI(); await delay(1000);
+          } catch(e) {}
+      }
+
+      async function triggerWorldEvent() {
+          try {
+              let keys = Object.keys(eventsConfig); if(keys.length === 0) return; let ev = eventsConfig[getRandomEventKey()];
+              document.getElementById('flash-overlay').style.background = '#ce93d8'; document.getElementById('flash-overlay').classList.add('flash-anim'); setTimeout(() => { document.getElementById('flash-overlay').classList.remove('flash-anim'); document.getElementById('flash-overlay').style.background = '#fff59d'; }, 600);
+              let bcast = { id: Date.now(), pId: myPlayerId, title: `🌍 เหตุการณ์โลก!`, desc: `${ev.name}: ${getEventDesc(ev)}`, img: '🌀' }; gameData.broadcast = bcast; lastBroadcastId = bcast.id; await playBroadcastCutscene(bcast);
+              gameData.players.forEach(p => {
+                  if(p.lives <= 0 || p.skillType === 'world_event_immune') return; 
+                  
+                  if (p.skillType === 'event_healer') {
+                      p.lives = Math.min(p.maxLives, p.lives + (p.skillVal || 1)); showFloatingAnim('❤️', '#ff1744', p.pos);
+                  }
+
+                  if(ev.type === 'power_all') { p.power += (ev.val || 0); showFloatingAnim(`+${ev.val||0}✨`, '#00e676', p.pos); } 
+                  else if (ev.type === 'damage_all') { applyClientDamage(p, ev.val || 1); } 
+                  else if (ev.type === 'heal_all') { p.lives = Math.min(p.maxLives, p.lives + (ev.val||1)); showFloatingAnim('❤️', '#ff1744', p.pos); }
+                  else if (ev.type === 'drop_item_1') { if(p.items.length > 0) { p.items.splice(Math.floor(Math.random() * p.items.length), 1); } }
+                  else if (ev.type === 'drop_item_all') { p.items = []; }
+                  else if (ev.type === 'halve_power_all') { p.power = Math.floor(p.power / 2); showFloatingAnim('/2✨', '#e53935', p.pos); }
+                  else if (ev.type === 'move_all') { p.pos += (ev.val || 0); if(p.pos > totalCells) { p.pos = p.pos % totalCells; if(p.pos===0) p.pos=1; } if(p.pos < 1) p.pos = 1; animateStep(p.id, p.pos); }
+                  else if (ev.type === 'storm_back') { p.pos -= (ev.val || 2); if(p.pos < 1) p.pos = 1; animateStep(p.id, p.pos); }
+                  else if (ev.type === 'rainbow_blessing') { p.power += (ev.val || 500); showFloatingAnim(`+${ev.val || 500}✨`, '#00e676', p.pos); }
+                  else if (ev.type === 'divine_shield') { p.shield = true; showFloatingAnim('🛡️', '#4fc3f7', p.pos); }
+                  else if (ev.type === 'dimension_rift') { p.pos = Math.floor(Math.random() * totalCells) + 1; animateStep(p.id, p.pos); }
+                  else if (ev.type === 'healing_spring') { p.lives = p.maxLives; showFloatingAnim('❤️MAX', '#ff1744', p.pos); }
+                  else if (ev.type === 'black_market') { if(p.items.length > 0) p.items.splice(Math.floor(Math.random() * p.items.length), 1); showFloatingAnim('🎒-', '#e53935', p.pos); }
+                  else if (ev.type === 'silent_curse') { p.silenced = (p.silenced || 0) + 1; showFloatingAnim('🤐', '#9e9e9e', p.pos); }
+              });
+              updateUI(); await delay(1000);
+          } catch(e) {}
+      }
+
+      function handlePvP(me) {
+        return new Promise(async resolve => {
+          try {
+              me.status = me.status || [];
+              if (me.status.includes('peace')) {
+                me.status = me.status.filter(s => s !== 'peace');
+                showToast("🕊️ เจรจาพาที ยกเลิกการต่อสู้!");
+                return resolve();
+              }
+              if(me.evade) { showToast("🥷 ซ่อนตัวผ่านการต่อสู้!"); me.evade = false; return resolve(); }
+              let enemies = gameData.players.filter(p => p.id !== me.id && p.pos === me.pos && p.pos !== 1 && p.lives > 0 && !(p.status && p.status.includes('invisible'))); 
+              if(enemies.length === 0) return resolve();
+
+              for(let op of enemies) {
+                if (me.lives <= 0) break; 
+                
+                if (me.skillType === 'combat_power') {
+                    let val = me.skillVal || 0;
+                    me.power += val;
+                    showFloatingAnim(`+${val}✨`, '#00e676', me.pos);
+                }
+                if (op.skillType === 'combat_power') {
+                    let val = op.skillVal || 0;
+                    op.power += val;
+                    showFloatingAnim(`+${val}✨`, '#00e676', op.pos);
+                }
+                if (me.skillType === 'combat_power' || op.skillType === 'combat_power') {
+                    await delay(600);
+                }
+
+                await playPvPCutscene(me.icon, op.icon);
+                
+                try {
+                    let fightResult = await new Promise(res => {
+                      const modal = document.getElementById('combat-modal');
+                      document.getElementById('combat-actions').style.display = 'block'; document.getElementById('combat-result-text').style.display = 'none'; 
+                      document.getElementById('combat-me-img').src = me.icon; document.getElementById('combat-me-name').innerText = me.name; document.getElementById('combat-me-power').innerText = me.power; document.getElementById('combat-me-lives').innerText = '❤️'.repeat(Math.max(0, me.lives));
+                      document.getElementById('combat-op-img').src = op.icon; document.getElementById('combat-op-name').innerText = op.name; document.getElementById('combat-op-power').innerText = op.power; document.getElementById('combat-op-lives').innerText = '❤️'.repeat(Math.max(0, op.lives));
+                      
+                      const renderPvpItems = () => {
+                        const itemBox = document.getElementById('combat-items-container'); itemBox.innerHTML = '';
+                        me.items.forEach((itemId, idx) => { let itm = itemsConfig[itemId]; if(itm) { if(allowedCombatTypes.includes(itm.type) && !movementItems.includes(itm.type) && !targetBossOnly.includes(itm.type)) { itemBox.innerHTML += `<div class="item-slot usable" onclick="promptUseItem('${itemId}', ${idx}, 'combat', ${op.id}, true)" title="${itm.name}">${itm.icon}</div>`; } else { itemBox.innerHTML += `<div class="item-slot" style="opacity: 0.3; cursor: not-allowed; filter: grayscale(100%);" title="${itm.name} (ห้ามใช้ตอนต่อสู้)">${itm.icon}</div>`; } } });
+                        if(itemBox.innerHTML === '') itemBox.innerHTML = '<span style="color:#888; font-size:12px;">(ไม่มีไอเท็มที่ใช้ได้)</span>';
+                      };
+                      renderPvpItems();
+                      
+                      let pvpResolved = false; 
+                      
+                      window.resolveCombatItem = async function(pendingItm) {
+                          try {
+                              let itm = itemsConfig[pendingItm.id]; let targetOp = gameData.players.find(p=>p.id===pendingItm.targetId); 
+                              if (targetOp.immune || targetOp.skillType === 'item_immunity') { showToast("❌ ศัตรูมีพลังป้องกันเวทย์!"); return; } 
+                              playSound('coin'); 
+                              let actualIdx = me.items.indexOf(pendingItm.id);
+                              if(actualIdx !== -1) me.items.splice(actualIdx, 1);
+                              else me.items.splice(pendingItm.idx, 1);
+                              me.itemsUsed = (me.itemsUsed||0) + 1; updateUI();
+                              
+                              let bcast = { id: Date.now(), pId: myPlayerId, title: `🪄 ${me.name} ใช้ไอเท็มใส่ ${targetOp.name}!`, desc: `${itm.name}`, img: itm.icon }; gameData.broadcast = bcast; lastBroadcastId = bcast.id; playBroadcastCutscene(bcast);
+
+                              await applyCombatItemEffect(me, targetOp, itm, null);
+                              
+                              document.getElementById('combat-me-power').innerText = me.power; document.getElementById('combat-op-power').innerText = targetOp.power; document.getElementById('combat-me-lives').innerText = '❤️'.repeat(Math.max(0, me.lives)); document.getElementById('combat-op-lives').innerText = '❤️'.repeat(Math.max(0, targetOp.lives)); updateUI();
+                              
+                              if (targetOp.lives <= 0 || me.lives <= 0) { 
+                                  if(pvpResolved) return; pvpResolved = true;
+                                  modal.style.display = 'none'; return res({action: 'item_kill'}); 
+                              }
+                              renderPvpItems();
+                          } catch(e) { if(pvpResolved) return; pvpResolved = true; res({action: 'skip'}); }
+                      };
+
+                      modal.style.display = 'flex'; 
+                      window.resolveCombat = async function(c) {
+                          if(pvpResolved) return; pvpResolved = true;
+                          document.getElementById('combat-actions').style.display = 'none';
+                          
+                          if(c === 'fight') { 
+                              let meTotal = me.power;
+                              let opTotal = op.power;
+                              
+                              document.getElementById('combat-me').classList.add('clash-left'); document.getElementById('combat-op').classList.add('clash-right'); playSound('hit'); await delay(500); document.getElementById('combat-me').classList.remove('clash-left'); document.getElementById('combat-op').classList.remove('clash-right'); 
+                              
+                              let rText = document.getElementById('combat-result-text');
+                              rText.innerHTML = `<div style="font-size:18px; color:#555; margin-bottom:5px;">(คุณ: ${meTotal} vs ศัตรู: ${opTotal})</div>`;
+                              if(meTotal > opTotal) { rText.innerHTML += `<span style="color:#4caf50;">🏆 ชนะ!</span>`; } else if(meTotal < opTotal) { rText.innerHTML += `💀 แพ้!`; } else { rText.innerHTML += `<span style="color:#ffb300;">⚖️ เสมอ! ไม่มีใครเจ็บตัว</span>`; }
+                              rText.style.display = 'block'; await delay(2500); modal.style.display = 'none'; res({action: 'fight', mTot: meTotal, oTot: opTotal});
+                          } else if (c === 'flee') { 
+                              modal.style.display = 'none'; res({action: 'flee'}); 
+                          } else { 
+                              modal.style.display = 'none'; res({action: 'skip'}); 
+                          }
+                      }
+                    });
+
+                    if (fightResult.action === 'flee') {
+                        showToast("🏃♂️ หลบหนีการต่อสู้สำเร็จ!");
+                    } else if (fightResult.action === 'fight') {
+                      triggerShake(); await delay(200);
+                      if(fightResult.mTot > fightResult.oTot) { 
+                          if (applyClientDamage(op, 1, me)) {
+                              playSound('hurt'); addGameLog(`⚔️ <b>${me.name}</b> อัด <b>${op.name}</b> เลือดลด!`); 
+                              if (me.skillType === 'vampire_strike') { me.lives = Math.min(me.maxLives, me.lives+1); showFloatingAnim('+❤️', '#ff1744', me.pos); }
+                              if (me.skillType === 'item_stealer' && op.items.length > 0) {
+                                  const maxCap = me.skillType === 'extra_item_slot' ? 4 : 3;
+                                  if (me.items.length < maxCap) { me.items.push(op.items.pop()); showToast("ขโมยไอเท็มมาได้ 1 ชิ้น!"); }
+                              }
+                              if (op.skillType === 'combat_bonus') { let val = op.skillVal || 0; op.power += val; showFloatingAnim(`+${val}✨`, '#00e676', op.pos); }
+                          }
+                      } else if(fightResult.mTot < fightResult.oTot) { 
+                          if (applyClientDamage(me, 1, op)) {
+                              playSound('hurt'); addGameLog(`💥 <b>${me.name}</b> แพ้ <b>${op.name}</b>!`); 
+                              if (me.skillType === 'counter_attack' && Math.random() < 0.5) { showToast("พลังสวนกลับ!"); applyClientDamage(op, 1, me); }
+                              if (me.skillType === 'reflect_chance' && (Math.random()*100) < (me.skillVal||0)) { showToast("พลังสะท้อนกลับทำงาน!"); applyClientDamage(op, 1, me); }
+                              if (me.skillType === 'combat_bonus') { let val = me.skillVal || 0; me.power += val; showFloatingAnim(`+${val}✨`, '#00e676', me.pos); }
+                              if(me.lives<=0) break; 
+                          }
+                      } else { await delay(500); }
+                    } else if (fightResult.action === 'item_kill') { await delay(500); }
+                } catch (innerE) {
+                    console.error("PvP Promise Error:", innerE);
+                    document.getElementById('combat-modal').style.display = 'none';
+                }
+              }
+              document.getElementById('pvp-cutscene').style.display = 'none'; document.getElementById('combat-modal').style.display = 'none';
+              resolve();
+          } catch (e) {
+              console.error("PvP Main Error:", e); document.getElementById('pvp-cutscene').style.display = 'none'; document.getElementById('combat-modal').style.display = 'none'; resolve();
+          }
+        });
+      }
+
+      function handleBoss(me, bossConfig) {
+        return new Promise(async resolve => {
+          try {
+              me.status = me.status || [];
+              if (me.status.includes('peace')) {
+                me.status = me.status.filter(s => s !== 'peace');
+                showToast("🕊️ เจรจาพาที ข้ามการสู้บอส!");
+                return resolve();
+              }
+              if(me.evade) { showToast("🥷 ซ่อนตัวผ่านบอสไป!"); me.evade = false; return resolve(); }
+              
+              if (me.skillType === 'combat_power') {
+                  let val = me.skillVal || 0;
+                  me.power += val;
+                  showFloatingAnim(`+${val}✨`, '#00e676', me.pos);
+                  await delay(600);
+              }
+              await playPvPCutscene(me.icon, bossConfig.bossImg);
+
+              const modal = document.getElementById('boss-modal'); document.getElementById('boss-result-text').style.display = 'none'; document.getElementById('boss-me-dice').style.display = 'none'; document.getElementById('boss-op-dice').style.display = 'none';
+              
+              const actionsContainer = document.getElementById('boss-actions');
+              actionsContainer.style.display = 'block';
+              actionsContainer.innerHTML = `<button class="btn btn-create" style="background: #e53935; color:white; width: 100%;" onclick="resolveBossFight('fight')">🎲 ทอยเต๋าสู้มัน!</button>`;
+              if (me.skillType === 'escape_artist') {
+                  actionsContainer.innerHTML += `<button class="btn" style="background: #9e9e9e; color:white; width: 100%; margin-top: 10px;" onclick="resolveBossFight('flee')">🏃♂️ หลบหนีบอส</button>`;
+              }
+              
+              let rebirthLvl = (gameData.bossLevels && gameData.bossLevels[me.pos]) ? gameData.bossLevels[me.pos] : 1; let nerf = (gameData.bossNerfs && gameData.bossNerfs[me.pos]) ? gameData.bossNerfs[me.pos] : 0;
+              let bossPowerRef = {
+                val: bossConfig.isSpecial ? bossConfig.bossPower : Math.max(0, (bossConfig.bossPower * rebirthLvl) - nerf),
+                basePower: bossConfig.bossPower,
+                isSpecial: Boolean(bossConfig.isSpecial)
+              };
+              
+              document.getElementById('boss-name-display').innerText = bossConfig.bossName; document.getElementById('boss-me-img').src = me.icon; document.getElementById('boss-my-power').innerText = me.power; document.getElementById('boss-me-lives').innerText = '❤️'.repeat(Math.max(0, me.lives)); document.getElementById('boss-img-display').src = bossConfig.bossImg; document.getElementById('boss-base-power').innerText = bossPowerRef.val;
+              
+              const renderBossItems = () => {
+                const itemBox = document.getElementById('boss-items-container'); itemBox.innerHTML = '';
+                me.items.forEach((itemId, idx) => { let itm = itemsConfig[itemId]; if(itm) { if(allowedCombatTypes.includes(itm.type) && !movementItems.includes(itm.type) && !targetPlayerOnly.includes(itm.type)) { itemBox.innerHTML += `<div class="item-slot usable" onclick="promptUseItem('${itemId}', ${idx}, 'boss', null, true)" title="${itm.name}">${itm.icon}</div>`; } else { itemBox.innerHTML += `<div class="item-slot" style="opacity: 0.3; cursor: not-allowed;" title="${itm.name}">${itm.icon}</div>`; } } });
+                if(itemBox.innerHTML === '') itemBox.innerHTML = '<span style="color:#888; font-size:12px;">(ไม่มีไอเท็มที่สู้บอสได้)</span>';
+              };
+              renderBossItems();
+
+              let bossResolved = false;
+
+              window.resolveCombatItem = async function(pendingItm) { 
+                  try {
+                      let itm = itemsConfig[pendingItm.id]; playSound('coin'); 
+                      let actualIdx = me.items.indexOf(pendingItm.id);
+                      if(actualIdx !== -1) me.items.splice(actualIdx, 1);
+                      else me.items.splice(pendingItm.idx, 1);
+                      me.itemsUsed = (me.itemsUsed||0) + 1; updateUI();
+                      let bcast = { id: Date.now(), pId: myPlayerId, title: `🪄 ${me.name} สาดไอเท็มใส่บอส!`, desc: `${itm.name}`, img: itm.icon }; gameData.broadcast = bcast; lastBroadcastId = bcast.id; playBroadcastCutscene(bcast);
+
+                      if (['attack','damage','ลดชีวิต'].includes(itm.type)) { 
+                          if(bossResolved) return; bossResolved = true;
+                          modal.style.display = 'none'; triggerShake(); playSound('hit'); showToast("⚡ ปลิดชีพบอสสำเร็จ!"); await delay(1000); 
+                          me.power += 100; showFloatingAnim('+100✨', '#00e676', me.pos);
+                          if(!bossConfig.isSpecial) { me.bossKills = (me.bossKills || 0) + 1; if (!gameData.bossLevels) gameData.bossLevels = {}; gameData.bossLevels[me.pos] = (gameData.bossLevels[me.pos] || 1) * 2; if (!gameData.bossNerfs) gameData.bossNerfs = {}; gameData.bossNerfs[me.pos] = 0; }
+                          if (!grantRandomItemToPlayer(me, '🎉 ได้รับไอเท็มจากบอส!')) {
+                            setTimeout(() => showToast('กระเป๋าเต็ม! อดได้ไอเท็มจากบอส'), 1000);
+                          }
+                          return resolve(); 
+                      }
+                      await applyCombatItemEffect(me, null, itm, bossPowerRef);
+                      document.getElementById('boss-base-power').innerText = bossPowerRef.val;
+                      document.getElementById('boss-my-power').innerText = me.power; document.getElementById('boss-me-lives').innerText = '❤️'.repeat(Math.max(0, me.lives)); updateUI();
+                      renderBossItems();
+                  } catch(e) {}
+              };
+
+              modal.style.display = 'flex';
+              window.resolveBossFight = async function(c) {
+                  if(bossResolved) return; bossResolved = true;
+                  try {
+                    if (c === 'flee') {
+                        modal.style.display = 'none';
+                        showToast("🥷 หลบหนีบอสสำเร็จ!");
+                        return resolve();
+                    }
+
+                    document.getElementById('boss-actions').style.display = 'none'; document.getElementById('boss-me-dice').style.display = 'block'; document.getElementById('boss-op-dice').style.display = 'block'; playSound('jump');
+                    let myBaseRoll = forcedDiceRoll > 0 ? forcedDiceRoll : Math.floor(Math.random() * 6) + 1; forcedDiceRoll = 0; let bossBaseRoll = Math.floor(Math.random() * 6) + 1; 
+                    for(let i=0; i<8; i++) { document.getElementById('boss-me-dice').innerText = diceFaces[Math.floor(Math.random() * 6)]; document.getElementById('boss-op-dice').innerText = diceFaces[Math.floor(Math.random() * 6)]; await delay(50); }
+                    document.getElementById('boss-me-dice').innerText = diceFaces[myBaseRoll - 1]; document.getElementById('boss-op-dice').innerText = diceFaces[bossBaseRoll - 1];
+                    
+                    let virtualPower = me.power;
+                    let diceMult = (me.skillType === 'boss_slayer') ? 200 : 100;
+                    let myTotal = virtualPower + (myBaseRoll * diceMult); let bossTotal = bossPowerRef.val + (bossBaseRoll * 100);
+                    document.getElementById('boss-me').classList.add('clash-left'); document.getElementById('boss-monster').classList.add('clash-right'); playSound('hit'); await delay(500); document.getElementById('boss-me').classList.remove('clash-left'); document.getElementById('boss-monster').classList.remove('clash-right'); 
+                    
+                    let rText = document.getElementById('boss-result-text');
+                    rText.innerHTML = `<div style="font-size:18px; color:#555; margin-bottom:5px;">(คุณ: ${myTotal} vs บอส: ${bossTotal})</div>`;
+                    if(myTotal >= bossTotal) { rText.innerHTML += `<span style="color:#4caf50;">🎉 ชนะ!</span>`; } else { rText.innerHTML += `💀 แพ้!`; }
+                    rText.style.display = 'block'; await delay(2500); modal.style.display = 'none'; triggerShake(); 
+                    
+                    if(myTotal >= bossTotal) { 
+                        playSound('coin'); 
+                        me.power += 100; showFloatingAnim('+100✨', '#00e676', me.pos);
+                        if(bossConfig.isSpecial) { me.power += 200; showFloatingAnim('+200✨', '#00e676', me.pos); } 
+                        else { me.bossKills = (me.bossKills || 0) + 1; if (!gameData.bossLevels) gameData.bossLevels = {}; gameData.bossLevels[me.pos] = (gameData.bossLevels[me.pos] || 1) * 2; if (!gameData.bossNerfs) gameData.bossNerfs = {}; gameData.bossNerfs[me.pos] = 0; }
+                        if (!grantRandomItemToPlayer(me, '🎉 ได้รับไอเท็มจากบอส!')) {
+                          setTimeout(() => showToast('กระเป๋าเต็ม! อดได้ไอเท็มจากบอส'), 1000);
+                        }
+                    } else { 
+                        if (applyClientDamage(me, 1)) {
+                            playSound('hurt'); 
+                            if (me.skillType === 'combat_bonus') { let val = me.skillVal || 0; me.power += val; showFloatingAnim(`+${val}✨`, '#00e676', me.pos); }
+                        }
+                    }
+                    
+                    document.getElementById('pvp-cutscene').style.display = 'none'; document.getElementById('boss-modal').style.display = 'none';
+                    await delay(1000); resolve();
+                  } catch(e) { resolve(); }
+              };
+          } catch(e) {
+              document.getElementById('pvp-cutscene').style.display = 'none'; document.getElementById('boss-modal').style.display = 'none'; resolve();
+          }
+        });
+      }
+
+      function resetPlayer(p) { 
+          p.status = p.status || [];
+          let autoRevIdx = p.status.indexOf('auto_revive');
+          if (autoRevIdx !== -1) {
+              p.status.splice(autoRevIdx, 1); p.lives = 1; showToast(`✨ ${p.name} ฟื้นคืนชีพ!`); addGameLog(`👼 <b>${p.name}</b> คืนชีพจากสกิลถอดดวงใจ!`); showFloatingAnim('👼', '#fff', p.pos); return;
+          }
+          let revIdx = p.items.findIndex(i => itemsConfig[i] && itemsConfig[i].type === 'revive');
+          if (revIdx !== -1) {
+              p.items.splice(revIdx, 1); p.lives = 1; showToast(`✨ ${p.name} ฟื้นคืนชีพ!`); addGameLog(`👼 <b>${p.name}</b> ใช้ไอเท็มชุบชีวิตตัวเอง!`); showFloatingAnim('👼', '#fff', p.pos); return;
+          }
+          if (p.skillType === 'revive_once' && !p.intrinsicReviveUsed) {
+              p.intrinsicReviveUsed = true; p.lives = p.maxLives; showToast(`✨ สกิลทำงาน! ${p.name} ฟื้นคืนชีพเต็มหลอด`); addGameLog(`👼 <b>${p.name}</b> คืนชีพด้วยสกิลพิเศษ!`); showFloatingAnim('👼', '#fff', p.pos); return;
+          }
+          if (p.skillType === 'last_stand' && !p.intrinsicLastStandUsed) {
+              p.intrinsicLastStandUsed = true; p.lives = 1; p.power += (p.skillVal||500); showToast(`✨ ฮึดสู้! ${p.name} รอดตายหวุดหวิด`); addGameLog(`🔥 <b>${p.name}</b> ใช้ฮึดสุดท้ายฟื้นตัว!`); showFloatingAnim('🔥', '#ffea00', p.pos); return;
+          }
+          
+          p.lives = 0; p.pos = 1; p.power = p.basePower !== undefined ? p.basePower : 200; p.items = []; p.shield = false; p.immune = false; p.reflect = false; p.tempBuff = 0; p.deaths = (p.deaths || 0) + 1; addGameLog(`💀 <b>${p.name}</b> ตาย! (และออกจากเกมถ้า AFK โดนเตะ)`); 
+      }
+
+      async function triggerCellEffect(me) {
+          if(me.lives <= 0) return; 
+          addGameLog(`🎯 <b>${me.name}</b> ตกช่อง ${me.pos}`);
+          let isQuizForced = (me.pos === 9 || me.pos === 17 || me.pos === 25);
+          
+          let globalRnd = Math.random();
+          if (globalRnd < 0.15 && !isQuizForced && me.pos !== 1 && cellEvents[me.pos] && !cellEvents[me.pos].bossPower) {
+              if (globalRnd < 0.075) {
+                  addGameLog(`🧙♂️ <b>${me.name}</b> พบฤๅษีใจดี!`); 
+                  await openQuiz(me, true); 
+                  if(me.lives > 0) { await handlePvP(me); }
+                  return;
+              } else {
+                  addGameLog(`⚠️ <b>${me.name}</b> เจอยักษ์ดักทำร้าย!`); 
+                  await handleBoss(me, { bossName: "ยักษ์ดักทำร้าย", bossImg: ROAMING_MONSTER_IMG, bossPower: me.power, isSpecial: true }); 
+                  if(me.lives > 0) { await handlePvP(me); }
+                  return;
+              }
+          }
+
+          if (isQuizForced) { await openQuiz(me); } 
+          else if(cellEvents[me.pos]) {
+              let evt = cellEvents[me.pos]; me.power += evt.power; 
+              if(evt.damage > 0) { triggerShake(); if(applyClientDamage(me, evt.damage)) playSound('hurt'); }
+              if(evt.item && itemsConfig[evt.item]) {
+                const maxCap = me.skillType === 'extra_item_slot' ? 4 : 3;
+                if(me.items.length < maxCap) { me.items.push(evt.item); playSound('coin'); showToast(`🎁 ได้รับ ${itemsConfig[evt.item].name}!`); }
+              }
+              if(evt.move && evt.move !== 0) {
+                me.pos = ((me.pos - 1 + evt.move) % totalCells + totalCells) % totalCells + 1;
+                await delay(400); await animateStep(me.id, me.pos);
+              }
+              if(evt.warpTo > 0) { me.pos = evt.warpTo; await delay(500); await animateStep(me.id, me.pos); }
+              if(evt.skip > 0) { me.skipTurns = evt.skip; }
+              if(evt.isChest) { 
+                  let bcast = { id: Date.now(), pId: myPlayerId, title: `🎁 ${me.name} เปิดหีบสมบัติ!`, desc: `ได้รับไอเท็มเวทมนตร์ลึกลับ`, img: '🎁' }; gameData.broadcast = bcast; lastBroadcastId = bcast.id; await playBroadcastCutscene(bcast);
+                  if (grantRandomItemToPlayer(me)) playSound('coin');
+                  await delay(1000); 
+              }
+              if(evt.isEvent) { await triggerWorldEvent(); }
+              if(evt.isShop && me.lives > 0) { 
+                  if(me.skillType === 'shop_investor') { me.power += (me.skillVal||500); showFloatingAnim(`+${me.skillVal||500}✨`, '#00e676', me.pos); playSound('coin'); }
+                  await delay(500); await openShop(me); 
+              }
+              if(evt.bossPower > 0 && me.lives > 0) { await handleBoss(me, evt); }
+          } else {
+              let rnd = Math.random();
+              if (rnd < 0.35) { 
+                  await triggerRandomSituation(me); 
+              }
+              else { 
+                  addGameLog(`🚶 <b>${me.name}</b> เดินผ่านอย่างปลอดภัย ไม่มีอะไรเกิดขึ้น`); 
+              }
+          }
+          if(me.lives > 0) { await handlePvP(me); }
+      }
+
+      async function processMyMove(steps) {
+        let me = gameData.players[myPlayerId];
+        try {
+            for(let i=0; i<steps; i++){
+              me.pos++; 
+              if(me.skillType === 'power_step') { me.power += (me.skillVal||100); }
+              
+              if(me.pos > totalCells) { 
+                me.pos = 1; 
+                let loopBonus = 0;
+                if (me.skillType === 'loop_power') {
+                    loopBonus = (me.skillVal || 0);
+                }
+                me.power += 500 + loopBonus; 
+                
+                if (me.skillType === 'loop_item') { grantRandomItemToPlayer(me); }
+                if (me.skillType === 'passive_heal') me.lives = Math.min(me.maxLives, me.lives+1);
+                if (me.skillType === 'start_shield') { me.shield = true; showFloatingAnim('🛡️', '#4fc3f7', me.pos); }
+
+                document.getElementById('flash-overlay').classList.add('flash-anim'); setTimeout(() => document.getElementById('flash-overlay').classList.remove('flash-anim'), 600); playSound('levelup'); showFloatingAnim(`+${500 + loopBonus}✨`, '#ffea00', me.pos); 
+              }
+              await animateStep(me.id, me.pos);
+            }
+            await triggerCellEffect(me);
+        } catch (e) {
+            console.error("Move Error:", e); showToast("⚠️ ขัดข้องระหว่างเดิน");
+        } finally {
+            finishTurn(); 
+            document.getElementById('pvp-cutscene').style.display = 'none'; document.getElementById('combat-modal').style.display = 'none'; document.getElementById('boss-modal').style.display = 'none';
+        }
+      }
+
+      function finishTurn() {
+        let me = gameData.players[myPlayerId];
+        me.status = me.status || [];
+        
+        if(me.tempBuff && me.tempBuff > 0) { me.power = Math.max(0, me.power - me.tempBuff); me.tempBuff = 0; }
+        me.immune = false; me.silenced = 0;
+
+        if (me.status.includes('burn')) {
+          me.status = me.status.filter(s => s !== 'burn');
+          showToast('🔥 โดนไฟเผาไหม้!');
+          applyClientDamage(me, 1);
+        }
+        if (me.status.includes('poison')) {
+          me.status = me.status.filter(s => s !== 'poison');
+          showToast('☠️ โดนพิษกัดกร่อน!');
+          applyClientDamage(me, 1);
+        }
+        me.status = me.status.filter(s => s !== 'invisible' && s !== 'peace');
+        
+        if (me.currentCooldown && me.currentCooldown > 0) { me.currentCooldown--; }
+        
+        if(checkWinCondition()) return; 
+        
+        gameData.turn = (gameData.turn + 1) % gameData.players.length; 
+        updateUI(); isMyTurnProcessing = false; clearTimeout(pollingTimer); clearTimeout(watchdogTimer); clearTimeout(afkTimerId);
+        document.getElementById('rollBtn').disabled = true;
+        document.getElementById('rollBtn').style.display = 'none';
+
+        prevDataStr = JSON.stringify(gameData);
+        google.script.run.withSuccessHandler(res => { 
+            if (res && res.v) lastStateVersion = res.v;
+            scheduleNextPoll(800); 
+        }).withFailureHandler(() => { 
+            scheduleNextPoll(2000); 
+        }).updateGameState(myRoomCode, JSON.stringify(gameData));
+      }
+    </script>
+  </body>
+</html>
