@@ -28,7 +28,7 @@
         background-size: cover; background-position: center; 
         margin: 0; color: #333; display: flex; flex-direction: column; align-items: center; min-height: 100vh; min-height: 100dvh; overflow-x: hidden; touch-action: manipulation;
       }
-      body.paused-anim *, body.paused-anim *::before, body.paused-anim *::after { animation-play-state: paused !important; }
+      body.paused-anim *, body.paused-anim *::before, body.paused-anim *::after, body.loading-active .center-dragon { animation-play-state: paused !important; }
       body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 20, 45, 0.22); z-index: -1; pointer-events: none; }
       .glass { background: rgba(255, 255, 255, 0.96); border: 2px solid rgba(255, 255, 255, 0.85); border-radius: 22px; box-shadow: 0 12px 32px rgba(0,0,0,0.24); color: #2c2c3a; }
       
@@ -56,11 +56,13 @@
       .char-grid::-webkit-scrollbar-track, .dice-box::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 10px; }
       .char-grid::-webkit-scrollbar-thumb, .dice-box::-webkit-scrollbar-thumb { background: #ce93d8; border-radius: 10px; }
 
-      .char-btn { display: flex; align-items: center; background: rgba(255,255,255,0.85); border: 2px solid rgba(206, 147, 216, 0.45); border-radius: 15px; padding: 9px 10px; cursor: pointer; transition: 0.2s; font-weight: bold; font-size: 14px; text-align: left; }
+      .char-btn { display: flex; align-items: center; background: rgba(255,255,255,0.9); border: 2px solid rgba(206, 147, 216, 0.45); border-radius: 15px; padding: 9px 10px; cursor: pointer; transition: 0.2s; font-weight: bold; font-size: 14px; text-align: left; }
       .char-btn:hover { border-color: #ab47bc; background: #fff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
       .char-btn img { width: 46px; height: 46px; border-radius: 50%; object-fit: contain; margin-right: 9px; border: 2px solid #ce93d8; background: #fff; flex-shrink: 0; }
-      .char-btn-meta { display: flex; flex-direction: column; min-width: 0; }
-      .char-btn-sub { font-size: 11px; font-weight: normal; color: #6a1b9a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+      .char-btn-meta { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+      .char-btn-title { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+      .char-btn-pow { font-size: 11px; background: #e0f2f1; color: #00796b; padding: 2px 7px; border-radius: 10px; font-weight: bold; flex-shrink: 0; }
+      .char-btn-sub { font-size: 11px; font-weight: normal; color: #6a1b9a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 3px; }
       .skin-picker { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 6px 0 10px 0; flex-wrap: wrap; }
       .skin-swatch { width: 28px; height: 28px; border-radius: 50%; border: 2.5px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.25); cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; padding: 0; }
       .skin-swatch:hover { transform: scale(1.12); }
@@ -131,20 +133,18 @@
       .cell-info::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: 6px; height: 20px; background: #5d4037; border-radius: 2px; }
       @keyframes signPopUp { 0% { transform: translate(-50%, -50%) translateZ(60px) rotateZ(var(--inv-rot)) rotateX(-55deg) scale(0); margin-top: -40px;} 100% { transform: translate(-50%, -50%) translateZ(60px) rotateZ(var(--inv-rot)) rotateX(-55deg) scale(1); margin-top: -80px;} }
       
-      .token { position: absolute; width: 45px; height: 60px; z-index: 100; transform: translateZ(45px) rotateZ(var(--inv-rot)) rotateX(-55deg); display: flex; align-items: center; justify-content: center; transition: top 0.4s ease-out, left 0.4s ease-out, transform 0.6s; }
+      .token { position: absolute; width: 45px; height: 60px; z-index: 100; transform: translateZ(45px) rotateZ(var(--inv-rot)) rotateX(-55deg); display: flex; align-items: center; justify-content: center; transition: top 0.22s ease-out, left 0.22s ease-out, transform 0.45s; }
       .token img { width: 100%; height: 100%; border-radius: 8px; object-fit: contain; background: transparent; filter: none; z-index: 2; }
       .token::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 54px; height: 54px; border-radius: 50%; z-index: -1; pointer-events: none; }
       .glow-token-0::before { background: radial-gradient(circle, rgba(0,176,255,0.75) 0%, rgba(0,176,255,0) 70%); } .glow-token-1::before { background: radial-gradient(circle, rgba(0,230,118,0.75) 0%, rgba(0,230,118,0) 70%); } .glow-token-2::before { background: radial-gradient(circle, rgba(255,234,0,0.75) 0%, rgba(255,234,0,0) 70%); } .glow-token-3::before { background: radial-gradient(circle, rgba(213,0,249,0.75) 0%, rgba(213,0,249,0) 70%); }
       
-      .token.hopping { animation: hop 0.3s cubic-bezier(0.25, 1.5, 0.5, 1); }
+      .token.hopping { animation: hop 0.22s cubic-bezier(0.25, 1.5, 0.5, 1); }
       @keyframes hop { 0%, 100% {} 50% { transform: translateZ(85px) rotateZ(var(--inv-rot)) rotateX(-55deg) scale(1.1); } }
 
-      .boss-token { position: absolute; width: 45px; height: 60px; z-index: 90; transform: translateZ(40px) rotateZ(var(--inv-rot)) rotateX(-55deg); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.6s; }
+      .boss-token { position: absolute; width: 45px; height: 60px; z-index: 90; transform: translateZ(40px) rotateZ(var(--inv-rot)) rotateX(-55deg); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.5s; }
       .boss-token img { width: 100%; height: 100%; border-radius: 8px; object-fit: contain; background: transparent; filter: none; z-index: 2; }
-      .boss-token::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 52px; height: 52px; border-radius: 50%; z-index: -1; background: radial-gradient(circle, rgba(255, 23, 68, 0.6) 0%, rgba(255, 23, 68, 0) 72%); animation: pulseRedSoft 2.8s ease-in-out infinite; pointer-events: none; }
-      @keyframes pulseRedSoft { 0%, 100% { transform: translate(-50%, -50%) scale(0.92); opacity: 0.55; } 50% { transform: translate(-50%, -50%) scale(1.08); opacity: 0.85; } }
-      .boss-token.rebirth-aura::before { background: radial-gradient(circle, rgba(255, 61, 0, 0.78) 0%, rgba(213, 0, 0, 0.32) 45%, rgba(213, 0, 0, 0) 75%); animation: pulseRebirth 2s ease-in-out infinite alternate; filter: hue-rotate(var(--aura-hue, 0deg)); width: 50px; height: 50px; }
-      @keyframes pulseRebirth { 0% { transform: translate(-50%, -50%) scale(0.88); opacity: 0.65; } 100% { transform: translate(-50%, -50%) scale(1.12); opacity: 0.95; } }
+      .boss-token::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 52px; height: 52px; border-radius: 50%; z-index: -1; background: radial-gradient(circle, rgba(255, 23, 68, 0.58) 0%, rgba(255, 23, 68, 0) 72%); pointer-events: none; }
+      .boss-token.rebirth-aura::before { background: radial-gradient(circle, rgba(255, 61, 0, 0.78) 0%, rgba(213, 0, 0, 0.34) 45%, rgba(213, 0, 0, 0) 75%); filter: hue-rotate(var(--aura-hue, 0deg)); width: 54px; height: 54px; }
 
       .shake-anim { animation: screenShake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
       @keyframes screenShake { 0%, 100% { transform: translate(0, 0); } 20% { transform: translate(-10px, 5px) rotate(-2deg); } 40% { transform: translate(10px, -5px) rotate(2deg); } 60% { transform: translate(-10px, -5px) rotate(-2deg); } 80% { transform: translate(10px, 5px) rotate(2deg); } }
@@ -190,22 +190,19 @@
       .lobby-copy-btn { padding: 9px 16px; border-radius: 22px; border: 2px solid rgba(255,255,255,0.75); background: rgba(255,255,255,0.16); color: #fff; font-family: 'Mali', sans-serif; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; }
       .lobby-copy-btn:active { transform: scale(0.95); }
 
-      /* Cute Loading Popup (No text description) */
-      #loading-modal { z-index: 10500 !important; background: rgba(20, 16, 42, 0.64); }
-      .loading-cute-card { position: relative; width: 146px; height: 146px; border-radius: 38px; background: linear-gradient(165deg, #fffdf8 0%, #fff0f6 55%, #fff8e1 100%); border: 3.5px solid #ffd54f; box-shadow: 0 18px 42px rgba(0,0,0,0.34), inset 0 2px 10px rgba(255,255,255,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; animation: modalPopIn 0.2s ease-out; overflow: hidden; }
-      .loading-ring { position: absolute; width: 92px; height: 92px; top: 14px; border-radius: 50%; border: 3px dashed rgba(255, 167, 38, 0.42); border-top-color: #ff8a65; animation: spinRing 3.6s linear infinite; pointer-events: none; }
-      .loading-mascot { width: 72px; height: 72px; display: flex; align-items: center; justify-content: center; animation: cuteBounce 1.25s ease-in-out infinite; z-index: 2; }
-      .loading-sparkle { position: absolute; font-size: 13px; color: #ffca28; pointer-events: none; animation: sparkleTwinkle 1.4s ease-in-out infinite; }
-      .loading-sparkle.s1 { top: 14px; left: 16px; }
-      .loading-sparkle.s2 { top: 18px; right: 16px; animation-delay: 0.7s; color: #ff80ab; }
-      .loading-dots { display: flex; gap: 7px; z-index: 2; }
-      .loading-dots span { width: 9px; height: 9px; border-radius: 50%; background: #ff8a65; animation: dotHop 1s infinite ease-in-out; }
-      .loading-dots span:nth-child(2) { background: #ba68c8; animation-delay: 0.16s; }
-      .loading-dots span:nth-child(3) { background: #4dd0e1; animation-delay: 0.32s; }
+      /* Cute Loading Popup (Clean & No text description) */
+      #loading-modal { z-index: 10500 !important; background: rgba(18, 22, 46, 0.52); }
+      .loading-cute-card { width: 150px; padding: 22px 16px 18px; border-radius: 28px; background: #ffffff; border: 2.5px solid #ffe082; box-shadow: 0 14px 36px rgba(18, 22, 46, 0.26); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; animation: modalPopIn 0.18s ease-out; box-sizing: border-box; }
+      .loading-orbit { position: relative; width: 78px; height: 78px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #fff9e6; }
+      .loading-ring { position: absolute; inset: 0; border-radius: 50%; border: 3.5px solid #ffecb3; border-top-color: #ff9800; border-right-color: #ec407a; animation: spinRing 1.05s linear infinite; pointer-events: none; }
+      .loading-mascot { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; animation: cuteBounce 1.4s ease-in-out infinite; z-index: 2; }
+      .loading-dots { display: flex; gap: 8px; align-items: center; justify-content: center; }
+      .loading-dots span { width: 9px; height: 9px; border-radius: 50%; background: #ff9800; animation: dotHop 1.05s infinite ease-in-out; }
+      .loading-dots span:nth-child(2) { background: #ec407a; animation-delay: 0.16s; }
+      .loading-dots span:nth-child(3) { background: #29b6f6; animation-delay: 0.32s; }
       @keyframes spinRing { to { transform: rotate(360deg); } }
-      @keyframes cuteBounce { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-6px) scale(1.05); } }
-      @keyframes sparkleTwinkle { 0%, 100% { transform: scale(0.75); opacity: 0.45; } 50% { transform: scale(1.15); opacity: 1; } }
-      @keyframes dotHop { 0%, 80%, 100% { transform: scale(0.65); opacity: 0.45; } 40% { transform: scale(1.15); opacity: 1; } }
+      @keyframes cuteBounce { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-4px) scale(1.04); } }
+      @keyframes dotHop { 0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; } 40% { transform: scale(1.12); opacity: 1; } }
 
       /* ========================================================= */
       /* ส่วนที่ 1: การตั้งค่าสำหรับหน้าจอมือถือ */
@@ -224,18 +221,21 @@
         #settings-panel { top: 46px; left: 0; max-width: 88vw; }
 
         #init-screen, #char-select-screen {
-            margin-top: 58px;
-            margin-bottom: 16px;
+            margin-top: 56px;
+            margin-bottom: 14px;
             width: 92vw;
             max-width: 430px;
-            max-height: calc(100dvh - 76px);
+            max-height: calc(100dvh - 72px);
             overflow-y: auto;
-            padding: 20px 16px;
+            padding: 18px 16px;
             touch-action: pan-y;
         }
-        .char-grid { gap: 10px; max-height: 46dvh; }
-        .char-btn { padding: 8px; font-size: 13px; border-radius: 13px; }
-        .char-btn img { width: 42px; height: 42px; margin-right: 8px; }
+        #init-screen img { height: 122px !important; }
+        #char-select-screen h1 { font-size: 24px; margin-bottom: 12px; }
+        .char-grid { grid-template-columns: 1fr; gap: 10px; max-height: 55dvh; padding-right: 4px; }
+        .char-btn { padding: 11px 13px; font-size: 15px; border-radius: 15px; }
+        .char-btn img { width: 52px; height: 52px; margin-right: 12px; }
+        .char-btn-sub { font-size: 12.5px; }
 
         #corner-ui { position: absolute; top: 0; left: 0; width: 100%; display: block; overflow: visible; padding: 0; pointer-events: none; z-index: 500; height: auto; }
         
@@ -243,7 +243,7 @@
         
         .corner-card.active-turn { 
             position: absolute !important; 
-            top: 56px !important;
+            top: 52px !important;
             left: 50% !important; 
             transform: translateX(-50%) !important; 
             
@@ -253,42 +253,42 @@
             justify-content: center !important;
             align-items: center !important;
             
-            width: 92vw !important; 
+            width: 94vw !important; 
             max-width: 420px !important; 
             
             height: auto !important; 
             min-height: min-content !important; 
             
             margin: 0 !important; 
-            padding: 9px 12px !important; 
-            gap: 5px;
+            padding: 7px 11px !important; 
+            gap: 4px 8px;
             
             font-size: 13px; 
             box-sizing: border-box; 
             pointer-events: auto; 
             border-radius: 16px; 
             border: 2.5px solid #00e676; 
-            box-shadow: 0 6px 18px rgba(0,0,0,0.32); 
+            box-shadow: 0 6px 16px rgba(0,0,0,0.28); 
             z-index: 1000 !important; 
-            background-color: rgba(255, 255, 255, 0.95); 
+            background-color: rgba(255, 255, 255, 0.96); 
         }
         
         .corner-card.active-turn > br { display: none; }
         .corner-card img { width: 32px; height: 32px; margin-bottom: 0; }
-        .item-slot { width: 30px; height: 30px; font-size: 15px; }
+        .item-slot { width: 29px; height: 29px; font-size: 15px; }
         
         .item-container { 
             display: flex;
-            gap: 8px; 
+            gap: 7px; 
             margin-top: 2px; 
             justify-content: center; 
             flex-wrap: wrap; 
             width: 100%; 
         } 
         
-        .active-skill-btn { font-size: 13px; padding: 6px 12px; margin-top: 4px; width: auto; min-width: 150px; }
+        .active-skill-btn { font-size: 13px; padding: 6px 12px; margin-top: 3px; width: auto; min-width: 150px; }
         
-        .scene { top: 140px; bottom: 130px; height: auto !important; align-items: center !important; padding-top: 0 !important; padding-bottom: 0 !important; }
+        .scene { top: 148px; bottom: 126px; height: auto !important; align-items: center !important; padding-top: 0 !important; padding-bottom: 0 !important; }
         
         #game-container { 
             position: absolute !important;
@@ -328,22 +328,22 @@
             display: flex; 
             flex-direction: column; 
             justify-content: flex-end;
-            background: rgba(255,255,255,0.96); 
-            padding: 10px 14px calc(12px + env(safe-area-inset-bottom, 0px)) 14px; 
+            background: rgba(255,255,255,0.97); 
+            padding: 9px 14px calc(10px + env(safe-area-inset-bottom, 0px)) 14px; 
             box-sizing: border-box;
             border-top-left-radius: 22px; 
             border-top-right-radius: 22px;
-            box-shadow: 0 -6px 22px rgba(0,0,0,0.22);
+            box-shadow: 0 -6px 20px rgba(0,0,0,0.2);
         }
         #rollBtn { 
             margin-bottom: 6px !important; 
-            font-size: 20px !important; 
-            padding: 12px 20px !important; 
-            border-radius: 20px; 
+            font-size: 18px !important; 
+            padding: 11px 18px !important; 
+            border-radius: 18px; 
             width: 100%; 
             box-sizing: border-box;
         }
-        #sys-log { font-size: 12px; padding: 8px 10px; height: 50px; margin-top: 0; border-radius: 12px; }
+        #sys-log { font-size: 12px; padding: 7px 10px; height: 46px; margin-top: 0; border-radius: 12px; }
         
         .dice-box { width: 92vw !important; max-width: 420px !important; padding: 20px 16px !important; box-sizing: border-box; max-height: 85dvh; border-radius: 22px; touch-action: pan-y; }
         #combat-modal .dice-box, #boss-modal .dice-box { width: 92vw !important; max-width: 420px !important; }
@@ -405,8 +405,8 @@
       /* ส่วนที่ 3: บังคับตั้งค่าเฉพาะตอนถือมือถือแนวตั้ง (Portrait) */
       /* ========================================================= */
       @media (max-width: 1080px) and (orientation: portrait) {
-        :root { --board-scale: 0.58; } 
-        .scene { top: 146px; bottom: 130px; padding-top: 0; }
+        :root { --board-scale: 0.54; } 
+        .scene { top: 158px; bottom: 132px; padding-top: 0; }
         .splash-subtitle { font-size: 20px; }
       }
     </style>
@@ -621,29 +621,19 @@
 
     <div id="loading-modal" class="modal-bg">
       <div class="loading-cute-card">
-        <div class="loading-ring"></div>
-        <span class="loading-sparkle s1">✦</span>
-        <span class="loading-sparkle s2">✧</span>
-        <div class="loading-mascot" aria-hidden="true">
-          <svg viewBox="0 0 80 80" width="72" height="72" xmlns="http://www.w3.org/2000/svg">
-            <!-- มงกุฎเล็กน่ารัก -->
-            <path d="M29 22 L33 12 L40 18 L47 12 L51 22 Z" fill="#ffd54f" stroke="#ffb300" stroke-width="2" stroke-linejoin="round"/>
-            <circle cx="40" cy="11" r="2.2" fill="#ff80ab"/>
-            <!-- หู/แก้มปุย -->
-            <ellipse cx="40" cy="46" rx="25" ry="21" fill="#fff9c4" stroke="#ffb74d" stroke-width="2.5"/>
-            <ellipse cx="40" cy="44" rx="22" ry="18" fill="#ffffff"/>
-            <!-- ตาโค้งยิ้ม -->
-            <path d="M27 43 Q31 38 35 43" fill="none" stroke="#5d4037" stroke-width="2.6" stroke-linecap="round"/>
-            <path d="M45 43 Q49 38 53 43" fill="none" stroke="#5d4037" stroke-width="2.6" stroke-linecap="round"/>
-            <!-- แก้มชมพู -->
-            <ellipse cx="24" cy="49" rx="4.2" ry="2.6" fill="#ffab91" opacity="0.8"/>
-            <ellipse cx="56" cy="49" rx="4.2" ry="2.6" fill="#ffab91" opacity="0.8"/>
-            <!-- ปากยิ้มน้อยๆ -->
-            <path d="M36 49 Q40 53.5 44 49" fill="none" stroke="#5d4037" stroke-width="2.4" stroke-linecap="round"/>
-            <!-- ดวงดาวข้างตัว -->
-            <circle cx="15" cy="30" r="2.2" fill="#ffd54f"/>
-            <circle cx="66" cy="33" r="2" fill="#ba68c8"/>
-          </svg>
+        <div class="loading-orbit">
+          <div class="loading-ring"></div>
+          <div class="loading-mascot" aria-hidden="true">
+            <svg viewBox="0 0 64 64" width="50" height="50" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="32" cy="34" r="21" fill="#ffd54f" stroke="#ffa000" stroke-width="2.5"/>
+              <path d="M22 16 L26 8 L32 13 L38 8 L42 16 Z" fill="#ffb300" stroke="#f57c00" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M21 32 Q25 27 29 32" fill="none" stroke="#5d4037" stroke-width="2.6" stroke-linecap="round"/>
+              <path d="M35 32 Q39 27 43 32" fill="none" stroke="#5d4037" stroke-width="2.6" stroke-linecap="round"/>
+              <circle cx="20" cy="38" r="3.2" fill="#ff8a80" opacity="0.75"/>
+              <circle cx="44" cy="38" r="3.2" fill="#ff8a80" opacity="0.75"/>
+              <path d="M28 39 Q32 43 36 39" fill="none" stroke="#5d4037" stroke-width="2.4" stroke-linecap="round"/>
+            </svg>
+          </div>
         </div>
         <div class="loading-dots"><span></span><span></span><span></span></div>
       </div>
@@ -720,12 +710,14 @@
       let loadingPopupCount = 0;
       function showLoadingPopup() {
         loadingPopupCount++;
+        document.body.classList.add('loading-active');
         const el = document.getElementById('loading-modal');
         if (el) el.style.display = 'flex';
       }
       function hideLoadingPopup(force = false) {
         loadingPopupCount = force ? 0 : Math.max(0, loadingPopupCount - 1);
         if (loadingPopupCount === 0) {
+          document.body.classList.remove('loading-active');
           const el = document.getElementById('loading-modal');
           if (el) el.style.display = 'none';
         }
@@ -1060,16 +1052,26 @@
         const hueShift = extractSkinHueShift(skinFilter);
         if (!hueShift) {
           imgEl.removeAttribute('data-skin-key');
-          imgEl.src = imgUrl;
+          if (imgEl.dataset.appliedSrc !== imgUrl) {
+            imgEl.dataset.appliedSrc = imgUrl;
+            imgEl.src = imgUrl;
+          }
           return;
         }
         const cacheKey = imgUrl + '|' + hueShift;
         imgEl.setAttribute('data-skin-key', cacheKey);
         if (skinImgCache[cacheKey]) {
-          imgEl.src = skinImgCache[cacheKey];
+          const cachedUrl = skinImgCache[cacheKey];
+          if (imgEl.dataset.appliedSrc !== cachedUrl) {
+            imgEl.dataset.appliedSrc = cachedUrl;
+            imgEl.src = cachedUrl;
+          }
           return;
         }
-        imgEl.src = imgUrl;
+        if (imgEl.dataset.appliedSrc !== imgUrl) {
+          imgEl.dataset.appliedSrc = imgUrl;
+          imgEl.src = imgUrl;
+        }
         if (skinPendingMap[cacheKey]) return;
         skinPendingMap[cacheKey] = true;
 
@@ -1079,7 +1081,7 @@
           try {
             const natW = loader.naturalWidth, natH = loader.naturalHeight;
             if (!natW || !natH) return;
-            const maxDim = 256;
+            const maxDim = 160;
             const scale = Math.min(1, maxDim / Math.max(natW, natH));
             const w = Math.max(1, Math.round(natW * scale));
             const hImg = Math.max(1, Math.round(natH * scale));
@@ -1103,7 +1105,10 @@
             const outUrl = canvas.toDataURL('image/png');
             skinImgCache[cacheKey] = outUrl;
             document.querySelectorAll('img[data-skin-key]').forEach(el => {
-              if (el.getAttribute('data-skin-key') === cacheKey) el.src = outUrl;
+              if (el.getAttribute('data-skin-key') === cacheKey && el.dataset.appliedSrc !== outUrl) {
+                el.dataset.appliedSrc = outUrl;
+                el.src = outUrl;
+              }
             });
           } catch (e) {}
           delete skinPendingMap[cacheKey];
@@ -1119,7 +1124,7 @@
               const rEl = document.getElementById('cut-r-img');
               applyClothSkinToElement(lEl, imgLeft, filterLeft);
               applyClothSkinToElement(rEl, imgRight, filterRight);
-              cut.style.display = 'flex'; playSound('hit'); setTimeout(() => { triggerShake(); }, 600); setTimeout(() => { cut.style.display = 'none'; res(); }, 1800); 
+              cut.style.display = 'flex'; playSound('hit'); setTimeout(() => { triggerShake(); }, 350); setTimeout(() => { cut.style.display = 'none'; res(); }, 1000); 
           }); 
       }
       
@@ -1138,7 +1143,7 @@
               }
               
               document.getElementById('ac-icon').innerText = bcast.img || '✨'; document.getElementById('ac-desc').innerText = bcast.desc || '';
-              cut.style.display = 'flex'; playSound('levelup'); triggerShake(); setTimeout(() => { cut.style.display = 'none'; res(); }, 2500);
+              cut.style.display = 'flex'; playSound('levelup'); triggerShake(); setTimeout(() => { cut.style.display = 'none'; res(); }, 1350);
           });
       }
 
@@ -1197,17 +1202,7 @@
           
           gameData.turn = (gameData.turn + 1) % gameData.players.length;
           prevDataStr = JSON.stringify(gameData);
-          showLoadingPopup();
-          google.script.run.withSuccessHandler(res => { 
-              hideLoadingPopup();
-              if (res && res.v) lastStateVersion = res.v;
-              isMyTurnProcessing = false; 
-              fetchGameState(); 
-          }).withFailureHandler(() => {
-              hideLoadingPopup();
-              isMyTurnProcessing = false;
-              fetchGameState();
-          }).updateGameState(myRoomCode, JSON.stringify(gameData));
+          saveStateAndContinue(true);
       }
 
       function emergencyUnstuck(isManual = false) {
@@ -1241,6 +1236,9 @@
           if(turnId === myPlayerId) { 
               ann.innerHTML = "🎲 ตาของคุณแล้ว!<br><span style='font-size:24px; color:#69f0ae;'>ทอยเต๋าได้เลย</span>"; 
               ann.style.borderColor = "#69f0ae"; 
+              if(gameData && gameData.players[turnId] && gameData.players[turnId].lives > 0 && !isMyTurnProcessing) {
+                  rollBtn.style.display = 'inline-block';
+              }
           } else { 
               let pName = gameData.players[turnId].name; 
               ann.innerHTML = `⏳ ตาของ<br><span style='color:#ffca28;'>${pName}</span>`; 
@@ -1250,10 +1248,7 @@
           ann.classList.add('announce-anim'); playSound('levelup'); 
           setTimeout(() => { 
               ann.classList.remove('announce-anim');
-              if(turnId === myPlayerId && gameData && gameData.players[turnId] && gameData.players[turnId].lives > 0) {
-                  rollBtn.style.display = 'inline-block';
-              }
-          }, 2500);
+          }, 1100);
       }
 
       window.onload = function() {
@@ -1275,7 +1270,8 @@
             const grid = document.getElementById('char-grid-container'); grid.innerHTML = '';
             loadedCharacters.forEach((char, idx) => {
               const actLabel = char.skill_name && char.skill_name !== '-' ? `⚡ ${char.skill_name}` : '🌟 สกิลติดตัว';
-              grid.innerHTML += `<div class="char-btn" id="char-btn-${idx}" onclick="selectChar(this, ${idx})"><img src="${char.img}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1004/1004313.png';"><div class="char-btn-meta"><div>${char.name}</div><div class="char-btn-sub">${actLabel}</div></div></div>`;
+              const basePow = char.basePower !== undefined ? char.basePower : 200;
+              grid.innerHTML += `<div class="char-btn" id="char-btn-${idx}" onclick="selectChar(this, ${idx})"><img src="${char.img}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1004/1004313.png';"><div class="char-btn-meta"><div class="char-btn-title"><span>${char.name}</span><span class="char-btn-pow">✨${basePow}</span></div><div class="char-btn-sub">${actLabel}</div></div></div>`;
             });
           }
         }).withFailureHandler(() => {
@@ -1285,11 +1281,19 @@
         }).getGameConfig();
       };
 
+      let bgmPausedByHide = false;
       document.addEventListener('visibilitychange', () => {
         document.body.classList.toggle('paused-anim', document.hidden);
-        if (!document.hidden && myRoomCode && !isMyTurnProcessing) {
-          clearTimeout(pollingTimer);
-          fetchGameState();
+        const bgm = document.getElementById('bgmAudio');
+        if (document.hidden) {
+          if (audioCtx && audioCtx.state === 'running') audioCtx.suspend().catch(() => {});
+          if (bgm && isBgmPlaying && !bgm.paused) { bgmPausedByHide = true; bgm.pause(); }
+        } else {
+          if (bgmPausedByHide && bgm && isBgmPlaying) { bgmPausedByHide = false; bgm.play().catch(() => {}); }
+          if (myRoomCode && !isMyTurnProcessing) {
+            clearTimeout(pollingTimer);
+            fetchGameState();
+          }
         }
       });
 
@@ -1595,6 +1599,104 @@
         pollingTimer = setTimeout(fetchGameState, delayMs);
       }
 
+      function hasOtherAliveHumans() {
+        return Boolean(gameData && gameData.players && gameData.players.some(p => !p.isBot && p.id !== myPlayerId && p.lives > 0));
+      }
+
+      function saveStateAndContinue(showLoader = false, retryCount = 0) {
+        if (showLoader) showLoadingPopup();
+        google.script.run.withSuccessHandler(res => {
+          if (showLoader) hideLoadingPopup();
+          if (res && res.success) {
+            if (res.v) lastStateVersion = res.v;
+            isMyTurnProcessing = false;
+            dispatchCurrentTurn();
+          } else if (retryCount < 1) {
+            setTimeout(() => saveStateAndContinue(showLoader, retryCount + 1), 450);
+          } else {
+            isMyTurnProcessing = false;
+            lastStateVersion = null;
+            fetchGameState();
+          }
+        }).withFailureHandler(() => {
+          if (showLoader) hideLoadingPopup();
+          isMyTurnProcessing = false;
+          scheduleNextPoll(1400);
+        }).updateGameState(myRoomCode, JSON.stringify(gameData));
+      }
+
+      function dispatchCurrentTurn() {
+        if (!gameData) return;
+        if (gameData.status === 'Finished' || (gameData.status === 'Playing' && checkWinCondition())) {
+          if (gameData.status === 'Finished') showVictoryScreen(gameData.winner);
+          return;
+        }
+        if (gameData.status === 'Waiting') {
+          document.getElementById('center-turn-display').innerText = `รอเริ่มเกม... (${gameData.players.length}/4 คน)`;
+          scheduleNextPoll(2200);
+          return;
+        }
+        if (gameData.status !== 'Playing') return;
+
+        document.getElementById('start-overlay').style.display = 'none';
+        const turnP = gameData.players[gameData.turn];
+        if (!turnP) { scheduleNextPoll(2000); return; }
+
+        if (turnP.lives <= 0 && (gameData.turn === myPlayerId || (turnP.isBot && isBotController()))) {
+          isMyTurnProcessing = true;
+          advanceTurnAndRound();
+          updateUI();
+          prevDataStr = JSON.stringify(gameData);
+          saveStateAndContinue(false);
+          return;
+        }
+
+        document.getElementById('center-turn-display').innerText = `รอบ ${gameData.round || 1} • ตาของ: ${turnP.name}`;
+
+        if (activeTurnId !== gameData.turn && !isMyTurnProcessing) {
+          activeTurnId = gameData.turn;
+          if (turnP.isBot) showToast(`🤖 ตาของ ${turnP.name}`);
+          else announceTurn(gameData.turn);
+        }
+
+        if (turnP.isBot && turnP.lives > 0 && isBotController() && !isMyTurnProcessing) {
+          document.getElementById('rollBtn').disabled = true;
+          document.getElementById('rollBtn').style.display = 'none';
+          clearTimeout(afkTimerId);
+          runBotTurn(turnP);
+          return;
+        }
+
+        const me = gameData.players[myPlayerId];
+        if (gameData.turn === myPlayerId && !isMyTurnProcessing && turnP.lives > 0) {
+          clearTimeout(afkTimerId);
+          if (me && me.skipTurns > 0) {
+            isMyTurnProcessing = true;
+            document.getElementById('rollBtn').disabled = true;
+            document.getElementById('rollBtn').style.display = 'none';
+            setTimeout(() => {
+              me.skipTurns--;
+              addGameLog(`🛑 <b>${me.name}</b> โดนพักเทิร์น!`);
+              advanceTurnAndRound();
+              updateUI();
+              prevDataStr = JSON.stringify(gameData);
+              saveStateAndContinue(false);
+            }, 800);
+            return;
+          }
+          document.getElementById('rollBtn').disabled = false;
+          document.getElementById('rollBtn').style.display = 'inline-block';
+          afkTimerId = setTimeout(handleAfkTimeout, 30000);
+          if (hasOtherAliveHumans()) scheduleNextPoll(5000);
+          return;
+        }
+
+        document.getElementById('rollBtn').disabled = true;
+        document.getElementById('rollBtn').style.display = 'none';
+        clearTimeout(afkTimerId);
+        if (!isMyTurnProcessing) scheduleNextPoll(1800);
+      }
+
       function fetchGameState() {
         if (isMyTurnProcessing || isPollInFlight) return;
         clearTimeout(pollingTimer);
@@ -1608,115 +1710,66 @@
           if (!res || isMyTurnProcessing) return;
 
           if (res.unchanged) {
-            const idleDelay = (gameData && gameData.status === 'Playing' && gameData.turn === myPlayerId) ? 3500 : 2000;
+            const idleDelay = (gameData && gameData.status === 'Playing' && gameData.turn === myPlayerId) ? 5000 : 1800;
             scheduleNextPoll(idleDelay);
             return;
           }
 
-          gameData = res.data;
-          lastStateVersion = gameData.v || 0;
+          try {
+            gameData = res.data;
+            lastStateVersion = gameData.v || 0;
 
-          if(document.getElementById('start-overlay').style.display === 'flex') {
-            let pNames = gameData.players.map(p => `${p.isBot ? '🤖' : '🙋'} ${p.name}`).join('<br>');
-            document.getElementById('lobby-players').innerHTML = "<b>ผู้เล่นในห้อง (" + gameData.players.length + "/4):</b><br>" + pNames;
-            const addBotBtn = document.getElementById('addBotBtn');
-            if (addBotBtn) addBotBtn.style.display = (myPlayerId === 0 && gameData.players.length < 4) ? 'inline-block' : 'none';
-          }
-          if(gameData.status === 'Finished') { showVictoryScreen(gameData.winner); return; }
+            if(document.getElementById('start-overlay').style.display === 'flex') {
+              let pNames = gameData.players.map(p => `${p.isBot ? '🤖' : '🙋'} ${p.name}`).join('<br>');
+              document.getElementById('lobby-players').innerHTML = "<b>ผู้เล่นในห้อง (" + gameData.players.length + "/4):</b><br>" + pNames;
+              const addBotBtn = document.getElementById('addBotBtn');
+              if (addBotBtn) addBotBtn.style.display = (myPlayerId === 0 && gameData.players.length < 4) ? 'inline-block' : 'none';
+            }
+            if(gameData.status === 'Finished') { showVictoryScreen(gameData.winner); return; }
 
-          if(!gameData.logs) gameData.logs = [];
-          document.getElementById('sys-log').innerHTML = gameData.logs.length > 0 ? gameData.logs.join('') : '-';
+            if(!gameData.logs) gameData.logs = [];
+            document.getElementById('sys-log').innerHTML = gameData.logs.length > 0 ? gameData.logs.join('') : '-';
 
-          let hasNewBroadcast = (gameData.broadcast && gameData.broadcast.id !== lastBroadcastId);
-          if (hasNewBroadcast) {
-              lastBroadcastId = gameData.broadcast.id;
-              if (gameData.broadcast.pId !== myPlayerId) {
-                  isMyTurnProcessing = true;
-                  await playBroadcastCutscene(gameData.broadcast);
-                  isMyTurnProcessing = false;
-              }
-          }
+            let hasNewBroadcast = (gameData.broadcast && gameData.broadcast.id !== lastBroadcastId);
+            if (hasNewBroadcast) {
+                lastBroadcastId = gameData.broadcast.id;
+                if (gameData.broadcast.pId !== myPlayerId) {
+                    isMyTurnProcessing = true;
+                    await playBroadcastCutscene(gameData.broadcast);
+                    isMyTurnProcessing = false;
+                }
+            }
 
-          if (prevDataStr && gameData.status === 'Playing') {
-              let oldData = JSON.parse(prevDataStr);
-              gameData.players.forEach((p) => {
-                  let op = oldData.players.find(x => x.id === p.id);
-                  if(op && (p.power !== op.power || p.lives !== op.lives)) {
-                      if(p.power > op.power) showFloatingAnim(`+${p.power - op.power}✨`, '#00e676', p.pos);
-                      else if(p.power < op.power) showFloatingAnim(`${p.power - op.power}✨`, '#e53935', p.pos);
-                      if(p.lives < op.lives) showFloatingAnim(`💔`, '#ff1744', p.pos);
-                      else if(p.lives > op.lives && op.lives > 0) showFloatingAnim(`❤️`, '#00e676', p.pos);
-                  }
-              });
-          }
-          prevDataStr = JSON.stringify(gameData);
-          
-          let me = gameData.players[myPlayerId];
-          if (me && !me.buffsInitialized && gameData.status === 'Playing') {
-              me.buffsInitialized = true; 
-              if (me.skillType === 'start_shield') { me.shield = true; }
-              if (me.skillType === 'start_item') { let ri = getRandomItemKey(); if(ri) { me.items.push(ri); } }
-              prevDataStr = JSON.stringify(gameData);
-              google.script.run.updateGameState(myRoomCode, JSON.stringify(gameData));
-          }
-
-          updateUI(); 
-
-          if (gameData.status === 'Playing' && checkWinCondition()) return;
-          
-          if (res.status === 'Waiting') { document.getElementById('center-turn-display').innerText = `รอเริ่มเกม... (${gameData.players.length}/4 คน)`; } 
-          else if (res.status === 'Playing') {
-            document.getElementById('start-overlay').style.display = 'none'; 
+            if (prevDataStr && gameData.status === 'Playing') {
+                let oldData = JSON.parse(prevDataStr);
+                gameData.players.forEach((p) => {
+                    let op = oldData.players.find(x => x.id === p.id);
+                    if(op && (p.power !== op.power || p.lives !== op.lives)) {
+                        if(p.power > op.power) showFloatingAnim(`+${p.power - op.power}✨`, '#00e676', p.pos);
+                        else if(p.power < op.power) showFloatingAnim(`${p.power - op.power}✨`, '#e53935', p.pos);
+                        if(p.lives < op.lives) showFloatingAnim(`💔`, '#ff1744', p.pos);
+                        else if(p.lives > op.lives && op.lives > 0) showFloatingAnim(`❤️`, '#00e676', p.pos);
+                    }
+                });
+            }
+            prevDataStr = JSON.stringify(gameData);
             
-            if(gameData.players[gameData.turn].lives <= 0 && (gameData.turn === myPlayerId || (gameData.players[gameData.turn].isBot && isBotController()))) {
-                isMyTurnProcessing = true; advanceTurnAndRound();
+            let me = gameData.players[myPlayerId];
+            if (me && !me.buffsInitialized && gameData.status === 'Playing') {
+                me.buffsInitialized = true; 
+                if (me.skillType === 'start_shield') { me.shield = true; }
+                if (me.skillType === 'start_item') { let ri = getRandomItemKey(); if(ri) { me.items.push(ri); } }
                 prevDataStr = JSON.stringify(gameData);
-                google.script.run.withSuccessHandler(()=>{ lastStateVersion = null; isMyTurnProcessing=false; fetchGameState(); }).updateGameState(myRoomCode, JSON.stringify(gameData)); 
-                return;
+                google.script.run.updateGameState(myRoomCode, JSON.stringify(gameData));
             }
 
-            const turnP = gameData.players[gameData.turn];
-            document.getElementById('center-turn-display').innerText = `รอบ ${gameData.round || 1} • ตาของ: ${turnP.name}`;
-            
-            if(activeTurnId !== gameData.turn && !isMyTurnProcessing) { activeTurnId = gameData.turn; announceTurn(gameData.turn); }
-
-            if (turnP.isBot && turnP.lives > 0 && isBotController() && !isMyTurnProcessing) {
-              document.getElementById('rollBtn').disabled = true;
-              document.getElementById('rollBtn').style.display = 'none';
-              clearTimeout(afkTimerId);
-              runBotTurn(turnP);
-              return;
-            }
-
-            if (gameData.turn === myPlayerId && !isMyTurnProcessing && turnP.lives > 0) {
-              document.getElementById('rollBtn').disabled = false;
-              if (activeTurnId === gameData.turn && !document.getElementById('turn-announcer').classList.contains('announce-anim')) {
-                  document.getElementById('rollBtn').style.display = 'inline-block';
-              }
-              clearTimeout(afkTimerId);
-              
-              if (me.skipTurns > 0) { 
-                  isMyTurnProcessing = true; document.getElementById('rollBtn').disabled = true; document.getElementById('rollBtn').style.display = 'none';
-                  setTimeout(() => { 
-                      me.skipTurns--; addGameLog(`🛑 <b>${me.name}</b> โดนพักเทิร์น!`); advanceTurnAndRound();
-                      prevDataStr = JSON.stringify(gameData);
-                      google.script.run.withSuccessHandler(()=>{ lastStateVersion = null; isMyTurnProcessing=false; fetchGameState(); }).updateGameState(myRoomCode, JSON.stringify(gameData)); 
-                  }, 1500); 
-                  return; 
-              } else {
-                  afkTimerId = setTimeout(handleAfkTimeout, 30000);
-              }
-            } else if (gameData.turn !== myPlayerId) { 
-              document.getElementById('rollBtn').disabled = true; 
-              document.getElementById('rollBtn').style.display = 'none';
-              clearTimeout(afkTimerId);
-            }
+            updateUI();
+            dispatchCurrentTurn();
+          } catch (err) {
+            console.error('fetchGameState error:', err);
+            isMyTurnProcessing = false;
+            scheduleNextPoll(2000);
           }
-          
-          if (!isMyTurnProcessing) {
-            const pollDelay = (gameData && gameData.status === 'Playing' && gameData.turn === myPlayerId) ? 3500 : 2000;
-            scheduleNextPoll(pollDelay);
-          } 
         }).withFailureHandler(() => {
           isPollInFlight = false;
           if (showInitialLoader) hideLoadingPopup();
@@ -2203,17 +2256,11 @@
         } finally {
             if(!checkWinCondition()) {
                 prevDataStr = JSON.stringify(gameData);
-                showLoadingPopup();
-                google.script.run.withSuccessHandler(res => { 
-                    hideLoadingPopup();
-                    if (res && res.v) lastStateVersion = res.v;
-                    isMyTurnProcessing = false; document.getElementById('rollBtn').disabled = false; clearTimeout(watchdogTimer);
-                    scheduleNextPoll(800); 
-                }).withFailureHandler(()=>{
-                    hideLoadingPopup();
-                    isMyTurnProcessing = false; document.getElementById('rollBtn').disabled = false; clearTimeout(watchdogTimer);
-                    scheduleNextPoll(2000); 
-                }).updateGameState(myRoomCode, JSON.stringify(gameData));
+                clearTimeout(watchdogTimer);
+                saveStateAndContinue(true);
+            } else {
+                isMyTurnProcessing = false;
+                clearTimeout(watchdogTimer);
             }
         }
       }
@@ -2267,7 +2314,7 @@
             if(baseRoll2 > 0) display2.innerText = diceFaces[Math.floor(Math.random() * 6)]; 
             
             rollCount++; 
-            if(rollCount > 15) { 
+            if(rollCount > 10) { 
                 clearInterval(intv); 
                 display1.innerText = diceFaces[baseRoll1 - 1]; 
                 if(baseRoll2 > 0) display2.innerText = diceFaces[baseRoll2 - 1];
@@ -2281,15 +2328,18 @@
                   showFloatingAnim('-50✨', '#e53935', me.pos);
                 }
                 showToast(`ได้ ${totalRoll} แต้ม!`);
-                setTimeout(() => { modal.style.display = 'none'; processMyMove(totalRoll); }, 2500); 
+                setTimeout(() => { modal.style.display = 'none'; processMyMove(totalRoll); }, 950); 
             } 
-        }, 100); 
+        }, 65); 
       }
 
       function delay(ms) { return new Promise(res => setTimeout(res, ms)); }
       async function animateStep(playerId, targetPos) {
-        const token = document.getElementById('token-' + playerId); let coords = getCellCoords(targetPos); let offsetLeft = (playerId % 2 === 0) ? 7 : -7; let offsetTop = (playerId < 2) ? 7 : -7;
-        token.style.top = (coords.row * CELL_SIZE) + offsetTop + 'px'; token.style.left = (coords.col * CELL_SIZE) + offsetLeft + 'px'; token.classList.add('hopping'); playSound('jump'); await delay(400); token.classList.remove('hopping');
+        let token = document.getElementById('token-' + playerId);
+        if (!token) { updateUI(); token = document.getElementById('token-' + playerId); }
+        if (!token) { await delay(160); return; }
+        let coords = getCellCoords(targetPos); let offsetLeft = (playerId % 2 === 0) ? 7 : -7; let offsetTop = (playerId < 2) ? 7 : -7;
+        token.style.top = (coords.row * CELL_SIZE) + offsetTop + 'px'; token.style.left = (coords.col * CELL_SIZE) + offsetLeft + 'px'; token.classList.add('hopping'); playSound('jump'); await delay(230); token.classList.remove('hopping');
       }
 
       let quizTimerInterval = null;
@@ -2326,7 +2376,7 @@
                         const timeoutText = selected === -1 ? '⏰ หมดเวลา! หักพลัง -200' : '❌ ผิด! หักพลัง -200';
                         showToast(timeoutText); showFloatingAnim(`-200✨`, '#e53935', me.pos); playSound('hurt'); triggerShake(); me.power = Math.max(0, me.power - 200);
                     }
-                    await delay(1000); resolve();
+                    await delay(550); resolve();
                 };
 
                 quizTimerInterval = setInterval(() => {
@@ -2391,7 +2441,7 @@
               else if (sit === 'warp_start') { showToast("เหตุการณ์ไม่ปกติ! ถูกวาร์ปสุ่ม"); me.pos = Math.floor(Math.random() * totalCells) + 1; playSound('jump'); triggerShake(); await animateStep(me.id, me.pos); } 
               else if (sit === 'storm_back') { showToast("เหตุการณ์ไม่ปกติ! พายุพัดถอยหลัง 2 ช่อง"); me.pos -= 2; if(me.pos < 1) me.pos = 1; playSound('jump'); triggerShake(); await animateStep(me.id, me.pos); }
               
-              addGameLog(`🎲 <b>${me.name}</b> เจอเหตุการณ์เคลื่อนที่สุ่ม!`); updateUI(); await delay(1000);
+              addGameLog(`🎲 <b>${me.name}</b> เจอเหตุการณ์เคลื่อนที่สุ่ม!`); updateUI(); await delay(500);
           } catch(e) {}
       }
 
@@ -2422,7 +2472,7 @@
                   else if (ev.type === 'black_market') { if(p.items.length > 0) p.items.splice(Math.floor(Math.random() * p.items.length), 1); showFloatingAnim('🎒-', '#e53935', p.pos); }
                   else if (ev.type === 'silent_curse') { p.silenced = (p.silenced || 0) + 1; showFloatingAnim('🤐', '#9e9e9e', p.pos); }
               });
-              updateUI(); await delay(1000);
+              updateUI(); await delay(500);
           } catch(e) {}
       }
 
@@ -2507,12 +2557,12 @@
                               let meTotal = me.power;
                               let opTotal = op.power;
                               
-                              document.getElementById('combat-me').classList.add('clash-left'); document.getElementById('combat-op').classList.add('clash-right'); playSound('hit'); await delay(500); document.getElementById('combat-me').classList.remove('clash-left'); document.getElementById('combat-op').classList.remove('clash-right'); 
+                              document.getElementById('combat-me').classList.add('clash-left'); document.getElementById('combat-op').classList.add('clash-right'); playSound('hit'); await delay(350); document.getElementById('combat-me').classList.remove('clash-left'); document.getElementById('combat-op').classList.remove('clash-right'); 
                               
                               let rText = document.getElementById('combat-result-text');
                               rText.innerHTML = `<div style="font-size:18px; color:#555; margin-bottom:5px;">(คุณ: ${meTotal} vs ศัตรู: ${opTotal})</div>`;
                               if(meTotal > opTotal) { rText.innerHTML += `<span style="color:#4caf50;">🏆 ชนะ!</span>`; } else if(meTotal < opTotal) { rText.innerHTML += `💀 แพ้!`; } else { rText.innerHTML += `<span style="color:#ffb300;">⚖️ เสมอ! ไม่มีใครเจ็บตัว</span>`; }
-                              rText.style.display = 'block'; await delay(2500); modal.style.display = 'none'; res({action: 'fight', mTot: meTotal, oTot: opTotal});
+                              rText.style.display = 'block'; await delay(1200); modal.style.display = 'none'; res({action: 'fight', mTot: meTotal, oTot: opTotal});
                           } else if (c === 'flee') { 
                               modal.style.display = 'none'; res({action: 'flee'}); 
                           } else { 
@@ -2627,11 +2677,11 @@
 
                       if (['attack','damage','ลดชีวิต'].includes(itm.type)) { 
                           if(bossResolved) return; bossResolved = true;
-                          modal.style.display = 'none'; triggerShake(); playSound('hit'); showToast("⚡ ปลิดชีพบอสสำเร็จ!"); await delay(1000); 
+                          modal.style.display = 'none'; triggerShake(); playSound('hit'); showToast("⚡ ปลิดชีพบอสสำเร็จ!"); await delay(550); 
                           me.power += 100; showFloatingAnim('+100✨', '#00e676', me.pos);
                           if(!bossConfig.isSpecial) { me.bossKills = (me.bossKills || 0) + 1; if (!gameData.bossLevels) gameData.bossLevels = {}; gameData.bossLevels[me.pos] = (gameData.bossLevels[me.pos] || 1) * 2; if (!gameData.bossNerfs) gameData.bossNerfs = {}; gameData.bossNerfs[me.pos] = 0; }
                           if (!grantRandomItemToPlayer(me, '🎉 ได้รับไอเท็มจากบอส!')) {
-                            setTimeout(() => showToast('กระเป๋าเต็ม! อดได้ไอเท็มจากบอส'), 1000);
+                            setTimeout(() => showToast('กระเป๋าเต็ม! อดได้ไอเท็มจากบอส'), 600);
                           }
                           return resolve(); 
                       }
@@ -2660,12 +2710,12 @@
                     let virtualPower = me.power;
                     let diceMult = (me.skillType === 'boss_slayer') ? 200 : 100;
                     let myTotal = virtualPower + (myBaseRoll * diceMult); let bossTotal = bossPowerRef.val + (bossBaseRoll * 100);
-                    document.getElementById('boss-me').classList.add('clash-left'); document.getElementById('boss-monster').classList.add('clash-right'); playSound('hit'); await delay(500); document.getElementById('boss-me').classList.remove('clash-left'); document.getElementById('boss-monster').classList.remove('clash-right'); 
+                    document.getElementById('boss-me').classList.add('clash-left'); document.getElementById('boss-monster').classList.add('clash-right'); playSound('hit'); await delay(350); document.getElementById('boss-me').classList.remove('clash-left'); document.getElementById('boss-monster').classList.remove('clash-right'); 
                     
                     let rText = document.getElementById('boss-result-text');
                     rText.innerHTML = `<div style="font-size:18px; color:#555; margin-bottom:5px;">(คุณ: ${myTotal} vs บอส: ${bossTotal})</div>`;
                     if(myTotal >= bossTotal) { rText.innerHTML += `<span style="color:#4caf50;">🎉 ชนะ!</span>`; } else { rText.innerHTML += `💀 แพ้!`; }
-                    rText.style.display = 'block'; await delay(2500); modal.style.display = 'none'; triggerShake(); 
+                    rText.style.display = 'block'; await delay(1200); modal.style.display = 'none'; triggerShake(); 
                     
                     if(myTotal >= bossTotal) { 
                         playSound('coin'); 
@@ -2673,7 +2723,7 @@
                         if(bossConfig.isSpecial) { me.power += 200; showFloatingAnim('+200✨', '#00e676', me.pos); } 
                         else { me.bossKills = (me.bossKills || 0) + 1; if (!gameData.bossLevels) gameData.bossLevels = {}; gameData.bossLevels[me.pos] = (gameData.bossLevels[me.pos] || 1) * 2; if (!gameData.bossNerfs) gameData.bossNerfs = {}; gameData.bossNerfs[me.pos] = 0; }
                         if (!grantRandomItemToPlayer(me, '🎉 ได้รับไอเท็มจากบอส!')) {
-                          setTimeout(() => showToast('กระเป๋าเต็ม! อดได้ไอเท็มจากบอส'), 1000);
+                          setTimeout(() => showToast('กระเป๋าเต็ม! อดได้ไอเท็มจากบอส'), 600);
                         }
                     } else { 
                         if (applyClientDamage(me, 1)) {
@@ -2683,7 +2733,7 @@
                     }
                     
                     document.getElementById('pvp-cutscene').style.display = 'none'; document.getElementById('boss-modal').style.display = 'none';
-                    await delay(1000); resolve();
+                    await delay(450); resolve();
                   } catch(e) { resolve(); }
               };
           } catch(e) {
@@ -2749,12 +2799,12 @@
               if(evt.isChest) { 
                   let bcast = { id: Date.now(), pId: myPlayerId, title: `🎁 ${me.name} เปิดหีบสมบัติ!`, desc: `ได้รับไอเท็มเวทมนตร์ลึกลับ`, img: '🎁' }; gameData.broadcast = bcast; lastBroadcastId = bcast.id; await playBroadcastCutscene(bcast);
                   if (grantRandomItemToPlayer(me)) playSound('coin');
-                  await delay(1000); 
+                  await delay(450); 
               }
               if(evt.isEvent) { await triggerWorldEvent(); }
               if(evt.isShop && me.lives > 0) { 
                   if(me.skillType === 'shop_investor') { me.power += (me.skillVal||500); showFloatingAnim(`+${me.skillVal||500}✨`, '#00e676', me.pos); playSound('coin'); }
-                  await delay(500); await openShop(me); 
+                  await delay(250); await openShop(me); 
               }
               if(evt.bossPower > 0 && me.lives > 0) { await handleBoss(me, evt); }
           } else {
@@ -2838,6 +2888,7 @@
         resetWatchdog();
 
         try {
+          await delay(250);
           if (!bot.buffsInitialized) {
             bot.buffsInitialized = true;
             if (bot.skillType === 'start_shield') bot.shield = true;
@@ -2847,7 +2898,7 @@
           if (bot.skipTurns > 0) {
             bot.skipTurns--;
             addGameLog(`🛑 <b>${bot.name}</b> โดนพักเทิร์น!`);
-            await delay(900);
+            await delay(450);
           } else {
             // Bot smart item use (heal / shield / power_up)
             if (bot.items && bot.items.length > 0 && !(bot.silenced > 0)) {
@@ -2866,7 +2917,7 @@
                 else if (itm.type === 'max_heal') bot.lives = bot.maxLives;
                 addGameLog(`🤖 <b>${bot.name}</b> ใช้ไอเท็ม ${itm.name}`);
                 updateUI();
-                await delay(600);
+                await delay(350);
               }
             }
 
@@ -2891,7 +2942,7 @@
             const steps = Math.max(1, r1 + r2 + bonus - penalty);
             showToast(`🤖 ${bot.name} ทอยได้ ${steps} แต้ม!`);
             addGameLog(`🎲 <b>${bot.name}</b> ทอยได้ ${steps} แต้ม`);
-            await delay(700);
+            await delay(420);
 
             for (let s = 0; s < steps; s++) {
               bot.pos++;
@@ -2912,8 +2963,10 @@
             if (bot.lives > 0) {
               const isQuiz = (bot.pos === 9 || bot.pos === 17 || bot.pos === 25);
               if (isQuiz) {
-                const qObj = loadedQuestions[Math.floor(Math.random() * loadedQuestions.length)];
-                let rScore = qObj.reward || 500;
+                const qObj = (loadedQuestions && loadedQuestions.length > 0)
+                  ? loadedQuestions[Math.floor(Math.random() * loadedQuestions.length)]
+                  : { reward: 500 };
+                let rScore = (qObj && qObj.reward) ? qObj.reward : 500;
                 if (bot.skillType === 'double_reward' || bot.skillType === 'quiz_master') rScore *= 2;
                 if (Math.random() < 0.65) {
                   bot.power += rScore;
@@ -3019,15 +3072,12 @@
           if (!checkWinCondition()) {
             advanceTurnAndRound();
             updateUI();
-            isMyTurnProcessing = false;
             clearTimeout(watchdogTimer);
             prevDataStr = JSON.stringify(gameData);
-            google.script.run.withSuccessHandler(res => {
-              if (res && res.v) lastStateVersion = res.v;
-              scheduleNextPoll(700);
-            }).withFailureHandler(() => {
-              scheduleNextPoll(1800);
-            }).updateGameState(myRoomCode, JSON.stringify(gameData));
+            saveStateAndContinue(false);
+          } else {
+            isMyTurnProcessing = false;
+            clearTimeout(watchdogTimer);
           }
         }
       }
@@ -3053,23 +3103,15 @@
         
         if (me.currentCooldown && me.currentCooldown > 0) { me.currentCooldown--; }
         
-        if(checkWinCondition()) return; 
+        if(checkWinCondition()) { isMyTurnProcessing = false; return; }
         
         advanceTurnAndRound();
-        updateUI(); isMyTurnProcessing = false; clearTimeout(pollingTimer); clearTimeout(watchdogTimer); clearTimeout(afkTimerId);
+        updateUI(); clearTimeout(pollingTimer); clearTimeout(watchdogTimer); clearTimeout(afkTimerId);
         document.getElementById('rollBtn').disabled = true;
         document.getElementById('rollBtn').style.display = 'none';
 
         prevDataStr = JSON.stringify(gameData);
-        showLoadingPopup();
-        google.script.run.withSuccessHandler(res => { 
-            hideLoadingPopup();
-            if (res && res.v) lastStateVersion = res.v;
-            scheduleNextPoll(800); 
-        }).withFailureHandler(() => { 
-            hideLoadingPopup();
-            scheduleNextPoll(2000); 
-        }).updateGameState(myRoomCode, JSON.stringify(gameData));
+        saveStateAndContinue(true);
       }
     </script>
   </body>
