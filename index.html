@@ -1273,10 +1273,9 @@
         }
         const statusBoard = document.getElementById('status-board');
         isConfigLoading = true;
-        showLoadingPopup();
         google.script.run.withSuccessHandler(res => { 
           isConfigLoading = false;
-          hideLoadingPopup();
+          hideLoadingPopup(true);
           if(res && res.error) { statusBoard.innerHTML = "❌ โหลดข้อมูลพัง: " + res.error; statusBoard.style.color = "#c62828"; } 
           else if(res) {
             statusBoard.innerHTML = "✅ กระดานหิมพานต์พร้อมแล้ว!"; statusBoard.style.color = "#2e7d32";
@@ -1291,7 +1290,7 @@
           }
         }).withFailureHandler(() => {
           isConfigLoading = false;
-          hideLoadingPopup();
+          hideLoadingPopup(true);
           statusBoard.innerHTML = "🚨 ติดต่อเซิร์ฟเวอร์ไม่ได้"; statusBoard.style.color = "#c62828";
         }).getGameConfig();
       };
