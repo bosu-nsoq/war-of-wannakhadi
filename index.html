@@ -154,6 +154,7 @@
       .modal-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 16, 35, 0.82); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 14px; box-sizing: border-box; }
       #item-confirm-modal { z-index: 2500 !important; }
       #skill-confirm-modal { z-index: 2600 !important; }
+      #target-modal, #dice-chooser-modal { z-index: 2700 !important; }
       
       @keyframes modalPopIn {
         0% { transform: scale(0.9) translateY(10px); opacity: 0; }
@@ -168,7 +169,7 @@
       .combat-fighter img { width: 76px; height: 76px; border-radius: 50%; object-fit: contain; background: rgba(255,255,255,0.95); box-shadow: 0 5px 12px rgba(0,0,0,0.18); margin-bottom: 8px; }
       .combat-dice-slot { font-size: 50px; color: #e53935; line-height: 50px; height: 50px; margin-top: 10px; display: none;}
 
-      #toast { visibility: hidden; min-width: 240px; max-width: 88vw; background: linear-gradient(135deg, #ffd54f, #ffb300); color: #4e342e; text-align: center; border-radius: 16px; padding: 12px 18px; position: fixed; z-index: 6500; top: 72px; left: 50%; transform: translate(-50%, -18px); font-weight: bold; font-size: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.28); transition: 0.35s; border: 2px solid #fff; box-sizing: border-box; line-height: 1.4; }
+      #toast { visibility: hidden; pointer-events: none; min-width: 240px; max-width: 88vw; background: linear-gradient(135deg, #ffd54f, #ffb300); color: #4e342e; text-align: center; border-radius: 16px; padding: 12px 18px; position: fixed; z-index: 6500; top: 72px; left: 50%; transform: translate(-50%, -18px); font-weight: bold; font-size: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.28); transition: 0.35s; border: 2px solid #fff; box-sizing: border-box; line-height: 1.4; }
       #toast.show { visibility: visible; transform: translate(-50%, 0); }
       #status-board { background: #fff9c4; color: #f57f17; padding: 10px 14px; border-radius: 12px; margin-bottom: 15px; font-weight: bold; border: 1.5px dashed #f57f17; font-size: 14px; }
 
@@ -1202,7 +1203,7 @@
           
           gameData.turn = (gameData.turn + 1) % gameData.players.length;
           prevDataStr = JSON.stringify(gameData);
-          saveStateAndContinue(true);
+          saveStateAndContinue(false);
       }
 
       function emergencyUnstuck(isManual = false) {
@@ -1211,15 +1212,14 @@
               if(confirm("⚠️ ยืนยันเตะข้ามตาผู้เล่นคนปัจจุบันใช่หรือไม่?")) {
                   showToast("⏩ กำลังข้ามตา..."); gameData.turn = (gameData.turn + 1) % gameData.players.length; isMyTurnProcessing = false; document.querySelectorAll('.modal-bg').forEach(m => m.style.display = 'none'); clearTimeout(pollingTimer);
                   prevDataStr = JSON.stringify(gameData);
-                  showLoadingPopup();
-                  google.script.run.withSuccessHandler(()=>{ hideLoadingPopup(); lastStateVersion = null; fetchGameState(); }).withFailureHandler(()=>{ hideLoadingPopup(); }).updateGameState(myRoomCode, JSON.stringify(gameData));
+                  saveStateAndContinue(false);
               }
               return;
           }
           showToast("🔄 รีเฟรชข้อมูล..."); isMyTurnProcessing = false; isPollInFlight = false; lastStateVersion = null;
           document.querySelectorAll('.modal-bg').forEach(m => m.style.display = 'none');
           document.getElementById('pvp-cutscene').style.display = 'none'; document.getElementById('action-cutscene').style.display = 'none'; document.getElementById('rollBtn').disabled = false; 
-          clearTimeout(pollingTimer); clearTimeout(watchdogTimer); showLoadingPopup(); fetchGameState();
+          clearTimeout(pollingTimer); clearTimeout(watchdogTimer); fetchGameState();
       }
 
       const totalCells = 32; const CELL_SIZE = 60; 
@@ -1610,6 +1610,7 @@
           if (res && res.success) {
             if (res.v) lastStateVersion = res.v;
             isMyTurnProcessing = false;
+            updateUI();
             dispatchCurrentTurn();
           } else if (retryCount < 1) {
             setTimeout(() => saveStateAndContinue(showLoader, retryCount + 1), 450);
@@ -1621,6 +1622,7 @@
         }).withFailureHandler(() => {
           if (showLoader) hideLoadingPopup();
           isMyTurnProcessing = false;
+          updateUI();
           scheduleNextPoll(1400);
         }).updateGameState(myRoomCode, JSON.stringify(gameData));
       }
@@ -1701,7 +1703,7 @@
         if (isMyTurnProcessing || isPollInFlight) return;
         clearTimeout(pollingTimer);
         isPollInFlight = true;
-        const showInitialLoader = (lastStateVersion === null);
+        const showInitialLoader = (lastStateVersion === null && !gameData);
         if (showInitialLoader) showLoadingPopup();
 
         google.script.run.withSuccessHandler(async res => {
@@ -1842,10 +1844,11 @@
           if (p.skill_name && p.skill_name !== '-' && p.skill_name !== 'none' && p.skill_name !== '') {
               let isCd = p.currentCooldown > 0;
               let noPower = p.power < (p.activeCost || 0);
-              let isDisabled = (isCd || noPower || p.id !== myPlayerId || isMyTurnProcessing || gameData.turn !== myPlayerId || p.lives <= 0 || p.skipTurns > 0) ? true : false;
+              let isNotMyTurn = (p.id !== myPlayerId || isMyTurnProcessing || gameData.turn !== myPlayerId || p.lives <= 0 || p.skipTurns > 0);
+              let isDisabled = (isCd || noPower || isNotMyTurn);
               let btnClass = isDisabled ? 'active-skill-btn disabled' : 'active-skill-btn';
-              let cdText = isCd ? `⏳ รอ ${p.currentCooldown} ตา` : (noPower ? `❌ พลังไม่พอ` : `⚡ สกิลพิเศษ`);
-              actSkillHtml = `<button class="${btnClass}" onclick="window.promptActiveSkill()" ${isDisabled?'disabled':''} title="${p.skill_name}">${cdText}</button>`;
+              let cdText = isCd ? `⏳ รอ ${p.currentCooldown} ตา` : (noPower ? `❌ ใช้ ${p.activeCost || 0}✨` : `⚡ สกิลพิเศษ`);
+              actSkillHtml = `<button class="${btnClass}" onclick="window.promptActiveSkill()" ${(isNotMyTurn) ? 'disabled' : ''} title="${p.skill_name}">${cdText}</button>`;
           }
 
           let glowClass = `glow-${p.id % 4}`; 
@@ -1896,16 +1899,18 @@
       }
 
       window.promptActiveSkill = function() {
+          if (isMyTurnProcessing || !gameData || gameData.turn !== myPlayerId) return;
           let me = gameData.players[myPlayerId];
-          if(!me || !me.skill_name || me.skill_name === '-' || me.skill_name === 'none' || me.skill_name === '') return;
-          if(me.currentCooldown > 0) return;
-          if(me.power < (me.activeCost || 0)) { showToast("พลังเวทย์ไม่พอใช้สกิล!"); return; }
+          if(!me || !me.skill_name || me.skill_name === '-' || me.skill_name === 'none' || me.skill_name === '' || me.lives <= 0) return;
+          if(me.currentCooldown > 0) { showToast(`⏳ สกิลยังติดคูลดาวน์อีก ${me.currentCooldown} ตา`); return; }
+          if(me.power < (me.activeCost || 0)) { showToast(`⚡ ต้องใช้พลัง ${me.activeCost || 0}✨ เพื่อใช้สกิล ${me.skill_name}`); return; }
 
           isMyTurnProcessing = true;
           clearTimeout(pollingTimer);
+          clearTimeout(afkTimerId);
 
           let effCode = me.effect_type || (me.skill_name === 'ควบม้าสีหมอก' ? 'move_boost' : '');
-          let effectDesc = getActiveSkillDesc(effCode);
+          let effectDesc = getActiveSkillDesc(effCode, me.activeSkillVal || 0);
           document.getElementById('skill-confirm-name').innerText = me.skill_name;
           document.getElementById('skill-confirm-desc').innerHTML = `รายละเอียด: <span style="color:#2e7d32;">${effectDesc}</span><br>ค่าร่าย: ${me.activeCost || 0} ✨ | คูลดาวน์: ${me.activeCooldown || 0} ตา<br><br>คุณต้องการจ่ายพลังเวทย์เพื่อใช้สกิลนี้หรือไม่?`;
           document.getElementById('skill-confirm-modal').style.display = 'flex';
@@ -1914,18 +1919,21 @@
       window.cancelUseSkill = function() {
           document.getElementById('skill-confirm-modal').style.display = 'none';
           isMyTurnProcessing = false;
-          fetchGameState();
+          updateUI();
+          dispatchCurrentTurn();
       };
 
       window.confirmUseSkill = async function() {
           document.getElementById('skill-confirm-modal').style.display = 'none';
           let me = gameData.players.find(p => p.id === myPlayerId);
+          if (!me) { isMyTurnProcessing = false; return; }
           let targetId = null;
           let effectType = (me.effect_type || (me.skill_name === 'ควบม้าสีหมอก' ? 'move_boost' : '')).toLowerCase();
 
           isMyTurnProcessing = true;
           document.getElementById('rollBtn').disabled = true;
           clearTimeout(pollingTimer);
+          clearTimeout(afkTimerId);
 
           const targetedSkills = [
               'stun', 'damage_pierce', 'damage_stun', 'crit_execute', 'burn_area', 
@@ -1938,8 +1946,8 @@
               let targetInfo = await openTargetSelector(me, 'act_target_player');
               if(!targetInfo) {
                   isMyTurnProcessing = false;
-                  document.getElementById('rollBtn').disabled = false;
-                  fetchGameState();
+                  updateUI();
+                  dispatchCurrentTurn();
                   return; 
               }
               targetId = targetInfo.id;
@@ -1960,35 +1968,33 @@
               img: '✨' 
           };
           lastBroadcastId = bcast.id;
-          showLoadingPopup();
+          showToast(`⚡ กำลังใช้สกิล ${me.skill_name}...`);
 
           google.script.run.withSuccessHandler(async res => {
-              hideLoadingPopup();
               if(res && res.success) {
                   if(res.data) {
                     gameData = res.data;
-                    lastStateVersion = gameData.v || null;
+                    lastStateVersion = gameData.v || lastStateVersion;
                     if(gameData.broadcast) lastBroadcastId = gameData.broadcast.id;
                     prevDataStr = JSON.stringify(gameData);
                     updateUI();
                   }
                   await playBroadcastCutscene(bcast);
                   isMyTurnProcessing = false;
-                  document.getElementById('rollBtn').disabled = false;
                   showToast("ใช้สกิลสำเร็จ!");
-                  if(!checkWinCondition()) fetchGameState();
+                  updateUI();
+                  if(!checkWinCondition()) dispatchCurrentTurn();
               } else {
                   isMyTurnProcessing = false;
-                  document.getElementById('rollBtn').disabled = false;
+                  updateUI();
                   showToast("❌ ล้มเหลว: " + ((res && res.msg) || 'ไม่ทราบสาเหตุ'));
-                  fetchGameState();
+                  dispatchCurrentTurn();
               }
           }).withFailureHandler(() => {
-              hideLoadingPopup();
               isMyTurnProcessing = false;
-              document.getElementById('rollBtn').disabled = false;
+              updateUI();
               showToast("❌ เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
-              fetchGameState();
+              dispatchCurrentTurn();
           }).useActiveSkill(myRoomCode, myPlayerId, targetId);
       };
 
@@ -2000,11 +2006,12 @@
         if(canActuallyUse && me.silenced && me.silenced > 0) { showToast("🤐 คุณติดสถานะใบ้ ใช้ไอเท็มไม่ได้!"); playSound('hurt'); return; }
         
         let desc = getItemDescInfo(item); 
+        if (item.type === 'revive') desc += '<br><span style="color:#e65100;">(ทำงานอัตโนมัติทันทีเมื่อพลังชีวิตหมด)</span>';
         document.getElementById('item-confirm-name').innerText = item.name; 
         document.getElementById('item-confirm-desc').innerHTML = desc; 
         document.getElementById('item-confirm-icon').innerText = item.icon; 
         
-        if(canActuallyUse) {
+        if(canActuallyUse && item.type !== 'revive') {
             document.getElementById('btn-confirm-use').style.display = 'block';
             document.getElementById('btn-cancel-use').innerText = 'ยกเลิก';
             pendingUseItem = { id: itemId, idx: index, ctx: context, targetId: combatTargetId }; 
@@ -2129,24 +2136,34 @@
       }
 
       async function useItem(itemId, index) {
+        if (isMyTurnProcessing) return;
         clearTimeout(afkTimerId);
+        clearTimeout(pollingTimer);
         let me = gameData.players[myPlayerId]; let item = itemsConfig[itemId]; 
+        if (!me || !item) return;
         me.afkCount = 0; 
+        isMyTurnProcessing = true;
         
         let isWarpStart = (item.type === 'warp_start' || item.type === 'ประตูมิติ'); 
         let isTargetSkill = targetPlayerOnly.includes(item.type) || targetBoth.includes(item.type) || targetBossOnly.includes(item.type);
         let isMovement = movementItems.includes(item.type);
 
         let chosenDice = 0; let targetInfo = null;
-        if(item.type === 'loaded_dice') { chosenDice = await openDiceChooser(); if(!chosenDice) return; } 
-        else if (isTargetSkill) { targetInfo = await openTargetSelector(me, item.type); if(!targetInfo) return; }
+        if(item.type === 'loaded_dice') {
+          chosenDice = await openDiceChooser();
+          if(!chosenDice) { isMyTurnProcessing = false; updateUI(); dispatchCurrentTurn(); return; }
+        } 
+        else if (isTargetSkill) {
+          targetInfo = await openTargetSelector(me, item.type);
+          if(!targetInfo) { isMyTurnProcessing = false; updateUI(); dispatchCurrentTurn(); return; }
+        }
         
         let actualIdx = me.items.indexOf(itemId);
         if(actualIdx !== -1) me.items.splice(actualIdx, 1);
         else me.items.splice(index, 1);
         updateUI();
 
-        isMyTurnProcessing = true; document.getElementById('rollBtn').disabled = true; resetWatchdog();
+        document.getElementById('rollBtn').disabled = true; resetWatchdog();
         me.itemsUsed = (me.itemsUsed || 0) + 1;
         addGameLog(`🪄 <b>${me.name}</b> ใช้ไอเท็ม: ${item.name}`); playSound('coin');
         
@@ -2257,7 +2274,7 @@
             if(!checkWinCondition()) {
                 prevDataStr = JSON.stringify(gameData);
                 clearTimeout(watchdogTimer);
-                saveStateAndContinue(true);
+                saveStateAndContinue(false);
             } else {
                 isMyTurnProcessing = false;
                 clearTimeout(watchdogTimer);
@@ -2527,7 +2544,8 @@
                       window.resolveCombatItem = async function(pendingItm) {
                           try {
                               let itm = itemsConfig[pendingItm.id]; let targetOp = gameData.players.find(p=>p.id===pendingItm.targetId); 
-                              if (targetOp.immune || targetOp.skillType === 'item_immunity') { showToast("❌ ศัตรูมีพลังป้องกันเวทย์!"); return; } 
+                              const offensiveCombatTypes = ['power_down_single', 'power_down_all', 'attack', 'damage', 'ลดชีวิต', 'destroy_item', 'swap_power', 'vampire', 'silence', 'half_op_power'];
+                              if (offensiveCombatTypes.includes(itm.type) && (targetOp.immune || targetOp.skillType === 'item_immunity')) { showToast("❌ ศัตรูมีพลังป้องกันเวทย์!"); return; }  
                               playSound('coin'); 
                               let actualIdx = me.items.indexOf(pendingItm.id);
                               if(actualIdx !== -1) me.items.splice(actualIdx, 1);
@@ -3111,7 +3129,7 @@
         document.getElementById('rollBtn').style.display = 'none';
 
         prevDataStr = JSON.stringify(gameData);
-        saveStateAndContinue(true);
+        saveStateAndContinue(false);
       }
     </script>
   </body>
