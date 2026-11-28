@@ -98,12 +98,26 @@
       @keyframes flashEffect { 0% { opacity: 0; } 20% { opacity: 0.7; } 100% { opacity: 0; } }
 
       /* Cutscenes */
-      #pvp-cutscene, #action-cutscene { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: none; align-items: center; justify-content: center; overflow: hidden; pointer-events:none;}
+      #pvp-cutscene, #action-cutscene { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 12, 28, 0.78); z-index: 9999; display: none; align-items: center; justify-content: center; overflow: hidden; pointer-events:none;}
       .vs-text { position: absolute; font-size: 120px; color: #ff1744; font-weight: bold; text-shadow: 5px 5px 0px #fff, 0 0 30px #ffca28; z-index: 10; transform: scale(0); animation: popVS 0.5s 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
       .fighter-cut-l, .fighter-cut-r { position: absolute; width: 200px; height: 200px; border-radius: 50%; border: 8px solid white; box-shadow: 0 0 30px rgba(0,0,0,0.8); z-index: 5; background: white; }
       .fighter-cut-l { left: -250px; animation: slideL 0.6s forwards; } .fighter-cut-r { right: -250px; animation: slideR 0.6s forwards; }
       
-      .action-box { background: rgba(255, 255, 255, 0.95); padding: 40px; border-radius: 20px; text-align: center; border: 5px solid #ffca28; animation: popVS 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; box-shadow: 0 0 50px rgba(255, 202, 40, 0.5); width: 80%; max-width: 500px;}
+      .cutscene-aura { position: absolute; width: 340px; height: 340px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 213, 79, 0.45) 0%, rgba(255, 167, 38, 0.14) 48%, rgba(255, 255, 255, 0) 74%); animation: auraBurst 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards; pointer-events: none; z-index: 1; }
+      .action-box { position: relative; z-index: 2; background: linear-gradient(180deg, #ffffff 0%, #fffdf5 100%); padding: 34px 30px; border-radius: 26px; text-align: center; border: 4.5px solid #ffca28; animation: popVS 0.42s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; box-shadow: 0 18px 48px rgba(0, 0, 0, 0.42); width: 82%; max-width: 460px; overflow: visible; }
+      .action-box.theme-item { border-color: #26a69a; background: linear-gradient(180deg, #ffffff 0%, #e0f2f1 100%); }
+      .action-box.theme-skill { border-color: #ab47bc; background: linear-gradient(180deg, #ffffff 0%, #f3e5f5 100%); }
+      .action-box.theme-world { border-color: #5c6bc0; background: linear-gradient(180deg, #ffffff 0%, #ede7f6 100%); }
+      .action-box.theme-chest { border-color: #ffa726; background: linear-gradient(180deg, #ffffff 0%, #fff8e1 100%); }
+      .ac-icon-anim { display: inline-block; font-size: 76px; margin: 12px 0; animation: iconHeroPop 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+      .cut-spark { position: absolute; font-size: 22px; pointer-events: none; opacity: 0; animation: sparkFly 0.85s ease-out forwards; z-index: 3; }
+      .cut-spark.sp1 { top: -12px; left: 16%; animation-delay: 0.05s; }
+      .cut-spark.sp2 { top: -14px; right: 16%; animation-delay: 0.12s; }
+      .cut-spark.sp3 { bottom: -10px; left: 18%; animation-delay: 0.18s; }
+      .cut-spark.sp4 { bottom: -10px; right: 18%; animation-delay: 0.24s; }
+      @keyframes auraBurst { 0% { transform: scale(0.35); opacity: 0; } 50% { transform: scale(1.15); opacity: 1; } 100% { transform: scale(1.35); opacity: 0.55; } }
+      @keyframes iconHeroPop { 0% { transform: scale(0.3) rotate(-18deg); } 55% { transform: scale(1.22) rotate(8deg); } 80% { transform: scale(0.95) rotate(-3deg); } 100% { transform: scale(1) rotate(0deg); } }
+      @keyframes sparkFly { 0% { transform: scale(0.4) translateY(8px); opacity: 0; } 45% { transform: scale(1.25) translateY(-10px); opacity: 1; } 100% { transform: scale(0.85) translateY(-20px); opacity: 0; } }
       
       @keyframes popVS { 0% { transform: scale(0) rotate(-20deg); } 100% { transform: scale(1) rotate(0deg); } }
       @keyframes slideL { 0% { left: -250px; transform: scale(1); } 60% { left: 50%; transform: translateX(-150%) scale(1.2); } 100% { left: 50%; transform: translateX(-120%) scale(1.1); } }
@@ -140,16 +154,27 @@
       .cell-info::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: 5px; height: 20px; background: #ffd54f; border-radius: 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.45); }
       @keyframes signPopUp { 0% { transform: translateZ(26px) rotateZ(var(--inv-rot)) rotateX(-55deg) translate(-50%, calc(-100% - 12px)) scale(0.5); opacity: 0; } 100% { transform: translateZ(26px) rotateZ(var(--inv-rot)) rotateX(-55deg) translate(-50%, calc(-100% - 22px)) scale(1); opacity: 1; } }
       
-      .token { position: absolute; width: 45px; height: 60px; z-index: 100; transform: translateZ(45px) rotateZ(var(--inv-rot)) rotateX(-55deg); display: flex; align-items: center; justify-content: center; transition: top 0.22s ease-out, left 0.22s ease-out, transform 0.45s; }
-      .token img { width: 100%; height: 100%; border-radius: 8px; object-fit: contain; background: transparent; filter: none; z-index: 2; }
-      .token::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 54px; height: 54px; border-radius: 50%; z-index: -1; pointer-events: none; }
-      .glow-token-0::before { background: radial-gradient(circle, rgba(0,176,255,0.75) 0%, rgba(0,176,255,0) 70%); } .glow-token-1::before { background: radial-gradient(circle, rgba(0,230,118,0.75) 0%, rgba(0,230,118,0) 70%); } .glow-token-2::before { background: radial-gradient(circle, rgba(255,234,0,0.75) 0%, rgba(255,234,0,0) 70%); } .glow-token-3::before { background: radial-gradient(circle, rgba(213,0,249,0.75) 0%, rgba(213,0,249,0) 70%); }
+      .token { position: absolute; width: 52px; height: 68px; z-index: 100; transform: translateZ(46px) rotateZ(var(--inv-rot)) rotateX(-55deg); display: flex; align-items: center; justify-content: center; transition: top 0.24s cubic-bezier(0.32, 0.72, 0.24, 1), left 0.24s cubic-bezier(0.32, 0.72, 0.24, 1), transform 0.45s; }
+      .token img { width: 100%; height: 100%; border-radius: 10px; object-fit: contain; background: transparent; filter: drop-shadow(0 4px 5px rgba(0,0,0,0.48)); image-rendering: -webkit-optimize-contrast; backface-visibility: hidden; z-index: 2; }
+      .token::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; border-radius: 50%; z-index: -1; pointer-events: none; }
+      .token.active-token-turn::after { content: ''; position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%); width: 38px; height: 14px; border-radius: 50%; border: 2.5px solid #ffd54f; background: rgba(255, 235, 59, 0.25); z-index: 1; pointer-events: none; }
+      .glow-token-0::before { background: radial-gradient(circle, rgba(0,176,255,0.82) 0%, rgba(0,176,255,0) 70%); } .glow-token-1::before { background: radial-gradient(circle, rgba(0,230,118,0.82) 0%, rgba(0,230,118,0) 70%); } .glow-token-2::before { background: radial-gradient(circle, rgba(255,234,0,0.82) 0%, rgba(255,234,0,0) 70%); } .glow-token-3::before { background: radial-gradient(circle, rgba(213,0,249,0.82) 0%, rgba(213,0,249,0) 70%); }
       
-      .token.hopping { animation: hop 0.22s cubic-bezier(0.25, 1.5, 0.5, 1); }
-      @keyframes hop { 0%, 100% {} 50% { transform: translateZ(85px) rotateZ(var(--inv-rot)) rotateX(-55deg) scale(1.1); } }
+      .token.hopping { animation: hop 0.25s cubic-bezier(0.28, 1.4, 0.5, 1); }
+      @keyframes hop {
+        0% { transform: translateZ(46px) rotateZ(var(--inv-rot)) rotateX(-55deg) scale(1.04, 0.92); }
+        45% { transform: translateZ(94px) rotateZ(var(--inv-rot)) rotateX(-55deg) scale(1.12, 1.12) rotate(-5deg); }
+        82% { transform: translateZ(46px) rotateZ(var(--inv-rot)) rotateX(-55deg) scale(1.05, 0.94); }
+        100% { transform: translateZ(46px) rotateZ(var(--inv-rot)) rotateX(-55deg) scale(1, 1); }
+      }
 
-      .boss-token { position: absolute; width: 45px; height: 60px; z-index: 90; transform: translateZ(40px) rotateZ(var(--inv-rot)) rotateX(-55deg); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.5s; }
-      .boss-token img { width: 100%; height: 100%; border-radius: 8px; object-fit: contain; background: transparent; filter: none; z-index: 2; }
+      .step-ripple { position: absolute; width: 42px; height: 42px; border-radius: 50%; border: 3px solid rgba(255, 245, 157, 0.92); transform: translate(-50%, -50%) translateZ(23px) scale(0.35); pointer-events: none; animation: stepRippleAnim 0.38s ease-out forwards; z-index: 80; }
+      .board-fx-ring { position: absolute; width: 64px; height: 64px; border-radius: 50%; border: 4px solid #ffd54f; transform: translate(-50%, -50%) translateZ(25px) scale(0.3); pointer-events: none; animation: boardFxRingAnim 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards; z-index: 120; }
+      @keyframes stepRippleAnim { 0% { transform: translate(-50%, -50%) translateZ(23px) scale(0.35); opacity: 0.95; } 100% { transform: translate(-50%, -50%) translateZ(23px) scale(1.15); opacity: 0; } }
+      @keyframes boardFxRingAnim { 0% { transform: translate(-50%, -50%) translateZ(25px) scale(0.3); opacity: 1; } 100% { transform: translate(-50%, -50%) translateZ(25px) scale(1.75); opacity: 0; } }
+
+      .boss-token { position: absolute; width: 52px; height: 68px; z-index: 90; transform: translateZ(42px) rotateZ(var(--inv-rot)) rotateX(-55deg); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.5s; }
+      .boss-token img { width: 100%; height: 100%; border-radius: 10px; object-fit: contain; background: transparent; filter: drop-shadow(0 4px 6px rgba(90,0,0,0.52)); image-rendering: -webkit-optimize-contrast; backface-visibility: hidden; z-index: 2; }
       .boss-token::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 52px; height: 52px; border-radius: 50%; z-index: -1; background: radial-gradient(circle, rgba(255, 23, 68, 0.58) 0%, rgba(255, 23, 68, 0) 72%); pointer-events: none; }
       .boss-token.rebirth-aura::before { background: radial-gradient(circle, rgba(255, 61, 0, 0.78) 0%, rgba(213, 0, 0, 0.34) 45%, rgba(213, 0, 0, 0) 75%); filter: hue-rotate(var(--aura-hue, 0deg)); width: 54px; height: 54px; }
 
@@ -463,7 +488,7 @@
     <audio id="bgmAudio" loop src="https://files.catbox.moe/5rp9jw.mp3" preload="auto"></audio>
 
     <div id="pvp-cutscene"><img id="cut-l-img" class="fighter-cut-l" src=""><div class="vs-text">VS</div><img id="cut-r-img" class="fighter-cut-r" src=""></div>
-    <div id="action-cutscene"><div class="action-box"><h1 id="ac-title" style="color: #e53935; margin: 0; font-size: 35px;">Title</h1><div id="ac-icon" style="font-size: 80px; margin: 15px 0;">✨</div><p id="ac-desc" style="font-size: 20px; font-weight: bold; color: #1a237e; margin: 0; background: #e8eaf6; padding: 10px; border-radius: 10px;">Desc</p></div></div>
+    <div id="action-cutscene"><div class="cutscene-aura" id="ac-aura"></div><div class="action-box" id="ac-box"><span class="cut-spark sp1">✦</span><span class="cut-spark sp2">✨</span><span class="cut-spark sp3">✧</span><span class="cut-spark sp4">⭐</span><h1 id="ac-title" style="color: #e53935; margin: 0; font-size: 32px;">Title</h1><div id="ac-icon" class="ac-icon-anim">✨</div><p id="ac-desc" style="font-size: 19px; font-weight: bold; color: #1a237e; margin: 0; background: rgba(255,255,255,0.85); padding: 10px 12px; border-radius: 12px; border: 1.5px solid rgba(26,35,126,0.12);">Desc</p></div></div>
     <div id="flash-overlay"></div><div id="toast">แจ้งเตือน</div>
 
     <div id="init-screen" class="glass" style="display:none;">
@@ -1097,13 +1122,15 @@
           try {
             const natW = loader.naturalWidth, natH = loader.naturalHeight;
             if (!natW || !natH) return;
-            const maxDim = 160;
+            const maxDim = 320;
             const scale = Math.min(1, maxDim / Math.max(natW, natH));
             const w = Math.max(1, Math.round(natW * scale));
             const hImg = Math.max(1, Math.round(natH * scale));
             const canvas = document.createElement('canvas');
             canvas.width = w; canvas.height = hImg;
             const ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
             ctx.drawImage(loader, 0, 0, w, hImg);
             const imgData = ctx.getImageData(0, 0, w, hImg);
             const d = imgData.data;
@@ -1148,19 +1175,55 @@
       function playBroadcastCutscene(bcast) {
           return new Promise(res => {
               const cut = document.getElementById('action-cutscene');
-              document.getElementById('ac-title').innerText = bcast.title; 
-              
+              const box = document.getElementById('ac-box');
+              const iconEl = document.getElementById('ac-icon');
+              const titleEl = document.getElementById('ac-title');
+              titleEl.innerText = bcast.title;
+              if (box) {
+                box.classList.remove('theme-item', 'theme-skill', 'theme-world', 'theme-chest');
+                if (bcast.title.includes('เหตุการณ์โลก')) box.classList.add('theme-world');
+                else if (bcast.title.includes('สกิล')) box.classList.add('theme-skill');
+                else if (bcast.title.includes('หีบสมบัติ')) box.classList.add('theme-chest');
+                else box.classList.add('theme-item');
+                box.style.animation = 'none'; void box.offsetWidth; box.style.animation = '';
+              }
+              if (iconEl) { iconEl.style.animation = 'none'; void iconEl.offsetWidth; iconEl.style.animation = ''; }
+              const aura = document.getElementById('ac-aura');
+              if (aura) { aura.style.animation = 'none'; void aura.offsetWidth; aura.style.animation = ''; }
+
               if(bcast.title === '🌍 เหตุการณ์โลก!') {
-                  document.getElementById('ac-title').style.fontSize = '45px';
-                  document.getElementById('ac-title').style.color = '#9c27b0';
+                  titleEl.style.fontSize = '38px';
+                  titleEl.style.color = '#5e35b1';
+              } else if (bcast.title.includes('สกิล')) {
+                  titleEl.style.fontSize = '32px';
+                  titleEl.style.color = '#8e24aa';
+              } else if (bcast.title.includes('หีบสมบัติ')) {
+                  titleEl.style.fontSize = '32px';
+                  titleEl.style.color = '#ef6c00';
               } else {
-                  document.getElementById('ac-title').style.fontSize = '35px';
-                  document.getElementById('ac-title').style.color = '#e53935';
+                  titleEl.style.fontSize = '32px';
+                  titleEl.style.color = '#00796b';
               }
               
-              document.getElementById('ac-icon').innerText = bcast.img || '✨'; document.getElementById('ac-desc').innerText = bcast.desc || '';
+              iconEl.innerText = bcast.img || '✨'; document.getElementById('ac-desc').innerText = bcast.desc || '';
               cut.style.display = 'flex'; playSound('levelup'); triggerShake(); setTimeout(() => { cut.style.display = 'none'; res(); }, 1350);
           });
+      }
+
+      function spawnBoardEffect(posId, color = '#ffd54f', emoji = '') {
+        const layer = document.getElementById('anim-layer');
+        if (!layer || !posId) return;
+        const coords = getCellCoords(posId);
+        const cx = (coords.col * CELL_SIZE + CELL_SIZE / 2) + 'px';
+        const cy = (coords.row * CELL_SIZE + CELL_SIZE / 2) + 'px';
+        const ring = document.createElement('div');
+        ring.className = 'board-fx-ring';
+        ring.style.left = cx;
+        ring.style.top = cy;
+        ring.style.borderColor = color;
+        layer.appendChild(ring);
+        setTimeout(() => ring.remove(), 750);
+        if (emoji) showFloatingAnim(emoji, color, posId);
       }
 
       function addGameLog(msg) {
@@ -1908,6 +1971,7 @@
           }
           const tImg = token.querySelector('img');
           if (tImg) applyClothSkinToElement(tImg, p.icon, p.skinFilter);
+          token.classList.toggle('active-token-turn', gameData.turn === p.id);
           if(!token.classList.contains('hopping')) { let coords = getCellCoords(p.pos); let offsetLeft = (p.id % 2 === 0) ? 7 : -7; let offsetTop = (p.id < 2) ? 7 : -7; token.style.top = (coords.row * CELL_SIZE) + offsetTop + 'px'; token.style.left = (coords.col * CELL_SIZE) + offsetLeft + 'px'; }
         });
       }
@@ -2278,6 +2342,7 @@
             else if (item.type === 'reset_boss') { if(gameData.bossLevels) gameData.bossLevels = {}; if(gameData.bossNerfs) gameData.bossNerfs = {}; showToast("บอสทั้งหมดถูกรีเซ็ตพลัง!"); triggerShake(); }
 
             updateUI(); 
+            spawnBoardEffect(targetInfo && targetInfo.type === 'player' ? (gameData.players.find(x => x.id === targetInfo.id) || me).pos : me.pos, isTargetSkill ? '#ff5252' : '#26a69a');
             if(isMovement) { 
                 await triggerCellEffect(me); 
             }
@@ -2370,7 +2435,17 @@
         if (!token) { updateUI(); token = document.getElementById('token-' + playerId); }
         if (!token) { await delay(160); return; }
         let coords = getCellCoords(targetPos); let offsetLeft = (playerId % 2 === 0) ? 7 : -7; let offsetTop = (playerId < 2) ? 7 : -7;
-        token.style.top = (coords.row * CELL_SIZE) + offsetTop + 'px'; token.style.left = (coords.col * CELL_SIZE) + offsetLeft + 'px'; token.classList.add('hopping'); playSound('jump'); await delay(230); token.classList.remove('hopping');
+        token.style.top = (coords.row * CELL_SIZE) + offsetTop + 'px'; token.style.left = (coords.col * CELL_SIZE) + offsetLeft + 'px'; token.classList.add('hopping'); playSound('jump');
+        const layer = document.getElementById('anim-layer');
+        if (layer) {
+          const rip = document.createElement('div');
+          rip.className = 'step-ripple';
+          rip.style.left = (coords.col * CELL_SIZE + CELL_SIZE / 2) + 'px';
+          rip.style.top = (coords.row * CELL_SIZE + CELL_SIZE / 2) + 'px';
+          layer.appendChild(rip);
+          setTimeout(() => rip.remove(), 400);
+        }
+        await delay(240); token.classList.remove('hopping');
       }
 
       let quizTimerInterval = null;
@@ -2472,7 +2547,7 @@
               else if (sit === 'warp_start') { showToast("เหตุการณ์ไม่ปกติ! ถูกวาร์ปสุ่ม"); me.pos = Math.floor(Math.random() * totalCells) + 1; playSound('jump'); triggerShake(); await animateStep(me.id, me.pos); } 
               else if (sit === 'storm_back') { showToast("เหตุการณ์ไม่ปกติ! พายุพัดถอยหลัง 2 ช่อง"); me.pos -= 2; if(me.pos < 1) me.pos = 1; playSound('jump'); triggerShake(); await animateStep(me.id, me.pos); }
               
-              addGameLog(`🎲 <b>${me.name}</b> เจอเหตุการณ์เคลื่อนที่สุ่ม!`); updateUI(); await delay(500);
+              addGameLog(`🎲 <b>${me.name}</b> เจอเหตุการณ์เคลื่อนที่สุ่ม!`); spawnBoardEffect(me.pos, '#26a69a'); updateUI(); await delay(500);
           } catch(e) {}
       }
 
@@ -2502,6 +2577,7 @@
                   else if (ev.type === 'healing_spring') { p.lives = p.maxLives; showFloatingAnim('❤️MAX', '#ff1744', p.pos); }
                   else if (ev.type === 'black_market') { if(p.items.length > 0) p.items.splice(Math.floor(Math.random() * p.items.length), 1); showFloatingAnim('🎒-', '#e53935', p.pos); }
                   else if (ev.type === 'silent_curse') { p.silenced = (p.silenced || 0) + 1; showFloatingAnim('🤐', '#9e9e9e', p.pos); }
+                  spawnBoardEffect(p.pos, '#ab47bc');
               });
               updateUI(); await delay(500);
           } catch(e) {}
@@ -2870,7 +2946,7 @@
                 if (me.skillType === 'passive_heal') me.lives = Math.min(me.maxLives, me.lives+1);
                 if (me.skillType === 'start_shield') { me.shield = true; showFloatingAnim('🛡️', '#4fc3f7', me.pos); }
 
-                document.getElementById('flash-overlay').classList.add('flash-anim'); setTimeout(() => document.getElementById('flash-overlay').classList.remove('flash-anim'), 600); playSound('levelup'); showFloatingAnim(`+${500 + loopBonus}✨`, '#ffea00', me.pos); 
+                document.getElementById('flash-overlay').classList.add('flash-anim'); setTimeout(() => document.getElementById('flash-overlay').classList.remove('flash-anim'), 600); playSound('levelup'); spawnBoardEffect(me.pos, '#ffd54f'); showFloatingAnim(`+${500 + loopBonus}✨`, '#ffea00', me.pos); 
               }
               await animateStep(me.id, me.pos);
             }
